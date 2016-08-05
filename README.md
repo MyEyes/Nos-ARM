@@ -1,0 +1,1 @@
+This is a rewrite of the NOS microkernel for ARM, to clean up and finally test on real hardware.
