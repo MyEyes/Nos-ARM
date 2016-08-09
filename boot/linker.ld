@@ -1,21 +1,26 @@
 ENTRY(_start)
- 
+
 SECTIONS
 {
     /* Starts at LOADER_ADDR. */
     . = orig;
     __start = .;
-    __text_start = .;
-    .text :
+	.text.remap :
+	{
+	    KEEP(*(.text.boot))
+		start_remap.o(.text)
+	}
+	. = . + kernel_base;
+	__text_start = .;
+    .text : AT(ADDR(.text) - kernel_base)
     {
-        KEEP(*(.text.boot))
         *(.text)
     }
     . = ALIGN(4096); /* align to page size */
     __text_end = .;
  
     __rodata_start = .;
-    .rodata :
+    .rodata : AT(ADDR(.rodata) - kernel_base)
     {
         *(.rodata)
     }
@@ -23,7 +28,7 @@ SECTIONS
     __rodata_end = .;
  
     __data_start = .;
-    .data :
+    .data : AT(ADDR(.data) - kernel_base)
     {
         *(.data)
     }
@@ -31,7 +36,7 @@ SECTIONS
     __data_end = .;
  
     __bss_start = .;
-    .bss :
+    .bss : AT(ADDR(.bss) - kernel_base)
     {
         bss = .;
         *(.bss)

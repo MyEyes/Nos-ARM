@@ -5,14 +5,14 @@
 .globl _start
  
 // Entry point for the kernel.
-// r15 -> should begin execution at start_loc.
+// r15 -> should begin execution at orig.
 // r0 -> 0x00000000
 // r1 -> 0x00000C42
 // r2 -> 0x00000100 - start of ATAGS
 // preserve these registers as argument for kernel_main
 _start:
 	// Setup the stack.
-	mov sp, #0x10000
+	mov sp, #orig
  
 	// Clear out bss.
 	ldr r4, =__bss_start
@@ -32,8 +32,8 @@ _start:
 	cmp r4, r9
 	blo 1b
  
-	// Call kernel_main
-	ldr r3, =kernel_main
+	// Call kernel_remap
+	ldr r3, =kernel_map
 	blx r3
  
 	// halt
