@@ -3,13 +3,16 @@
 #include <stdint.h>
 #include "kernel/mem/mmu.h"
 #include "kernel/mem/mem.h"
-#include "kernel/mem/fld.h"
+#include "kernel/mem/paging.h"
 #include "kernel/util/kernel_uart.h"
 #include "kernel/cpu/int.h"
 #include "kernel/kernel.h"
 
+#define INIT_DEBUG
+
 void kernel_init()
 {
+	/*
 	//Set up identity mapped page tables
 	create_flat_fld0(KERNEL_FLD0_LOC, 0, PLATFORM_PROC_MAX_MEM);
 	if(PLATFORM_TTBCR_N!=0)
@@ -19,11 +22,35 @@ void kernel_init()
 		uart_puts("Flat Page Tables set up\r\n");
 #endif
 	}
+	*/
+	
+	#ifdef INIT_DEBUG
+	uart_puts("Setting up page tables\r\n");
+	#endif	
+	
+	paging_create_default(KERNEL_DEF_PG_LOC, KERNEL_DEF_USR_PG_LOC);
+	
+	/*
 	//Set correct n value for TTBRC
 	mmu_set_ttbrc(PLATFORM_TTBCR_N);
 #ifdef INIT_DEBUG
 	uart_puts("TTBRC set\r\n");
 #endif
+	*/
+	
+	#ifdef INIT_DEBUG
+	uart_puts("Setting user memory limit\r\n");
+	#endif	
+
+	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
+	
+	#ifdef INIT_DEBUG
+	uart_puts("Assigning page tables\r\n");
+	#endif	
+	
+	mmu_set_user_pgtbl(KERNEL_DEF_USR_PG_LOC);
+	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
+	/*
 	//Set up TTBR0 and 1 if necessary
 	mmu_set_ttbr0(KERNEL_FLD0_LOC);
 #ifdef INIT_DEBUG
@@ -36,8 +63,11 @@ void kernel_init()
 		uart_puts("TTBR1 set\r\n");
 #endif
 	}
+	*/
 	
 	//Become the domain manager, so that the MMU won't hate us
+	//Sort of arch dependent wether it exists. But we might as well use it and replace it with a stub
+	//If the arch does not support domains
 	domain_manager_set();
 #ifdef INIT_DEBUG
 	uart_puts("Became domain manager\r\n");
@@ -59,10 +89,6 @@ void kernel_init()
 #endif
 
 	int_init();
-	set_int_hnd(INT_UND, kernel_panic);
-	set_int_hnd(INT_SWI, kernel_panic);
-	set_int_hnd(INT_PAB, kernel_panic);
-	set_int_hnd(INT_DAB, kernel_panic);
-	set_int_hnd(INT_IRQ, kernel_panic);
-	set_int_hnd(INT_FIQ, kernel_panic);
+	/*
+	*/
 }

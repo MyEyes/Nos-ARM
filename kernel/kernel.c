@@ -43,34 +43,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	uart_puts("Look mommy, I'm running on real hardware!\r\n");
 	
-	uint32_t* fld_tbl_loc = (uint32_t*)KERNEL_FLD1_LOC;
-	void* test_addr = (void*)(PLATFORM_KERNEL_BASE-0x100000);
-	uart_puthex((uint32_t)fld_tbl_loc);
-	uart_puts("\r\n");
-	uart_puthex((uint32_t)test_addr);
-	uart_puts("\r\n");
-	uart_puthex((uint32_t)mem_get_phys(fld_tbl_loc, test_addr));
-	uart_puts("\r\n");
-	
-	mem_unmap(fld_tbl_loc, test_addr, 1<<12);
-	uart_puthex((uint32_t)mem_get_phys(fld_tbl_loc, test_addr));
-	uart_puts("\r\n");
-	
-	uart_puthex((uint32_t)mem_get_phys(fld_tbl_loc, test_addr+(1<<12)));
-	uart_puts("\r\n");
-	
-	mem_map(fld_tbl_loc, test_addr, (void*) 0xFEF00000, 1<<12, 0, 0, 0, 1, 0);
-	uart_puthex((uint32_t)mem_get_phys(fld_tbl_loc, test_addr));
-	uart_puts("\r\n");
-	
-	uart_puthex((uint32_t)mem_get_phys(fld_tbl_loc, test_addr+(1<<12)));
-	uart_puts("\r\n");
-	
-	uart_puthex(*((uint32_t*)0x4));
-	uart_puts("\r\n");
-	uart_puthex(*((uint32_t*)0x24));
-	uart_puts("\r\n");
-	
 	//__asm__("udf 0");
  
 	while ( true )
