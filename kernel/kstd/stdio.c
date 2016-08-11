@@ -20,6 +20,8 @@ int vprintf(const char *format, va_list arg)
 	for(uint32_t i = 0; ; i++)
 	{
 		char c = format[i];
+		if(!c)
+			return 0;
 		
 		if(c=='%')
 		{
@@ -59,6 +61,10 @@ void print_hexbyte(char byte, FILE* stream)
 
 int fputc(int c, FILE* stream)
 {
-	stream->ops.putc(c);
-	return 0;
+	if(stream->ops.putc)
+	{
+		stream->ops.putc(c);
+		return 0;
+	}
+	return -1;
 }

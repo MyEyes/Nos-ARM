@@ -29,7 +29,7 @@ typedef struct
 {
 	char 	x;
 	char 	y;
-	ushort 	video_page;
+	unsigned short 	video_page;
 	char	video_mode;
 	char	video_cols;
 	char	video_ega_bx;
