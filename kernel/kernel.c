@@ -6,42 +6,49 @@
 #include __PLATFORM__
 #include "kernel/init.h"
 #include "kernel/mem/mem.h"
-#include "kernel/util/kernel_uart.h"
+#include "std/stdio.h"
 #include "kernel/hw/reset.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
 #endif
+
+extern unsigned char uart_getc();
+extern void uart_putc(unsigned char c);
+extern void uart_mod_init(void*, uint32_t);
+
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 {	
 	(void) r0;
 		
 	(void) atags;
+	
+	uart_mod_init(0, 0);
  
-	uart_init();
-	uart_puts("Hello, kernel World!\r\n\r\n");
+	//uart_init();
+	printf("Hello, kernel World!\r\n\r\n");
 	
 	if(r1==PLATFORM_CPU_MACHINE_TYPE)
-		uart_puts("Found correct CPU type\r\n");
+		printf("Found correct CPU type\r\n");
 	else
 	{
-		uart_puts("Unexpected CPU type detected\r\n");
-		uart_puts("Expected:");
-		uart_puthex(PLATFORM_CPU_MACHINE_TYPE);
-		uart_puts("\r\nDetected:");
-		uart_puthex(r1);
-		uart_puts("\r\n\r\n");
+		printf("Unexpected CPU type detected\r\n");
+		printf("Expected:");
+		printf("%x", PLATFORM_CPU_MACHINE_TYPE);
+		printf("\r\nDetected:");
+		printf("%x", r1);
+		printf("\r\n\r\n");
 	}
 	
-	uart_puts("ATAGS: ");
-	uart_puthex(atags);
-	uart_puts("\r\n\r\n");
+	printf("ATAGS: ");
+	printf("%x", atags);
+	printf("\r\n\r\n");
 		
 	kernel_init();
 		
-	uart_puts("Hello, MMU World!\r\n");
+	printf("Hello, MMU World!\r\n");
 	
-	uart_puts("Look mommy, I'm running on real hardware!\r\n");
+	printf("Look mommy, I'm running on real hardware!\r\n");
 	
 	//__asm__("udf 0");
  
@@ -57,6 +64,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 
 void kernel_panic()
 {
-	uart_puts("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
+	printf("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
+	while(1) ;
 	reset();
 }

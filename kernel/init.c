@@ -4,7 +4,7 @@
 #include "kernel/mem/mmu.h"
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
-#include "kernel/util/kernel_uart.h"
+#include "std/stdio.h"
 #include "kernel/cpu/int.h"
 #include "kernel/kernel.h"
 
@@ -31,7 +31,6 @@ void kernel_init()
 	
 	mmu_set_user_pgtbl(KERNEL_DEF_USR_PG_LOC);
 	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
-	*/
 	
 	//Become the domain manager, so that the MMU won't hate us
 	//Sort of arch dependent wether it exists. But we might as well use it and replace it with a stub

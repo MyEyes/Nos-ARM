@@ -2,6 +2,7 @@
 #define __MEM_H__
 #include __PLATFORM__
 
+#include <stdint.h>
 #include <stddef.h>
 
 #define KERNEL_PHYS_MEM_TBL (void*)(PLATFORM_KERNEL_BASE+0x400000) //4MB after kernel image

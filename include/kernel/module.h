@@ -11,21 +11,23 @@ typedef enum
 	SRV
 } module_type;
 
-typedef (*mod_init) (void* addr, uint32_t port);
+typedef void (*mod_init) (void* addr, uint32_t port);
 
 typedef struct
 {
 	uint32_t magic;
 	
 	module_type type;
-	char name[20];
+	char mod_name[20];
+	char srv_name[20];
 	
 	uint32_t num_devs;
 	char **dev_lst;
 	
+	uint32_t num_reqs;
+	char **req_list;
+	
 	mod_init init;
 } module_hdr_t;
-
-
 
 #endif
