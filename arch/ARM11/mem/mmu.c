@@ -83,3 +83,13 @@ void mmu_set_ttbr1(void* tbl_addr)
 	#endif
 	MCR(SYS_CTRL,0,MMU_TTB_CTRL,0,MMU_TTB1,uaddr);
 }
+
+void mem_dsb()
+{
+	MCR(SYS_CTRL,0,7,10,4,0);
+}
+
+void mem_dmb()
+{
+	MCR(SYS_CTRL,0,7,10,5,0);
+}

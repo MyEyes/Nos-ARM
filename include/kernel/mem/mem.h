@@ -53,4 +53,7 @@ void* mem_get_phys(uint32_t* fld_tbl, void* virt_addr);
 
 void mem_plat_init(); //define by architecture
 
+void mem_dsb();
+void mem_dmb();
+
 #endif

@@ -5,6 +5,8 @@ FILE stdout;
 
 int printf(const char *format, ...)
 {
+	if(!format)
+		return -1;
 	va_list arg;
 	int done;
 	
@@ -28,6 +30,10 @@ int vprintf(const char *format, va_list arg)
 			char f = format[++i];
 			if(f=='x')
 				print_hex(va_arg(arg, uint32_t), &stdout);
+			if(f=='s')
+				printf(va_arg(arg, char*));
+			if(f=='c')
+				fputc((char)va_arg(arg, uint32_t), &stdout);
 		}
 		else
 			fputc(c, &stdout);

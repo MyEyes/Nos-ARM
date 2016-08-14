@@ -22,9 +22,10 @@ PI_QEMU_LDFILE = $(ARM11_LDFILE)
 PI_B_PLATFORM = platform/pi-modelb/
 PI_B_ORIGIN=0x8000
 
-PI_B_BOOTFLAGS = -mcpu=arm1176jzf-s -fpic -ffreestanding -c -Xassembler --defsym -Xassembler orig=$(PI_B_ORIGIN)
-PI_B_CFLAGS = -mcpu=arm1176jzf-s -fpic -std=gnu99 -ffreestanding -D__PLATFORM__=\"$(PI_B_PLATFORM)platform.h\" -D__ORIGIN__=$(PI_B_ORIGIN) -c -O2 -Wall -Wextra
-PI_B_LDFLAGS = -ffreestanding -O2 -nostdlib -Xlinker --defsym=orig=$(PI_B_ORIGIN) -Xlinker --defsym=kernel_base=$(KERNEL_BASE)
+PI_B_GCCFLAGS = -mcpu=arm1176jzf-s -fpic -std=gnu99 -ffreestanding -nostdlib -O2
+PI_B_BOOTFLAGS = $(PI_B_GCCFLAGS) -c -Xassembler --defsym -Xassembler orig=$(PI_B_ORIGIN)
+PI_B_CFLAGS = $(PI_B_GCCFLAGS) -c -D__PLATFORM__=\"$(PI_B_PLATFORM)platform.h\" -D__ORIGIN__=$(PI_B_ORIGIN) -Wall -Wextra
+PI_B_LDFLAGS = $(PI_B_GCCFLAGS) -Xlinker --defsym=orig=$(PI_B_ORIGIN) -Xlinker --defsym=kernel_base=$(KERNEL_BASE)
 PI_B_ARCH_FILES = $(ARM11_ARCH_FILES)
 PI_B_BOOTFILE = $(ARM11_BOOTFILE)
 PI_B_LDFILE = $(ARM11_LDFILE)
@@ -57,12 +58,16 @@ pi-b-cc: 	$(SRC_FILES)
 		$(CC) $(INCLUDE_PATH) $(PI_B_CFLAGS) $(SRC_FILES) $(PI_B_ARCH_FILES)
 
 pi-b-ld:	
-		$(CC) -T $(PI_B_LDFILE) -o nos.elf  $(PI_B_LDFLAGS) *.o
+		$(CC) -T $(PI_B_LDFILE) $(PI_B_LDFLAGS) -o nos.elf  *.o -lgcc
 		
 #General targets
 		
 clean: 
-		rm -f *o nos.elf nos.bin
+		rm -f *o nos.elf nos.bin nos.sym nos.bin
 		
 install: nos.elf
-		arm-none-eabi-objcopy nos.elf -O binary nos.bin
+		set -e
+		arm-none-eabi-nm nos.elf > nos.sym.temp
+		tools/sysmap_bld.exe nos.sym.temp nos.sym
+		arm-none-eabi-objcopy --set-section-flags .bss=alloc,load,contents nos.elf -O binary nos.bin
+		./mk_img.sh
