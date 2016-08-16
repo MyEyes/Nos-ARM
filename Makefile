@@ -45,7 +45,7 @@ pi-qemu-cc: 	$(SRC_FILES)
 		$(CC) $(INCLUDE_PATH) $(PI_QEMU_CFLAGS) $(SRC_FILES) $(PI_QEMU_ARCH_FILES)
 
 pi-qemu-ld:	
-		$(CC) -T $(PI_QEMU_LDFILE) -o nos.elf  $(PI_QEMU_LDFLAGS) *.o
+		$(CC) -T $(PI_QEMU_LDFILE) -o nos.elf  $(PI_QEMU_LDFLAGS) *.o -lgcc
 		
 #raspbi modelb targets
 

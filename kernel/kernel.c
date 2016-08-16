@@ -41,7 +41,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	{
 		printf("Unexpected CPU type detected\r\n");
 		printf("Expected:");
-		printf("x", PLATFORM_CPU_MACHINE_TYPE);
+		printf("%x", PLATFORM_CPU_MACHINE_TYPE);
 		printf("\r\nDetected:");
 		printf("%x", r1);
 		printf("\r\n\r\n");
