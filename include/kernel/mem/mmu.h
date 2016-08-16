@@ -15,5 +15,7 @@ void mmu_set_user_pgtbl(void* tbl_addr);
 void mmu_set_user_limit(uint32_t limit);
 
 void domain_manager_set();
+void domain_user_set();
+uint32_t domain_get_flags();
 
 #endif

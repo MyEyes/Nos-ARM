@@ -1,5 +1,5 @@
-#ifndef __CPU_H__
-#define __CPU_H__
+#ifndef __A_CPU_H__
+#define __A_CPU_H__
 
 #define CPU_MODE_USR 0b10000
 #define CPU_MODE_FIQ 0b10001

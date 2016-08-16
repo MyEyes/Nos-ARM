@@ -50,6 +50,7 @@ char mem_bit_set(char* base, uint32_t bit);
 void mem_map(uint32_t* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
 void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem);
 void* mem_get_phys(uint32_t* fld_tbl, void* virt_addr);
+uint32_t mem_get_entry(uint32_t* fld_tbl, void* virt_addr);
 
 void mem_plat_init(); //define by architecture
 

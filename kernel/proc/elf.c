@@ -80,3 +80,31 @@ char* elf_get_sym_name(elf_header_t* header, elf_sheader_t* sheader, elf_sym_t* 
 	elf_sheader_t* strtab = elf_get_sect_hdr(header, sheader->link);
 	return (char*) header+strtab->offset+symbol->name;
 }
+
+/*
+R_ARM_PC24 Bits 0-23 encode a signed offset in units of 4-byte words.
+R_ARM_PC13 Bits 0-11 encode an unsigned byte offset. Bit 23 encodes the direction of
+the offset— 0 means to a lower address than P, 1 to a higher address.
+R_ARM_ABS12 Bits 0-11 encode an unsigned byte offset.
+R_ARM_AMP_VCALL9 Bits 11-19 encode an unsigned offset in units of 8-byte AMP instructions.
+R_ARM_SWI24 Bits 0-23 encode the ARM SWI number.
+R_ARM_XPC25 Bits 0-23 encode a signed offset in units of 4-byte words. Bit 24 encodes
+bit 1 of the target Thumb address.
+*/
+uint32_t elf_calc_reloc(uint32_t orig, elf_rel_t* rel, uint32_t addend)
+{
+	(void) addend;
+	(void) orig;
+	uint32_t mask;
+	switch(ELF_R_SYM(rel->info))
+	{
+		case R_ARM_PC24: mask = ((1<<24)-1); break;
+		case R_ARM_PC13: mask = ((1<<12)-1) | 1<<23; break;
+		case R_ARM_ABS12: mask = (1<<12)-1; break;
+		case R_ARM_AMP_VCALL9: mask = ((1<<9)-1)<<11;
+		case R_ARM_SWI24: mask = ((1<<24))-1;
+		case R_ARM_XPC25: mask = ((1<<24))-1;
+		default: mask = (uint32_t)-1;
+	}
+	return mask;
+}

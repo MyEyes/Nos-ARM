@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include __PLATFORM__
+#include "kernel/mem/mem.h"
 #include "kernel/module.h"
 #include "kernel/mod/kernel_uart.h"
 #include "std/stdio.h"
@@ -36,6 +37,7 @@ inline uint32_t mmio_read(uint32_t reg)
 }
  
 /* Loop <delay> times in a way that the compiler won't optimize away. */
+
 inline void delay(int32_t count)
 {
 	asm volatile("__delay_%=: subs %[count], %[count], #1; bne __delay_%=\n"
@@ -63,6 +65,7 @@ void uart_mod_init(void* addr, uint32_t port)
 
 void uart_init()
 {
+	
 	// Disable UART0.
 	mmio_write(UART0_CR, 0x00000000);
 	// Setup the GPIO pin 14 && 15.

@@ -37,6 +37,18 @@ void domain_manager_set()
 	MCR(SYS_CTRL, 0, 3, 0, 0, 3);
 }
 
+void domain_user_set()
+{
+	MCR(SYS_CTRL, 0, 3, 0, 0, 1);
+}
+
+uint32_t domain_get_flags()
+{
+	uint32_t res = 0;
+	MRC(SYS_CTRL, 0, 3, 0, 0, res);
+	return res;
+}
+
 void mmu_set_user_limit(uint32_t limit)
 {
 	char n = 7;

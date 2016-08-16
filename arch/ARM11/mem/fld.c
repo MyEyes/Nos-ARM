@@ -1,5 +1,5 @@
 #include "arch/ARM11/mem/fld.h"
-#include "arch/ARM11/mem/perm.h"
+#include "kernel/mem/perm.h"
 #include "arch/ARM11/mem/cache.h"
 
 void fld_set(uint32_t* fld_addr, uint32_t value)
@@ -48,9 +48,9 @@ uint32_t* create_flat_fld0(uint32_t* location, uint32_t* start_phys_addr, uint32
 	for(i=0; i<count; i++)
 		//Make sure we map the kernel pages to where they should be
 		if(i<PLATFORM_KERNEL_VIRT_BASE_OFFSET || i>=PLATFORM_KERNEL_VIRT_BASE_OFFSET+(PLATFORM_KERNEL_PHYS_SIZE>>20))
-			fld_set(startLoc+i, fld_construct_section(start_phys_addr + (i<<(20-2)), 0, 0, 0, 1, 0)); //i*1MB
+			fld_set(startLoc+i, fld_construct_section(start_phys_addr + (i<<(20-2)), 0, PERM_PRW_URW, 0, 1, 0)); //i*1MB
 		else
-			fld_set(startLoc+i, fld_construct_section(start_phys_addr + ((i-PLATFORM_KERNEL_VIRT_BASE_OFFSET)<<(20-2)), 0, 0, 0, 1, 0));
+			fld_set(startLoc+i, fld_construct_section(start_phys_addr + ((i-PLATFORM_KERNEL_VIRT_BASE_OFFSET)<<(20-2)), 0, PERM_PRW_URW, 0, 1, 0));
 	return startLoc;
 }
 
@@ -66,8 +66,8 @@ uint32_t* create_flat_fld1(uint32_t* location, uint32_t* start_phys_addr, uint32
 	for(i=0; i<count; i++)
 		//Make sure we map the kernel pages to where they should be
 		if(i<PLATFORM_KERNEL_VIRT_BASE_OFFSET || i>=PLATFORM_KERNEL_VIRT_BASE_OFFSET+(PLATFORM_KERNEL_PHYS_SIZE>>20))
-			fld_set(startLoc+i, fld_construct_section(start_phys_addr + (i<<(20-2)), 0, 0, 0, 1, 0)); //i*1MB
+			fld_set(startLoc+i, fld_construct_section(start_phys_addr + (i<<(20-2)), 0, PERM_PRW_URW, 0, 1, 0)); //i*1MB
 		else
-			fld_set(startLoc+i, fld_construct_section(start_phys_addr + ((i-PLATFORM_KERNEL_VIRT_BASE_OFFSET)<<(20-2)), 0, 0, 0, 1, 0));
+			fld_set(startLoc+i, fld_construct_section(start_phys_addr + ((i-PLATFORM_KERNEL_VIRT_BASE_OFFSET)<<(20-2)), 0, PERM_PRW_URW, 0, 1, 0));
 	return startLoc;
 }

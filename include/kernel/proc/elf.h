@@ -89,8 +89,63 @@ typedef enum
 	FUNC = 2	
 } elf_sym_type;
 
+typedef struct
+{
+	uint32_t addr;
+	uint32_t info;
+} elf_rel_t;
+
 #define ELF_SYM_BINDING(INFO) ((INFO)>>4)
 #define ELF_SYM_TYPE(INFO) ((INFO)&0xF)
+
+typedef struct
+{
+	uint32_t offset;
+	uint32_t info;
+	uint32_t addend;
+} elf_rela_t;
+
+#define ELF_R_SYM(i)	((i)>>8)
+#define ELF_R_TYPE(i)	((unsigned char)(i))
+#define ELF_R_INFO(s,t)	((((s)<<8))+(unsigned char)(t))
+
+
+/*
+A denotes the addend used to compute the new value of the storage unit being relocated.
+- It is the value extracted from the storage unit being relocated (relocation directives of sort SHT_REL) or
+the sum of that value and the addend field of the relocation directive (sort SHT_RELA).
+- If it has a unit, the unit is bytes. An encoded address or offset value is converted to bytes on extraction
+from an instruction and re-encoded on insertion into an instruction.
+
+P denotes the place (section offset or address of the storage unit) being re-located. It is calculated using the
+r_offset field of the relocation directive and the base address of the section being re-located.
+ARM ELF
+SWS ESPC 0003 A-06 Page 31 of 43
+
+S denotes the value of the symbol whose index is given in the r_info field of the relocation directive.
+
+B denotes the base address of the consolidated section in which the symbol is defined. For relocations of
+type R_ARM_SBREL32, this is the lowest static data address (the static base). For relocations of type
+R_ARM_AMP_VCALL9, this is the base address of the AMP co-processor code section.
+*/
+
+typedef enum
+{
+	R_ARM_NONE 		= 0,	//No reloc
+	R_ARM_PC24 		= 1,	//S-P+A
+	R_ARM_ABS32 	= 2,	//S+A
+	R_ARM_REL32 	= 3,	//S-P+A
+	R_ARM_PC13  	= 4,	//S-P+A
+	R_ARM_ABS16 	= 5,	//S+A
+	R_ARM_ABS12 	= 6,	//S+A
+	R_ARM_ABS8		= 8,	//S+A
+	R_ARM_SBREL32	= 9,	//S-B+A
+	R_ARM_AMP_VCALL9= 12,	//S-B+A
+	R_ARM_SWI24		= 13,	//S+A
+	R_ARM_XPC25		= 15,	//S-P+A
+	R_ARM_GLOB_DAT	= 21,	//S+A
+} elf_arm_r_t;
+
 
 typedef struct
 {
@@ -117,4 +172,5 @@ void elf_print_symbol(elf_header_t* header, elf_sheader_t* sheader, elf_sym_t* s
 uint32_t elf_get_sym_value(elf_header_t* header, elf_sheader_t* sheader, elf_sym_t* symbol);
 char* elf_get_sym_name(elf_header_t* header, elf_sheader_t* sheader, elf_sym_t* symbol);
 
+uint32_t elf_calc_reloc(uint32_t orig, elf_rel_t* rel, uint32_t addend);
 #endif

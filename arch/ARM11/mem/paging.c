@@ -262,3 +262,23 @@ void* mem_get_phys(uint32_t* fld_tbl, void* virt_addr)
 	}
 	return (void*)0;
 }
+
+uint32_t mem_get_entry(uint32_t* fld_tbl, void* virt_addr)
+{
+	uint32_t u_addr = (uint32_t) virt_addr;
+	uint32_t fld_index = u_addr >> 20; //how many MBs
+	uint32_t entry = fld_tbl[fld_index];
+	if(FLD_IS_SECTION(entry))
+		return entry;
+	else if(FLD_IS_PGTBL(entry))
+	{
+		uint32_t* sld_tbl = (uint32_t*)(entry&FLD_PG_TBL_MASK);
+		uint32_t sld_index = u_addr - (fld_index<<20); //Get offset inside 1MB
+		sld_index >>= 12;							 //Get 4kb offset
+		uint32_t sld_entry = sld_tbl[sld_index];
+		//If the page is mapped as a small page
+		if(sld_entry&0x2)
+			return sld_entry;
+	}
+	return 0;
+}

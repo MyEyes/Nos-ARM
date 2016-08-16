@@ -1,5 +1,5 @@
 #include "arch/ARM11/mem/sld.h"
-#include "arch/ARM11/mem/perm.h"
+#include "kernel/mem/perm.h"
 #include "arch/ARM11/mem/cache.h"
 
 
