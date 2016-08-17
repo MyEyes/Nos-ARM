@@ -1,6 +1,8 @@
 #ifndef __A_CPU_H__
 #define __A_CPU_H__
 
+#define CPU_INT_STACK_SIZE 256
+
 #define CPU_MODE_USR 0b10000
 #define CPU_MODE_FIQ 0b10001
 #define CPU_MODE_IRQ 0b10010

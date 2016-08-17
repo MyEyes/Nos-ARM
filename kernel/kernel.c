@@ -33,7 +33,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	(void) atags;
 	
 	uart_mod_init(0, 0);
-		
+			
 	kernel_init();
 		
 	printf("Hello, kernel World!\r\n\r\n");
@@ -87,31 +87,13 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	reset();
 }
 
-void __attribute__((naked)) kernel_panic()
+void kernel_panic()
 {
-	__asm__("mov sp, %0"::"r"(&__start));
-	uint32_t instr = 0;
-	__asm__("mov %0, r14":"=r"(instr));
 	//mem_dsb();
 	//mem_dmb();
 	uart_init();
-	
-	uart_puts("cpu und instr:");
-	uart_puthex(instr);
-	uart_puts("\r\n");
-	
-	uart_puts("stdout addr:");
-	uart_puthex((uint32_t)&stdout);
-	uart_puts("\r\n");
-	uart_puts("stdout putc:");
-	uart_puthex((uint32_t)stdout.ops.putc);
-	uart_puts("\r\n");
-	uart_puts("Processor state:");
-	uart_puthex(cpu_get_state());
-	uart_puts("\r\n");
-	uart_puts("Saved processor state:");
-	uart_puthex(cpu_get_saved_state());
-	uart_puts("\r\n");
-	uart_puts("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
+	printf("Processor state: %x\r\n", cpu_get_state());
+	printf("Saved processor state: %x\r\n", cpu_get_saved_state());
+	printf("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
 	reset();
 }
