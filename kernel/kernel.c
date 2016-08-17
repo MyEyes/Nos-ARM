@@ -12,6 +12,8 @@
 #include "kernel/proc/elf.h"
 #include "kernel/proc/sysmap.h"
 #include "kernel/mod/kernel_uart.h"
+#include "kernel/cpu/cpu.h"
+#include "kernel/mem/mmu.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -59,7 +61,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//Change to user mode
 	
 	printf("stdout addr: %x\r\n", &stdout);
-	printf("Page info: %x\r\n", mem_get_entry(KERNEL_DEF_PG_LOC,UART0_BASE_ADDR));
+	printf("Page info: %x\r\n", mem_get_entry(KERNEL_DEF_PG_LOC,(uint32_t *)UART0_BASE_ADDR));
 	printf("Domain Flags: %x\r\n", domain_get_flags());
 	printf("Processor state: %x\r\n", cpu_get_state());
 	
@@ -95,10 +97,10 @@ void kernel_panic()
 	uart_puts("\r\n");
 	
 	uart_puts("stdout addr:");
-	uart_puthex(&stdout);
+	uart_puthex((uint32_t)&stdout);
 	uart_puts("\r\n");
 	uart_puts("stdout putc:");
-	uart_puthex(stdout.ops.putc);
+	uart_puthex((uint32_t)stdout.ops.putc);
 	uart_puts("\r\n");
 	uart_puts("Processor state:");
 	uart_puthex(cpu_get_state());
