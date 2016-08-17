@@ -12,9 +12,9 @@ ARM11_OBJ_FILES = $(patsubst %.c,.obj/%.o,$(ARM11_ARCH_FILES))
 PI_B_PLATFORM = platform/pi-modelb/
 PI_B_ORIGIN=0x8000
 
-PI_B_GCCFLAGS = -mcpu=arm1176jzf-s -fpic -fpie -pie -std=gnu99 -ffreestanding -nostdlib -O2
+PI_B_GCCFLAGS = -mcpu=arm1176jzf-s -fpic -fpie -pie -std=gnu99 -ffreestanding -nostdlib -O2 -Wall -Wextra -Werror
 PI_B_BOOTFLAGS = $(PI_B_GCCFLAGS) -c -Xassembler --defsym -Xassembler orig=$(PI_B_ORIGIN)
-PI_B_CFLAGS = $(PI_B_GCCFLAGS) -c -D__PLATFORM__=\"$(PI_B_PLATFORM)platform.h\" -D__ORIGIN__=$(PI_B_ORIGIN) -Wall -Wextra
+PI_B_CFLAGS = $(PI_B_GCCFLAGS) -c -D__PLATFORM__=\"$(PI_B_PLATFORM)platform.h\" -D__ORIGIN__=$(PI_B_ORIGIN)
 PI_B_LDFLAGS = $(PI_B_GCCFLAGS) -Xlinker --defsym=orig=$(PI_B_ORIGIN) -Xlinker --defsym=kernel_base=$(KERNEL_BASE)
 PI_B_ARCH_FILES = $(ARM11_ARCH_FILES)
 PI_B_BOOTFILE = $(ARM11_BOOTFILE)

@@ -6,13 +6,16 @@
 #include <stddef.h>
 
 #define KERNEL_DEF_PG_LOC PLATFORM_PROC_MAX_MEM
-#define KERNEL_DEF_USR_PG_LOC (KERNEL_DEF_PG_LOC+0x100000)
+#define KERNEL_DEF_USR_PG_LOC ((char*)KERNEL_DEF_PG_LOC+0x100000)
 
 typedef struct
 {
 	void* 		addr;
 	uint32_t	size;
 } pg_tbl_t;
+
+extern pg_tbl_t kernel_page;
+extern pg_tbl_t user_page;
 
 void pg_create_default(void* loc, void* usr_loc);
 

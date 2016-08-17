@@ -12,9 +12,10 @@ ARM11_OBJ_FILES = $(patsubst %.c,.obj/%.o,$(ARM11_ARCH_FILES))
 PI_QEMU_PLATFORM = platform/qemu-pi/
 PI_QEMU_ORIGIN=0x10000
 
-PI_QEMU_BOOTFLAGS = -mcpu=arm1176jzf-s -fpic -ffreestanding -c -Xassembler --defsym -Xassembler orig=$(PI_QEMU_ORIGIN)
-PI_QEMU_CFLAGS = -mcpu=arm1176jzf-s -fpic -std=gnu99 -ffreestanding -D__PLATFORM__=\"$(PI_QEMU_PLATFORM)platform.h\" -D__ORIGIN__=$(PI_QEMU_ORIGIN) -c -O2 -Wall -Wextra
-PI_QEMU_LDFLAGS = -ffreestanding -O2 -nostdlib -Xlinker --defsym=orig=$(PI_QEMU_ORIGIN) -Xlinker --defsym=kernel_base=$(KERNEL_BASE)
+PI_QEMU_GCCFLAGS = -O2 -mcpu=arm1176jzf-s -fpic -std=gnu99 -ffreestanding -nostdlib -Wall -Wextra -Werror
+PI_QEMU_BOOTFLAGS = $(PI_QEMU_GCCFLAGS) -c -Xassembler --defsym -Xassembler orig=$(PI_QEMU_ORIGIN)
+PI_QEMU_CFLAGS =  $(PI_QEMU_GCCFLAGS) -D__PLATFORM__=\"$(PI_QEMU_PLATFORM)platform.h\" -D__ORIGIN__=$(PI_QEMU_ORIGIN) -c 
+PI_QEMU_LDFLAGS =  $(PI_QEMU_GCCFLAGS) -Xlinker --defsym=orig=$(PI_QEMU_ORIGIN) -Xlinker --defsym=kernel_base=$(KERNEL_BASE)
 PI_QEMU_ARCH_FILES = $(ARM11_ARCH_FILES)
 PI_QEMU_BOOTFILE = $(ARM11_BOOTFILE)
 PI_QEMU_LDFILE = $(ARM11_LDFILE)

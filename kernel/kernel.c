@@ -60,15 +60,17 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	mem_dmb();
 	//Change to user mode
 	
-	printf("stdout addr: %x\r\n", &stdout);
-	printf("Page info: %x\r\n", pg_get_entry(KERNEL_DEF_PG_LOC,(uint32_t *)UART0_BASE_ADDR));
 	printf("Domain Flags: %x\r\n", domain_get_flags());
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
-	cpu_set_user();
+	//cpu_set_user();
 	
-	__asm__("udf 0");
+	//__asm__("udf 0");
+	void* dummy = (void*)0xff000000;
+	pg_unmap(&kernel_page, dummy, 4);
+	
+	*((uint32_t*)dummy) = 0;
 	
 	//printf("Processor state (User): %x\r\n", cpu_get_state());
 	

@@ -34,13 +34,13 @@ void pg_create_default(void* ker_loc, void* usr_loc)
 
 void pg_map(pg_tbl_t* tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
 {
-	if((uint32_t)virt_addr+mem<tbl->size)
+	if((uint32_t)virt_addr+mem < tbl->size)
 		__plat_pg_map(tbl->addr, virt_addr, phys_addr, mem, domain, perm, caching, global, shared);
 }
 
 void pg_unmap(pg_tbl_t* tbl, void* virt_addr, size_t mem)
 {
-	if((uint32_t)virt_addr+mem<tbl->size)
+	if((uint32_t)virt_addr+mem < tbl->size)
 		__plat_pg_unmap(tbl->addr, virt_addr, mem);
 }
 

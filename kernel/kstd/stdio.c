@@ -1,5 +1,6 @@
 #include "std/stdio.h"
 #include "std/string.h"
+#include "kernel/mem/mem.h"
 
 FILE stdout;
 
@@ -13,6 +14,8 @@ int printf(const char *format, ...)
 	va_start(arg, format);
 	done = vprintf(format, arg);
 	va_end(arg);
+	
+	mem_dmb();
 	
 	return done;
 }

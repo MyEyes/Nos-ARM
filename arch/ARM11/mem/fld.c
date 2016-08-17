@@ -43,7 +43,7 @@ uint32_t* create_flat_fld0(uint32_t* location, uint32_t* start_phys_addr, uint32
 	uint32_t* startLoc = (uint32_t*)(((uint32_t)location)&FLD0_ADDR_MASK);
 		
 	uint32_t count = ((uint32_t)(end_phys_addr-start_phys_addr))>>(20-2); //difference/1MB, but since they are 4byte pointers we only divide by 256kb
-		
+	
 	uint32_t i = 0;
 	for(i=0; i<count; i++)
 		//Make sure we map the kernel pages to where they should be

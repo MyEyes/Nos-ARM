@@ -13,7 +13,7 @@ typedef struct
 void* malloc(size_t size)
 {
 	mem_hdr_t* hdr = (mem_hdr_t*)mem_phys_find_free(size+sizeof(mem_hdr_t));
-	void* addr = ((void*)hdr) + sizeof(mem_hdr_t);
+	void* addr = ((char*)hdr) + sizeof(mem_hdr_t);
 	if(addr)
 	{
 		hdr->location = addr;
@@ -45,7 +45,7 @@ void free(void *ptr)
 {
 	if(!ptr)
 		return;
-	mem_hdr_t *hdr = (mem_hdr_t*)(ptr-sizeof(mem_hdr_t));
+	mem_hdr_t *hdr = (mem_hdr_t*)((char*)ptr-sizeof(mem_hdr_t));
 	if(hdr->location == ptr && hdr->used)
 	{
 		mem_phys_clear(hdr, hdr->size);

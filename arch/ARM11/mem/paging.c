@@ -162,7 +162,7 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 			}
 			else
 			{
-				mem_create_sld(fld_tbl+i, offset, len, (void*)p_addr, domain, perm, caching, global, shared);
+				mem_create_sld(((uint32_t*)fld_tbl)+i, offset, len, (void*)p_addr, domain, perm, caching, global, shared);
 			}
 		}
 	}
@@ -174,7 +174,7 @@ void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
 	uint32_t e_addr = (u_addr + mem);
 	uint32_t fld_start = u_addr >> 20;
 	uint32_t fld_end =  (e_addr-1) >> 20;
-	
+		
 	for(uint32_t i = fld_start; i<=fld_end; i++)
 	{
 		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
@@ -186,7 +186,7 @@ void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
 		int32_t len = e_addr-sec_addr;
 		if(len>(1<<20)) len = 1<<20;
 		len -= offset;
-		
+				
 		//If we are unmapping the whole MB
 		if(offset == 0 && len == 1<<20)
 		{
@@ -211,7 +211,8 @@ void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
 			}
 			else if(FLD_IS_SECTION(fld_entry))
 			{
-				mem_create_sld(fld_tbl+i, offset, len, (void*)0, 0, 0, 0, 0, 0);
+				//should map with fld entries attributes instead of 0
+				mem_create_sld((uint32_t*)fld_tbl+i, offset, len, (void*)0, 0, 0, 0, 0, 0);
 				uint32_t* sld_tbl = (uint32_t*)(((uint32_t*)fld_tbl)[i]&FLD_PG_TBL_MASK);
 				uint32_t sld_start = offset>>12;
 				uint32_t sld_end = (offset+len-1)>>12;

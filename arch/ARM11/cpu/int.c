@@ -1,6 +1,7 @@
 #include "arch/ARM11/cpu/int.h"
 #include "kernel/kernel.h"
 #include "arch/ARM11/cpu/cpu.h"
+#include "std/stdio.h"
 #include <stdint.h>
 
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
@@ -19,6 +20,11 @@ void set_int_hnd(char interrupt, void* hnd_addr)
 {
 	void **hnd_loc = (void**)(interrupt + INT_ADDR_LOC);
 	*hnd_loc = hnd_addr;
+}
+
+void __attribute__((interrupt("ABORT"))) test_hnd()
+{
+	printf("Data abort!\r\n");
 }
 
 void int_init()
@@ -46,10 +52,10 @@ void int_init()
 							
 	__asm__ __volatile__(	"CPS %0\r\n"::"i"(CPU_MODE_SVC));
 	
-	set_int_hnd(INT_UND, kernel_panic);
-	set_int_hnd(INT_SWI, kernel_panic);
-	set_int_hnd(INT_PAB, kernel_panic);
-	set_int_hnd(INT_DAB, kernel_panic);
-	set_int_hnd(INT_IRQ, kernel_panic);
-	set_int_hnd(INT_FIQ, kernel_panic);
+	set_int_hnd(INT_UND, (void*)kernel_panic);
+	set_int_hnd(INT_SWI, (void*)kernel_panic);
+	set_int_hnd(INT_PAB, (void*)kernel_panic);
+	set_int_hnd(INT_DAB, (void*)test_hnd);
+	set_int_hnd(INT_IRQ, (void*)kernel_panic);
+	set_int_hnd(INT_FIQ, (void*)kernel_panic);
 }
