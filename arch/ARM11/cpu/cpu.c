@@ -1,5 +1,6 @@
 #include "arch/ARM11/cpu/cpu.h"
 #include "kernel/cpu/cpu.h"
+#include "arch/ARM11/cpu/coproc.h"
 
 void cpu_set_user()
 {
@@ -29,5 +30,12 @@ uint32_t cpu_get_und_instr()
 {
 	uint32_t res = 0;
 	__asm__ __volatile__("mov %0, r14":"=r"(res));
+	return res;
+}
+
+uint32_t cpu_get_ctrl_regs()
+{
+	uint32_t res = 0;
+	MRC(SYS_CTRL, 0, 1, 0, 0, res);
 	return res;
 }

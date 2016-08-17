@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "kernel/mem/paging.h"
 
 #define KERNEL_PHYS_MEM_TBL (void*)(PLATFORM_KERNEL_BASE+0x400000) //4MB after kernel image
 #define KERNEL_PHYS_MEM_TBL_SIZE (PLATFORM_TOTAL_MEMORY>>14) //64 byte per megabyte (20-6)
@@ -46,11 +47,6 @@ void mem_unmark_as_kernel(void* phys_addr, size_t mem);
 void mem_set_bits(char* base, uint32_t start_bit, uint32_t end_bit);
 void mem_clear_bits(char* base, uint32_t start_bit, uint32_t end_bit);
 char mem_bit_set(char* base, uint32_t bit);
-
-void mem_map(uint32_t* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
-void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem);
-void* mem_get_phys(uint32_t* fld_tbl, void* virt_addr);
-uint32_t mem_get_entry(uint32_t* fld_tbl, void* virt_addr);
 
 void mem_plat_init(); //define by architecture
 

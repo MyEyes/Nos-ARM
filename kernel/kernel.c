@@ -55,15 +55,17 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	mem_dsb();
 	mem_dmb();
-	//__asm__("udf 0");
 	//Change to user mode
 	
 	printf("stdout addr: %x\r\n", &stdout);
 	printf("Page info: %x\r\n", mem_get_entry(KERNEL_DEF_PG_LOC,UART0_BASE_ADDR));
 	printf("Domain Flags: %x\r\n", domain_get_flags());
 	printf("Processor state: %x\r\n", cpu_get_state());
+	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
 	cpu_set_user();
+	
+	__asm__("udf 0");
 	
 	//printf("Processor state (User): %x\r\n", cpu_get_state());
 	
@@ -86,8 +88,8 @@ void kernel_panic()
 {
 	uint32_t instr = 0;
 	__asm__("mov %0, r14":"=r"(instr));
-	mem_dsb();
-	mem_dmb();
+	//mem_dsb();
+	//mem_dmb();
 	uart_init();
 	
 	uart_puts("cpu und instr:");
