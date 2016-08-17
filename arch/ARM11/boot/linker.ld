@@ -8,7 +8,7 @@ SECTIONS
 	.text.remap :
 	{
 	    KEEP(*(.text.boot))
-		start_remap.o(.text)
+		*start_remap.o(.text)
 	}
 	. = . + kernel_base;
 	__text_start = .;

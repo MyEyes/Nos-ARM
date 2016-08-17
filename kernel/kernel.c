@@ -22,6 +22,7 @@ extern "C" /* Use C linkage for kernel_main. */
 extern unsigned char uart_getc();
 extern void uart_putc(unsigned char c);
 extern void uart_mod_init(void*, uint32_t);
+extern int __start;
 extern int __end;
 extern FILE stdout;
 
@@ -60,7 +61,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//Change to user mode
 	
 	printf("stdout addr: %x\r\n", &stdout);
-	printf("Page info: %x\r\n", mem_get_entry(KERNEL_DEF_PG_LOC,(uint32_t *)UART0_BASE_ADDR));
+	printf("Page info: %x\r\n", pg_get_entry(KERNEL_DEF_PG_LOC,(uint32_t *)UART0_BASE_ADDR));
 	printf("Domain Flags: %x\r\n", domain_get_flags());
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
@@ -86,8 +87,9 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	reset();
 }
 
-void kernel_panic()
+void __attribute__((naked)) kernel_panic()
 {
+	__asm__("mov sp, %0"::"r"(&__start));
 	uint32_t instr = 0;
 	__asm__("mov %0, r14":"=r"(instr));
 	//mem_dsb();

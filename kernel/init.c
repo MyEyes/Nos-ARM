@@ -17,7 +17,7 @@ void kernel_init()
 	uart_puts("Setting up page tables\r\n");
 	#endif	
 	
-	paging_create_default(KERNEL_DEF_PG_LOC, KERNEL_DEF_USR_PG_LOC);
+	pg_create_default(KERNEL_DEF_PG_LOC, KERNEL_DEF_USR_PG_LOC);
 	
 	#ifdef INIT_DEBUG
 	uart_puts("Setting user memory limit\r\n");

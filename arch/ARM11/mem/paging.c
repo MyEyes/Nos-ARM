@@ -6,18 +6,6 @@
 
 uint32_t* free_slds[MEM_SLD_CACHE_SIZE];
 
-void paging_create_default(void* loc, void* usr_loc)
-{
-	create_flat_fld0(usr_loc, 0, PLATFORM_PROC_MAX_MEM);
-	if(PLATFORM_TTBCR_N!=0)
-	{
-		create_flat_fld1(loc, 0, PLATFORM_TOTAL_ADDR_RANGE);
-#ifdef INIT_DEBUG
-		uart_puts("Flat Page Tables set up\r\n");
-#endif
-	}
-}
-
 void mem_plat_init()
 {
 	for(uint32_t i=0; i<MEM_SLD_CACHE_SIZE; i++) free_slds[i] = 0;
@@ -128,7 +116,7 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 	}
 }
 
-void mem_map(uint32_t* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
+void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
 {	
 	uint32_t u_addr = (uint32_t) virt_addr;
 	uint32_t e_addr = (u_addr + mem);
@@ -138,7 +126,7 @@ void mem_map(uint32_t* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, ch
 	
 	for(uint32_t i = fld_start; i<=fld_end; i++, p_addr+=1<<20)
 	{
-		uint32_t fld_entry = fld_tbl[i];
+		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
 		uint32_t sec_addr = i<<20;
 			
 		int32_t offset = u_addr-sec_addr;
@@ -153,7 +141,7 @@ void mem_map(uint32_t* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, ch
 		{
 			if(FLD_IS_PGTBL(fld_entry))
 				free_sld((uint32_t*)(fld_entry & FLD_PG_TBL_MASK));
-			fld_tbl[i] = fld_construct_section((void*)p_addr, domain, 0, 0, 1, 0);
+			((uint32_t*)fld_tbl)[i] = fld_construct_section((void*)p_addr, domain, perm, caching, global, shared);
 		}
 		//otherwise we need to create a second level page table
 		//if it was a section before we need to transfer all of those values over
@@ -180,7 +168,7 @@ void mem_map(uint32_t* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, ch
 	}
 }
 
-void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem)
+void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
 {	
 	uint32_t u_addr = (uint32_t) virt_addr;
 	uint32_t e_addr = (u_addr + mem);
@@ -189,7 +177,7 @@ void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem)
 	
 	for(uint32_t i = fld_start; i<=fld_end; i++)
 	{
-		uint32_t fld_entry = fld_tbl[i];
+		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
 		uint32_t sec_addr = i<<20;
 			
 		int32_t offset = u_addr-sec_addr;
@@ -204,7 +192,7 @@ void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem)
 		{
 			if(FLD_IS_PGTBL(fld_entry))
 				free_sld((uint32_t*)(fld_entry & FLD_PG_TBL_MASK));
-			fld_tbl[i] = 0;
+			((uint32_t*)fld_tbl)[i] = 0;
 		}
 		//otherwise we need to create a second level page table
 		//if it was a section before we need to transfer all of those values over
@@ -224,7 +212,7 @@ void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem)
 			else if(FLD_IS_SECTION(fld_entry))
 			{
 				mem_create_sld(fld_tbl+i, offset, len, (void*)0, 0, 0, 0, 0, 0);
-				uint32_t* sld_tbl = (uint32_t*)((*(fld_tbl+i))&FLD_PG_TBL_MASK);
+				uint32_t* sld_tbl = (uint32_t*)(((uint32_t*)fld_tbl)[i]&FLD_PG_TBL_MASK);
 				uint32_t sld_start = offset>>12;
 				uint32_t sld_end = (offset+len-1)>>12;
 				#ifdef MEM_DBG_TBLS
@@ -243,11 +231,11 @@ void mem_unmap(uint32_t* fld_tbl, void* virt_addr, size_t mem)
 	}
 }
 
-void* mem_get_phys(uint32_t* fld_tbl, void* virt_addr)
+void* __plat_pg_get_phys(void* fld_tbl, void* virt_addr)
 {
 	uint32_t u_addr = (uint32_t) virt_addr;
 	uint32_t fld_index = u_addr >> 20; //how many MBs
-	uint32_t entry = fld_tbl[fld_index];
+	uint32_t entry = ((uint32_t*)fld_tbl)[fld_index];
 	if(FLD_IS_SECTION(entry))
 		return (void*)((entry & FLD_SECTION_MASK) | (u_addr&(~FLD_SECTION_MASK)));
 	else if(FLD_IS_PGTBL(entry))
@@ -263,11 +251,11 @@ void* mem_get_phys(uint32_t* fld_tbl, void* virt_addr)
 	return (void*)0;
 }
 
-uint32_t mem_get_entry(uint32_t* fld_tbl, void* virt_addr)
+uint32_t __plat_pg_get_entry(void* fld_tbl, void* virt_addr)
 {
 	uint32_t u_addr = (uint32_t) virt_addr;
 	uint32_t fld_index = u_addr >> 20; //how many MBs
-	uint32_t entry = fld_tbl[fld_index];
+	uint32_t entry = ((uint32_t*)fld_tbl)[fld_index];
 	if(FLD_IS_SECTION(entry))
 		return entry;
 	else if(FLD_IS_PGTBL(entry))
@@ -281,4 +269,9 @@ uint32_t mem_get_entry(uint32_t* fld_tbl, void* virt_addr)
 			return sld_entry;
 	}
 	return 0;
+}
+
+uint32_t __plat_pg_tbl_maxentry()
+{
+	return 1<<20;
 }

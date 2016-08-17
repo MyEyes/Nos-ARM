@@ -6,3 +6,4 @@ nos.bin
 *.temp
 *.bin
 *.img
+*.log
