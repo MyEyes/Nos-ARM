@@ -45,7 +45,9 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 	(void)swi_num;
 	thread_curr_store(pc, sp);
 	printf("SWI pc=%x sp=%x\r\n",pc,sp);
-	return thread_curr_sp();
+	char* test = thread_curr_sp();
+	printf("thread_stored_sp = %x\r\n", test);
+	return test;
 }
 
 void __attribute__((naked)) swi_hnd()

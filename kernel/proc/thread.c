@@ -4,6 +4,8 @@
 
 thread_t kern_thread;
 
+thread_t* curr_thread;
+
 void thread_curr_store(char* pc, char* sp)
 {
 	thread_store(curr_thread, pc, sp);
