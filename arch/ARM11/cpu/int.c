@@ -54,10 +54,14 @@ void __attribute__((naked)) swi_hnd()
 {
 	__asm__	(
 	"stmfd sp!, {r0-r12, lr}\n"\
+	"mrs r0, spsr\n"\
+	"push {r0}\n"\
 	"mov r1, sp\n"\
 	"mov r0, lr\n"\
 	"bl swi_hnd2\n"\
 	"mov sp, r0\n"\
+	"pop {r0}\n"\
+	"msr spsr, r0\n"\
 	"ldmfd sp!, {r0-r12, pc}^\n"
 	);
 }
