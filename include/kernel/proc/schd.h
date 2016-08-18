@@ -4,5 +4,6 @@
 #include "kernel/proc/thread.h"
 
 void schd_init();
+void schd_chg_thread();
 
 #endif

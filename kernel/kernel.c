@@ -8,12 +8,15 @@
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
 #include "std/stdio.h"
+#include "std/stdlib.h"
 #include "kernel/hw/reset.h"
 #include "kernel/proc/elf.h"
 #include "kernel/proc/sysmap.h"
 #include "kernel/mod/kernel_uart.h"
 #include "kernel/cpu/cpu.h"
 #include "kernel/mem/mmu.h"
+#include "kernel/proc/proc.h"
+#include "kernel/proc/thread.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -25,6 +28,11 @@ extern void uart_mod_init(void*, uint32_t);
 extern int __start;
 extern int __end;
 extern FILE stdout;
+
+void test()
+{
+	printf("Proc, started");
+}
 
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 {	
@@ -77,6 +85,13 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//printf("Processor state (User): %x\r\n", cpu_get_state());
 	
 	//printf("Hello user mode!\r\n");
+
+	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
+	proc_init(test_proc, &kernel_page, 1);
+	thread_t* test_thread = malloc(sizeof(thread_t));
+	char* stack = malloc(0x8000);
+	thread_init(test_thread, test_proc, stack+0x8000, stack, (char*)test, 1);
+	
  
 	
 	while ( true )
