@@ -7,8 +7,12 @@
 #include "std/stdio.h"
 #include "kernel/cpu/int.h"
 #include "kernel/kernel.h"
+#include "kernel/proc/proc.h"
+#include "kernel/proc/thread.h"
 
 //#define INIT_DEBUG
+
+extern char* __start;
 
 void kernel_init()
 {
@@ -54,6 +58,9 @@ void kernel_init()
 #ifdef INIT_DEBUG	
 	uart_puts("Kernel memory marked as used and kernel \r\n");
 #endif
+
+	proc_init(&kern_proc, &user_page, 0);
+	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0);
 
 	int_init();
 }

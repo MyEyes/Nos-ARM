@@ -72,6 +72,8 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	*((uint32_t*)dummy) = 0;
 	
+	__asm__("swi 0");
+	
 	//printf("Processor state (User): %x\r\n", cpu_get_state());
 	
 	//printf("Hello user mode!\r\n");

@@ -1,5 +1,6 @@
 #include "arch/ARM11/cpu/int.h"
 #include "kernel/kernel.h"
+#include "kernel/proc/thread.h"
 #include "arch/ARM11/cpu/cpu.h"
 #include "std/stdio.h"
 #include <stdint.h>
@@ -22,9 +23,41 @@ void set_int_hnd(char interrupt, void* hnd_addr)
 	*hnd_loc = hnd_addr;
 }
 
-void __attribute__((interrupt("ABORT"))) test_hnd()
+void __attribute__((used)) test_hnd2()
 {
-	printf("Data abort!\r\n");
+	printf("Data abort!\r\n");	
+}
+
+void __attribute__((naked)) test_hnd()
+{
+	__asm__	(
+	"stmfd sp!, {r0-r12, lr}\n"\
+	"bl test_hnd2\n"\
+	"ldmfd sp!, {r0-r12, lr}\n"
+	);
+}
+
+
+//returns sp of process to return from
+
+char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
+{
+	(void)swi_num;
+	thread_curr_store(pc, sp);
+	printf("SWI pc=%x sp=%x\r\n",pc,sp);
+	return thread_curr_sp();
+}
+
+void __attribute__((naked)) swi_hnd()
+{
+	__asm__	(
+	"stmfd sp!, {r0-r12, lr}\n"\
+	"mov r1, sp\n"\
+	"mov r0, lr\n"\
+	"bl swi_hnd2\n"\
+	"mov sp, r0\n"\
+	"ldmfd sp!, {r0-r12, pc}^\n"
+	);
 }
 
 void int_init()
@@ -53,7 +86,7 @@ void int_init()
 	__asm__ __volatile__(	"CPS %0\r\n"::"i"(CPU_MODE_SVC));
 	
 	set_int_hnd(INT_UND, (void*)kernel_panic);
-	set_int_hnd(INT_SWI, (void*)kernel_panic);
+	set_int_hnd(INT_SWI, (void*)swi_hnd);
 	set_int_hnd(INT_PAB, (void*)kernel_panic);
 	set_int_hnd(INT_DAB, (void*)test_hnd);
 	set_int_hnd(INT_IRQ, (void*)kernel_panic);
