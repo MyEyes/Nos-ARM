@@ -86,12 +86,13 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	//printf("Hello user mode!\r\n");
 
+	/*
 	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
 	proc_init(test_proc, &kernel_page, 1);
 	thread_t* test_thread = malloc(sizeof(thread_t));
 	char* stack = malloc(0x8000);
 	thread_init(test_thread, test_proc, stack+0x8000, stack, (char*)test, 1);
-	
+	*/
  
 	
 	while ( true )

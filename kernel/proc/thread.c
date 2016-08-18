@@ -33,3 +33,8 @@ void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* st
 	thread->sp=stack_start;
 	thread->pc=entry;
 }
+
+void thread_change(thread_t* thread)
+{
+	curr_thread = thread;
+}

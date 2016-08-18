@@ -20,6 +20,7 @@ extern thread_t* curr_thread;
 void thread_curr_store(char* pc, char* sp);
 void thread_store(thread_t* thread, char* pc, char* sp);
 void thread_print(thread_t* thread);
+void thread_change(thread_t*);
 
 char* thread_curr_sp();
 
