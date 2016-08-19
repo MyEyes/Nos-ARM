@@ -1,5 +1,6 @@
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
+#include "kernel/mod/kernel_uart.h"
 #include __PLATFORM__
 
 pg_tbl_t kernel_page;
@@ -19,7 +20,6 @@ void pg_create_default(void* ker_loc, void* usr_loc)
 		else
 			__plat_pg_map(ker_loc, (void*)(i * ent_size), (void*)((i-PLATFORM_KERNEL_VIRT_BASE_OFFSET) * ent_size), ent_size, 0, PERM_PRW_UNA, 0, 1, 0);
 	
-
 	user_page.addr = usr_loc;
 	user_page.size = (uint32_t)PLATFORM_PROC_MAX_MEM;
 	

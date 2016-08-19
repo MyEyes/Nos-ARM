@@ -15,6 +15,7 @@ int printf(const char *format, ...)
 	done = vprintf(format, arg);
 	va_end(arg);
 	
+	mem_dsb();
 	mem_dmb();
 	
 	return done;

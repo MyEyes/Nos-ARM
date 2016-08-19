@@ -53,16 +53,20 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 void __attribute__((naked)) swi_hnd()
 {
 	__asm__	(
-	"stmfd sp!, {r0-r12, lr}\n"\
-	"mrs r0, spsr\n"\
-	"push {r0}\n"\
-	"mov r1, sp\n"\
-	"mov r0, lr\n"\
-	"bl swi_hnd2\n"\
-	"mov sp, r0\n"\
-	"pop {r0}\n"\
-	"msr spsr, r0\n"\
-	"ldmfd sp!, {r0-r12, pc}^\n"
+	"CPS #31\n"							//Change to System mode to get access to user stack
+	"stmfd sp!, {r0-r12, lr}\n"			//push register states onto stack
+	"mov r1, sp\n"						//mov sps value into r1
+	"CPS #19\n"							//Enter supervisor mode
+	"mrs r0, spsr\n"					//mov stored process state into r0
+	"stmfd r1!, {r0}\n"					//push value onto stack of process
+	"mov r1, sp\n"						//set up arguments for swi_hnd2 call
+	"mov r0, lr\n"						//^
+	"bl swi_hnd2\n"						//call swi_hnd2
+	"CPS #31\n"							//become system again
+	"mov sp, r0\n"						//mov return value in as stack pointer of process
+	"pop {r0}\n"						//pop stored process state off
+	"msr spsr, r0\n"					//Set process state
+	"ldmfd sp!, {r0-r12, pc}^\n"		//load registers and restore process state
 	);
 }
 

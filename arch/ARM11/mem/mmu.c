@@ -1,5 +1,6 @@
 #include "arch/ARM11/mem/mmu.h"
 #include "arch/ARM11/cpu/coproc.h"
+#include "kernel/mem/mem.h"
 //#define MMU_DEBUG
 #ifdef MMU_DEBUG
 #include "kernel/mod/kernel_uart.h"
@@ -15,8 +16,11 @@ void mmu_enable()
 	#ifdef MMU_DEBUG
 	uart_puthex(old_val);
 	#endif
+	
+	MCR(SYS_CTRL,0,7,10,5,0);
 	//Set new value
 	MCR(SYS_CTRL,0,MMU_SYSCTL_MAIN,0, 0, old_val);
+	MCR(SYS_CTRL,0,7,10,5,0);
 }
 
 void mmu_disable()
@@ -35,18 +39,24 @@ void mmu_disable()
 
 void domain_manager_set()
 {
+	mem_dmb();
 	MCR(SYS_CTRL, 0, 3, 0, 0, 3);
+	mem_dsb();
 }
 
 void domain_user_set()
 {
+	mem_dmb();
 	MCR(SYS_CTRL, 0, 3, 0, 0, 1);
+	mem_dsb();
 }
 
 uint32_t domain_get_flags()
 {
 	uint32_t res = 0;
+	mem_dmb();
 	MRC(SYS_CTRL, 0, 3, 0, 0, res);
+	mem_dsb();
 	return res;
 }
 
@@ -74,7 +84,11 @@ void mmu_set_ttbrc(char n)
 	#ifdef MMU_DEBUG
 	uart_puthex(n);
 	#endif
+	MCR(SYS_CTRL,0,7,10,4,0);
+	MCR(SYS_CTRL,0,7,10,5,0);
 	MCR(SYS_CTRL,0,MMU_TTB_CTRL,0,MMU_TTBC, n);
+	MCR(SYS_CTRL,0,7,10,4,0);
+	MCR(SYS_CTRL,0,7,10,5,0);
 }
 
 void mmu_set_ttbr0(void* tbl_addr)
@@ -84,7 +98,9 @@ void mmu_set_ttbr0(void* tbl_addr)
 	#ifdef MMU_DEBUG
 	uart_puthex(uaddr);
 	#endif
+	MCR(SYS_CTRL,0,7,10,5,0);
 	MCR(SYS_CTRL,0,MMU_TTB_CTRL,0,MMU_TTB0,uaddr);
+	MCR(SYS_CTRL,0,7,10,5,0);
 }
 
 void mmu_set_ttbr1(void* tbl_addr)
@@ -94,7 +110,9 @@ void mmu_set_ttbr1(void* tbl_addr)
 	#ifdef MMU_DEBUG
 	uart_puthex(uaddr);
 	#endif
+	MCR(SYS_CTRL,0,7,10,5,0);
 	MCR(SYS_CTRL,0,MMU_TTB_CTRL,0,MMU_TTB1,uaddr);
+	MCR(SYS_CTRL,0,7,10,5,0);
 }
 
 void mem_dsb()

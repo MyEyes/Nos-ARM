@@ -17,47 +17,58 @@ extern char* __start;
 
 void kernel_init()
 {
+	#ifdef INIT_DEBUG
+	uart_puts("Setting up interrupt handlers\r\n");
+	#endif
+	int_init();
+	
 	
 	#ifdef INIT_DEBUG
 	uart_puts("Setting up page tables\r\n");
-	#endif	
+	#endif
 	
+	mem_dmb();
 	pg_create_default(KERNEL_DEF_PG_LOC, KERNEL_DEF_USR_PG_LOC);
-	
-	#ifdef INIT_DEBUG
-	uart_puts("Setting user memory limit\r\n");
-	#endif	
-
-	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
+	mem_dmb();
 	
 	#ifdef INIT_DEBUG
 	uart_puts("Assigning page tables\r\n");
 	#endif	
 	
-	mmu_set_user_pgtbl(KERNEL_DEF_USR_PG_LOC);
 	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
+	
+	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
+	
+	#ifdef INIT_DEBUG
+	uart_puts("Setting user memory limit\r\n");
+	#endif
+	
+	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
 	
 	//Become the domain manager, so that the MMU won't hate us
 	//Sort of arch dependent wether it exists. But we might as well use it and replace it with a stub
 	//if the arch does not support domains
+	
+	//We should already be domain manager from the kernel remap
 	domain_manager_set();
 #ifdef INIT_DEBUG
-	uart_puts("Became domain manager\r\n");
+	printf("Became domain manager\r\n");
 #endif	
 	//Enable the MMU
+	//Should already be enabled from kernel remap
 	mmu_enable();
 #ifdef INIT_DEBUG	
-	uart_puts("MMU enabled\r\n");
+	printf("MMU enabled\r\n");
 #endif
 
 	mem_phys_init(PLATFORM_TOTAL_MEMORY);
 #ifdef INIT_DEBUG	
-	uart_puts("Started tracking phys mem \r\n");
+	printf("Started tracking phys mem \r\n");
 #endif
 	mem_phys_set(0, PLATFORM_KERNEL_PHYS_SIZE);
 	mem_mark_as_kernel(0, PLATFORM_KERNEL_PHYS_SIZE);
 #ifdef INIT_DEBUG	
-	uart_puts("Kernel memory marked as used and kernel \r\n");
+	printf("Kernel memory marked as used and kernel \r\n");
 #endif
 
 	proc_init(&kern_proc, &user_page, 0);
@@ -66,8 +77,6 @@ void kernel_init()
 	curr_thread = &kern_thread;
 
 #ifdef INIT_DEBUG	
-	uart_puts("Kernel thread initialized\r\n");
+	printf("Kernel thread initialized\r\n");
 #endif
-
-	int_init();
 }

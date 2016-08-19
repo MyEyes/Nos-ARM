@@ -1,8 +1,8 @@
 #include "std/string.h"
 
-void memset(void* ptr, int c, size_t n)
+void memset(char* ptr, int c, size_t n)
 {
-	char* cp = (char*)ptr;
+	char* cp = ptr;
 	for(;n>0;n--)
 		cp[n-1] = (char)c;
 }

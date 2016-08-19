@@ -37,10 +37,10 @@ void test()
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 {	
 	(void) r0;
-		
-	(void) atags;
 	
 	uart_mod_init(0, 0);
+	
+	printf("%x\r\n", cpu_get_state());
 			
 	kernel_init();
 
@@ -69,22 +69,24 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//Change to user mode
 	
 	printf("Domain Flags: %x\r\n", domain_get_flags());
+	mem_dsb();
+	mem_dmb();
 	printf("Processor state: %x\r\n", cpu_get_state());
-	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
+	//printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
 	//cpu_set_user();
 	
 	//__asm__("udf 0");
-	void* dummy = (void*)0xff000000;
-	pg_unmap(&kernel_page, dummy, 4);
+	//void* dummy = (void*)0xff000000;
+	//pg_unmap(&kernel_page, dummy, 4);
 	
-	*((uint32_t*)dummy) = 0;
+	//*((uint32_t*)dummy) = 0;
 	
-	__asm__("swi 0");
+	//__asm__("swi 0");
 	
 	//printf("Processor state (User): %x\r\n", cpu_get_state());
 	
-	//printf("Hello user mode!\r\n");
+	printf("Hello user mode!\r\n");
 
 	/*
 	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));

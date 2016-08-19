@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
+#include "std/string.h"
 #ifdef MEM_DBG_TBLS
 #include "kernel/util/kernel_uart.h"
 #endif
@@ -15,6 +16,7 @@ void mem_phys_init(size_t total_mem)
 {
 	desc_tbl = KERNEL_PHYS_MEM_TBL;
 	num_descs = total_mem >> 20; //number of entries, if there is a partial MB somehow, we just throw it away
+	memset((char*)desc_tbl, 0, num_descs*sizeof(desc_tbl));
 	mem_plat_init();
 } 
 

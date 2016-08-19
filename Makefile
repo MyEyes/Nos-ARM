@@ -9,6 +9,7 @@ pi-b-all:
 		
 clean: 
 		rm -f *o nos.elf nos.bin nos.sym nos.bin nos.sym.temp nos.img
+		rm -r -f .obj
 		
 install: nos.elf
 		set -e
