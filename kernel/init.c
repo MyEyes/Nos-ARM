@@ -9,8 +9,9 @@
 #include "kernel/kernel.h"
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
+#include "kernel/mod/kernel_uart.h"
 
-//#define INIT_DEBUG
+#define INIT_DEBUG
 
 extern char* __start;
 
@@ -63,6 +64,10 @@ void kernel_init()
 	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0);
 	
 	curr_thread = &kern_thread;
+
+#ifdef INIT_DEBUG	
+	uart_puts("Kernel thread initialized\r\n");
+#endif
 
 	int_init();
 }

@@ -1,7 +1,8 @@
 #include "arch/ARM11/mem/mmu.h"
 #include "arch/ARM11/cpu/coproc.h"
+//#define MMU_DEBUG
 #ifdef MMU_DEBUG
-#include "kernel/util/kernel_uart.h"
+#include "kernel/mod/kernel_uart.h"
 #endif
 
 void mmu_enable()

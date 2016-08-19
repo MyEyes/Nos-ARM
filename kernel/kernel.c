@@ -43,7 +43,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	uart_mod_init(0, 0);
 			
 	kernel_init();
-		
+
 	printf("Hello, kernel World!\r\n\r\n");
 	
 	if(r1==PLATFORM_CPU_MACHINE_TYPE)
