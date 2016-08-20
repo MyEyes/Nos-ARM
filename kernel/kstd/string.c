@@ -7,6 +7,14 @@ void memset(char* ptr, int c, size_t n)
 		cp[n-1] = (char)c;
 }
 
+void memcpy(char* trg, const char* src, size_t n)
+{
+	while(n>0)
+	{
+		*(trg++) = *(src++);
+		n--;
+	}
+}
 
 size_t strlen(const char* str)
 {

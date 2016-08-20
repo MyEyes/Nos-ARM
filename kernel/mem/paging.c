@@ -32,6 +32,12 @@ void pg_create_default(void* ker_loc, void* usr_loc)
 			__plat_pg_unmap(usr_loc, (void*)(i * ent_size), ent_size);
 }
 
+void pg_create(pg_tbl_t* tbl, void* entry_loc, size_t mem)
+{
+	tbl->addr = entry_loc;
+	tbl->size = mem;
+}
+
 void pg_map(pg_tbl_t* tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
 {
 	if((uint32_t)virt_addr+mem < tbl->size)

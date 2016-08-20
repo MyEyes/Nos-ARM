@@ -15,4 +15,4 @@ install: nos.elf
 		set -e
 		arm-none-eabi-nm nos.elf > nos.sym.temp
 		arm-none-eabi-objcopy --set-section-flags .bss=alloc,load,contents nos.elf -O binary nos.bin
-		cat nos.bin > nos.img
+		./mk_img.sh

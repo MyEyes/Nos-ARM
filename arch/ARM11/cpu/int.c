@@ -3,6 +3,7 @@
 #include "kernel/proc/thread.h"
 #include "arch/ARM11/cpu/cpu.h"
 #include "std/stdio.h"
+#include "kernel/proc/schd.h"
 #include <stdint.h>
 
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
@@ -34,9 +35,10 @@ void __attribute__((naked)) panic_hnd()
 	);
 }
 
-void __attribute__((used)) test_hnd2()
+void __attribute__((used)) test_hnd2(uint32_t lr)
 {
-	printf("Data abort!\r\n");	
+	printf("Data abort! @%x\r\n",lr);
+	while(1);
 }
 
 void __attribute__((naked)) test_hnd()
@@ -44,6 +46,7 @@ void __attribute__((naked)) test_hnd()
 	__asm__	(
 	"sub lr, #4\n"
 	"stmfd sp!, {r0-r12, lr}\n"
+	"mov r0, lr\n"
 	"bl test_hnd2\n"
 	"ldmfd sp!, {r0-r12, pc}^\n"
 	);
@@ -57,6 +60,7 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 	(void)swi_num;
 	thread_curr_store(pc, sp);
 	printf("SWI pc=%x sp=%x\r\n",pc,sp);
+	schd_chg_thread();
 	char* test = thread_curr_sp();
 	printf("thread_stored_sp = %x\r\n", test);
 	return test;

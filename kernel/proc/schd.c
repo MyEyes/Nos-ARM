@@ -23,3 +23,15 @@ void schd_chg_thread()
 		}
 	}
 }
+
+void schd_add_thread(thread_t* thread)
+{
+	for(uint32_t x=0; x<20; x++)
+	{
+		if(!threads[x])
+		{
+			threads[x] = thread;
+			return;
+		}
+	}
+}

@@ -3,13 +3,6 @@
 #include "kernel/mem/mem.h"
 #include <stdint.h>
 
-typedef struct
-{
-	void*		location;
-	uint32_t	used;
-	size_t 		size;
-} mem_hdr_t;
-
 void* malloc(size_t size)
 {
 	mem_hdr_t* hdr = (mem_hdr_t*)mem_phys_find_free(size+sizeof(mem_hdr_t));

@@ -1,6 +1,8 @@
 #include "kernel/proc/thread.h"
 #include "kernel/cpu/reg.h"
 #include "kernel/proc/schd.h"
+#include "kernel/mem/mmu.h"
+#include "std/stdio.h"
 
 thread_t kern_thread;
 
@@ -34,8 +36,18 @@ void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* st
 	thread->pc=entry;
 }
 
+void thread_ready(thread_t* thread)
+{
+	__plat_thread_ready(thread);
+}
+
 void thread_change(thread_t* thread)
 {
+	if(curr_thread->proc->pg_tbl!=thread->proc->pg_tbl)
+	{
+		printf("Setting pagetable to %x\r\n", thread->proc->pg_tbl->addr);
+		mmu_set_user_pgtbl(thread->proc->pg_tbl->addr);
+	}
 	curr_thread = thread;
 }
 

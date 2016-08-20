@@ -9,6 +9,7 @@
 #include "kernel/mem/paging.h"
 #include "std/stdio.h"
 #include "std/stdlib.h"
+#include "std/string.h"
 #include "kernel/hw/reset.h"
 #include "kernel/proc/elf.h"
 #include "kernel/proc/sysmap.h"
@@ -17,6 +18,7 @@
 #include "kernel/mem/mmu.h"
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
+#include "kernel/proc/schd.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -29,9 +31,9 @@ extern int __start;
 extern int __end;
 extern FILE stdout;
 
-void test()
+void test(uint32_t tid)
 {
-	printf("Proc, started\r\n");
+	printf("Proc, started, tid=%x\r\n", tid);
 	while(1);
 }
 
@@ -74,18 +76,33 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	void* dummy = (void*)0xff000000;
 	pg_unmap(&kernel_page, dummy, 4);
 	
-	*((uint32_t*)dummy) = 0;
+	//*((uint32_t*)dummy) = 0;
+	
+	domain_user_set();
 	
 	printf("Processor state (User): %x\r\n", cpu_get_state());
 
 	
-	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
-	proc_init(test_proc, &kernel_page, 1);
-	thread_t* test_thread = malloc(sizeof(thread_t));
-	char* stack = malloc(0x8000);
-	thread_init(test_thread, test_proc, stack+0x8000, stack, (char*)test, 1);
 	
-	//thread_start(test_thread);
+	pg_tbl_t* test_tbl = proc_create((char*)0x100000, (char*)0x200000, 0x8000);
+	char* phys = pg_get_phys(test_tbl, (char*)0x100000);
+	
+	printf("Test proc table set up at %x\r\n", test_tbl);
+	printf("Test proc phys entry at %x\r\n", phys);
+	printf("Copying image from %x to %x\r\n", &__end, phys);
+	memcpy(phys, (char*)&__end, 0x100000);
+	
+	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
+	proc_init(test_proc, test_tbl, 0, 1);
+	thread_t* test_thread = malloc(sizeof(thread_t));
+	
+	thread_init(test_thread, test_proc, (char*)0x100000, (char*)0x100000-0x8000, (char*)0x100000, 1);
+	thread_ready(test_thread);
+	
+	schd_add_thread(test_thread);
+	
+	printf("Running\r\n");
+	__asm__("swi 0");
 	
 	while ( true )
 	{
@@ -103,6 +120,7 @@ void kernel_panic(uint32_t sp, uint32_t pc)
 {
 	//mem_dsb();
 	//mem_dmb();
+	mmu_set_user_pgtbl(&kernel_page);
 	uart_init();
 	printf("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
 	printf("sp: %x\tpc: %x\r\n", sp, pc);

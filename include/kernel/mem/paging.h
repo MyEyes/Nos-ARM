@@ -19,6 +19,8 @@ extern pg_tbl_t user_page;
 
 void pg_create_default(void* loc, void* usr_loc);
 
+void pg_create(pg_tbl_t* tbl, void* entry_loc, size_t mem);
+
 void pg_map(pg_tbl_t* tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
 void pg_unmap(pg_tbl_t* tbl, void* virt_addr, size_t mem);
 void* pg_get_phys(pg_tbl_t* tbl, void* virt_addr);

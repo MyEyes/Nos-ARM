@@ -5,5 +5,6 @@
 
 void schd_init();
 void schd_chg_thread();
+void schd_add_thread(thread_t*);
 
 #endif
