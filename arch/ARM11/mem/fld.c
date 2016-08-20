@@ -42,12 +42,12 @@ uint32_t* create_flat_fld0(uint32_t* location, uint32_t* start_phys_addr, uint32
 	//Mask start location to be aligned
 	uint32_t* startLoc = (uint32_t*)(((uint32_t)location)&FLD0_ADDR_MASK);
 		
-	uint32_t count = ((uint32_t)(end_phys_addr-start_phys_addr))>>(20-2); //difference/1MB, but since they are 4byte pointers we only divide by 256kb
+	uint32_t count = ((uint32_t)end_phys_addr-(uint32_t)start_phys_addr)>>20; //difference/1MB
 	
 	uint32_t i = 0;
 	for(i=0; i<count; i++)
 		//Make sure we map the kernel pages to where they should be
-		if(i<PLATFORM_KERNEL_VIRT_BASE_OFFSET || i>=PLATFORM_KERNEL_VIRT_BASE_OFFSET+(PLATFORM_KERNEL_PHYS_SIZE>>20))
+		if(i<PLATFORM_KERNEL_VIRT_BASE_OFFSET || i>=PLATFORM_KERNEL_VIRT_BASE_OFFSET+PLATFORM_KERNEL_VIRT_SIZE)
 			fld_set(startLoc+i, fld_construct_section(start_phys_addr + (i<<(20-2)), 0, PERM_PRW_URW, 0, 1, 0)); //i*1MB
 		else
 			fld_set(startLoc+i, fld_construct_section(start_phys_addr + ((i-PLATFORM_KERNEL_VIRT_BASE_OFFSET)<<(20-2)), 0, PERM_PRW_URW, 0, 1, 0));

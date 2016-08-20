@@ -15,8 +15,8 @@ void thread_store(thread_t* thread, char* pc, char* sp)
 {
 	if(!thread)
 		return;
-	thread->pc=pc;
-	thread->sp=sp;
+	thread->pc = pc;
+	thread->sp = sp;
 }
 
 char* thread_curr_sp()
@@ -37,4 +37,9 @@ void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* st
 void thread_change(thread_t* thread)
 {
 	curr_thread = thread;
+}
+
+void thread_start(thread_t* thread)
+{
+	
 }

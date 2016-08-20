@@ -17,9 +17,11 @@ void cpu_set_user()
 uint32_t cpu_get_state()
 {
 	uint32_t res = 0;
+	mem_dsb();
 	mem_dmb();
 	__asm__("mrs %0, cpsr":"=r"(res));
 	mem_dsb();
+	mem_dmb();
 	return res;
 }
 

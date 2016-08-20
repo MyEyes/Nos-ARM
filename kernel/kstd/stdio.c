@@ -34,10 +34,12 @@ int vprintf(const char *format, va_list arg)
 			char f = format[++i];
 			if(f=='x')
 				print_hex(va_arg(arg, uint32_t), &stdout);
-			if(f=='s')
+			else if(f=='s')
 				printf(va_arg(arg, char*));
-			if(f=='c')
+			else if(f=='c')
 				fputc((char)va_arg(arg, uint32_t), &stdout);
+			else if(f==0)
+				return -1;
 		}
 		else
 			fputc(c, &stdout);

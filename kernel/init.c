@@ -11,20 +11,14 @@
 #include "kernel/proc/thread.h"
 #include "kernel/mod/kernel_uart.h"
 
-#define INIT_DEBUG
+//#define INIT_DEBUG
 
 extern char* __start;
 
 void kernel_init()
-{
+{	
 	#ifdef INIT_DEBUG
-	uart_puts("Setting up interrupt handlers\r\n");
-	#endif
-	int_init();
-	
-	
-	#ifdef INIT_DEBUG
-	uart_puts("Setting up page tables\r\n");
+	printf("Setting up page tables\r\n");
 	#endif
 	
 	mem_dmb();
@@ -32,7 +26,7 @@ void kernel_init()
 	mem_dmb();
 	
 	#ifdef INIT_DEBUG
-	uart_puts("Assigning page tables\r\n");
+	printf("Assigning page tables\r\n");
 	#endif	
 	
 	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
@@ -40,7 +34,7 @@ void kernel_init()
 	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
 	
 	#ifdef INIT_DEBUG
-	uart_puts("Setting user memory limit\r\n");
+	printf("Setting user memory limit\r\n");
 	#endif
 	
 	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
@@ -71,12 +65,22 @@ void kernel_init()
 	printf("Kernel memory marked as used and kernel \r\n");
 #endif
 
+#ifdef INIT_DEBUG
+	printf("Setting up interrupt handlers\r\n");
+#endif
+
+	int_init();
+	
+#ifdef INIT_DEBUG
+	printf("\tDone!\r\n");
+#endif	
+
 	proc_init(&kern_proc, &user_page, 0);
 	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0);
 	
 	curr_thread = &kern_thread;
 
 #ifdef INIT_DEBUG	
-	printf("Kernel thread initialized\r\n");
+	printf("Kernel thread initialized at %x\r\n", curr_thread);
 #endif
 }

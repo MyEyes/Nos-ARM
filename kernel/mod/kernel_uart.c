@@ -8,6 +8,7 @@
 #include "kernel/module.h"
 #include "kernel/mod/kernel_uart.h"
 #include "std/stdio.h"
+#include "std/string.h"
 
 extern FILE stdout;
 
@@ -44,14 +45,6 @@ inline void delay(int32_t count)
 		 : "=r"(count): [count]"0"(count) : "cc");
 }
  
-size_t strlen(const char* str)
-{
-	size_t ret = 0;
-	while ( str[ret] != 0 )
-		ret++;
-	return ret;
-}
-
 void uart_mod_init(void* addr, uint32_t port)
 {
 	//Remove unused variable warning

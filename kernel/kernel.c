@@ -31,7 +31,8 @@ extern FILE stdout;
 
 void test()
 {
-	printf("Proc, started");
+	printf("Proc, started\r\n");
+	while(1);
 }
 
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
@@ -40,8 +41,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	uart_mod_init(0, 0);
 	
-	printf("%x\r\n", cpu_get_state());
-			
 	kernel_init();
 
 	printf("Hello, kernel World!\r\n\r\n");
@@ -58,44 +57,35 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 		printf("\r\n\r\n");
 	}
 	
-	printf("ATAGS: ");
-	printf("%x", atags);
-	printf("\r\n\r\n");
+	printf("ATAGS: %x \r\n\r\n", atags);
 	
 	printf("Look mommy, I'm running on real hardware!\r\n");
 	
-	mem_dsb();
-	mem_dmb();
+	//mem_dsb();
+	//mem_dmb();
 	//Change to user mode
 	
-	printf("Domain Flags: %x\r\n", domain_get_flags());
-	mem_dsb();
-	mem_dmb();
-	printf("Processor state: %x\r\n", cpu_get_state());
+	//printf("Domain Flags: %x\r\n", domain_get_flags());
+	//mem_dsb();
+	//mem_dmb();
+	//printf("Processor state: %x\r\n", cpu_get_state());
 	//printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
-	//cpu_set_user();
+	void* dummy = (void*)0xff000000;
+	pg_unmap(&kernel_page, dummy, 4);
 	
-	//__asm__("udf 0");
-	//void* dummy = (void*)0xff000000;
-	//pg_unmap(&kernel_page, dummy, 4);
+	*((uint32_t*)dummy) = 0;
 	
-	//*((uint32_t*)dummy) = 0;
-	
-	//__asm__("swi 0");
-	
-	//printf("Processor state (User): %x\r\n", cpu_get_state());
-	
-	printf("Hello user mode!\r\n");
+	printf("Processor state (User): %x\r\n", cpu_get_state());
 
-	/*
+	
 	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
 	proc_init(test_proc, &kernel_page, 1);
 	thread_t* test_thread = malloc(sizeof(thread_t));
 	char* stack = malloc(0x8000);
 	thread_init(test_thread, test_proc, stack+0x8000, stack, (char*)test, 1);
-	*/
- 
+	
+	thread_start(test_thread);
 	
 	while ( true )
 	{
@@ -109,13 +99,15 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	reset();
 }
 
-void kernel_panic()
+void kernel_panic(uint32_t sp, uint32_t pc)
 {
 	//mem_dsb();
 	//mem_dmb();
 	uart_init();
+	printf("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
+	printf("sp: %x\tpc: %x\r\n", sp, pc);
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Saved processor state: %x\r\n", cpu_get_saved_state());
-	printf("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
+	
 	reset();
 }
