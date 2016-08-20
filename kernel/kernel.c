@@ -85,7 +85,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	char* stack = malloc(0x8000);
 	thread_init(test_thread, test_proc, stack+0x8000, stack, (char*)test, 1);
 	
-	thread_start(test_thread);
+	//thread_start(test_thread);
 	
 	while ( true )
 	{

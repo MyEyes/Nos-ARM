@@ -41,5 +41,5 @@ void thread_change(thread_t* thread)
 
 void thread_start(thread_t* thread)
 {
-	
+	(void) thread;
 }
