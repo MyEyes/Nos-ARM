@@ -2,7 +2,9 @@
 #include "kernel/cpu/reg.h"
 #include "kernel/proc/schd.h"
 #include "kernel/mem/mmu.h"
+#include "kernel/mem/mem.h"
 #include "std/stdio.h"
+#include "kernel/mem/cache.h"
 
 thread_t kern_thread;
 
@@ -43,6 +45,8 @@ void thread_ready(thread_t* thread)
 
 void thread_change(thread_t* thread)
 {
+	printf("Switching to thread %x\r\n", thread->tid);
+	printf("sp=%x\tpc=%x\r\n", thread->sp, thread->pc);
 	if(curr_thread->proc->pg_tbl!=thread->proc->pg_tbl)
 	{
 		printf("Setting pagetable to %x\r\n", thread->proc->pg_tbl->addr);

@@ -16,8 +16,8 @@ void pg_create_default(void* ker_loc, void* usr_loc)
 	kernel_page.size = (uint32_t)PLATFORM_TOTAL_ADDR_RANGE;
 	__plat_pg_clear(ker_loc, (size_t)PLATFORM_TOTAL_ADDR_RANGE);
 	__plat_pg_map(ker_loc, 0, 0, ((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size), 0, PERM_PRW_URW, 0, 1, 0);
-	__plat_pg_map(ker_loc, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size), 0, (PLATFORM_KERNEL_VIRT_SIZE)*ent_size, 0, PERM_PRW_UNA, 0, 1, 0);
-	__plat_pg_map(ker_loc,(void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET+PLATFORM_KERNEL_VIRT_SIZE)*ent_size), (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET+PLATFORM_KERNEL_VIRT_SIZE)*ent_size), (uint32_t)PLATFORM_TOTAL_ADDR_RANGE-(PLATFORM_KERNEL_VIRT_BASE_OFFSET+PLATFORM_KERNEL_VIRT_SIZE)*ent_size, 0, PERM_PRW_URW, 0, 1, 0);
+	__plat_pg_map(ker_loc, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size), 0, (uint32_t)PLATFORM_TOTAL_MEMORY, 0, PERM_PRW_UNA, 0, 1, 0);
+	__plat_pg_map(ker_loc,(void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size+(uint32_t)PLATFORM_TOTAL_MEMORY), (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size+(uint32_t)PLATFORM_TOTAL_MEMORY), (uint32_t)PLATFORM_TOTAL_ADDR_RANGE-((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size+(uint32_t)PLATFORM_TOTAL_MEMORY), 0, PERM_PRW_URW, 0, 1, 0);
 	
 	user_page.addr = usr_loc;
 	user_page.size = (uint32_t)PLATFORM_PROC_MAX_MEM;

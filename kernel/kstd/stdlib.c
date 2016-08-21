@@ -1,6 +1,8 @@
 #include "std/stdlib.h"
 #include "std/string.h"
 #include "kernel/mem/mem.h"
+#include "kernel/mem/paging.h"
+#include __PLATFORM__
 #include <stdint.h>
 
 void* malloc(size_t size)
@@ -14,7 +16,7 @@ void* malloc(size_t size)
 		hdr->used = 1;
 	
 		mem_phys_set(hdr, hdr->size);
-		return addr;
+		return PLATFORM_KERNEL_BASE + addr;
 	}
 	return 0;
 }

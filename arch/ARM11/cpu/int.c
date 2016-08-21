@@ -39,9 +39,9 @@ void __attribute__((naked)) panic_hnd()
 	);
 }
 
-void __attribute__((used)) test_hnd2(uint32_t lr)
+void __attribute__((used)) test_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
 {
-	printf("Data abort! @%x\r\n",lr);
+	printf("Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
 }
 
 void __attribute__((naked)) test_hnd()
@@ -50,6 +50,8 @@ void __attribute__((naked)) test_hnd()
 	"sub lr, #4\n"
 	"stmfd sp!, {r0-r12, lr}\n"
 	"mov r0, lr\n"
+	"mrc p15, 0, r1, c6, c0, 0\n"
+	"mrc p15, 0, r2, c5, c0, 0\n"
 	"bl test_hnd2\n"
 	"ldmfd sp!, {r0-r12, pc}^\n"
 	);
@@ -87,12 +89,27 @@ void __attribute__((naked)) swi_hnd()
 	
 	"bl swi_hnd2\n"						//call swi_hnd2																	r0=lr_SRV, r1=sp_sys
 	
+	
 	"CPS #31\n"							//become system again															SYS
-	"mov sp, r0\n"						//mov return value in as stack pointer of process								sp=swi_hnd2
-	"ldmfd sp!, {lr}\n"					//pop stored lr off																lr_sys=lr_SRV					sys stack
-	"ldmfd sp!, {r0}\n"					//pop stored process state off													r0=spsr_SRV						sys stack
+	"mov sp, r0\n"						//Set up sp to return value
+	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
+	
+	"mov r0, #0\n"
+	"MCR p15, 0, r0, c8, c7, 0\n"		//flush TLB
+	
+	"CPS #19\n"							//become supervisor again
+	//"mov r0, r12\n"
+	//"bl uart_puthex\n"
+	"ldmfd r12!, {lr}\n"				//pop stored lr off																lr_sys=lr_SRV					sys stack
+	
+	
+	//"mov r0, lr\n"
+	//"bl uart_puthex\n"
+	
+	
+	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_SRV						sys stack
 	"msr spsr, r0\n"					//Set process state																spsr=r0
-	"ldmfd sp!, {r0-r12}\n"				//load registers																pop(r0-r12)						sys stack
+	"ldmfd r12!, {r0-r12}\n"			//load registers																pop(r0-r12)						sys stack
 	"movs pc, lr"						//return from interrupt															pc=lr
 	);
 }
