@@ -1,5 +1,7 @@
-#ifndef __CACHE_H__
-#define __CACHE_H__
+#ifndef __A_CACHE_H__
+#define __A_CACHE_H__
+
+#include "arch/ARM11/cpu/coproc.h"
 
 #define CACHE_TYPE_STRONGORDER 	0b00000 //strongly ordered memory operations
 #define CACHE_TYPE_SHAREDDEV	0b00001 //shared device

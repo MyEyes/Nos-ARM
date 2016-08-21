@@ -4,6 +4,7 @@
 #include "kernel/mem/mmu.h"
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
+#include "kernel/mem/cache.h"
 #include "std/stdio.h"
 #include "kernel/cpu/int.h"
 #include "kernel/kernel.h"
@@ -18,8 +19,6 @@ extern char* __start;
 
 void kernel_init()
 {	
-
-
 	mem_phys_init((uint32_t)PLATFORM_TOTAL_MEMORY);
 	mem_phys_reset();
 	#ifdef INIT_DEBUG	
@@ -48,6 +47,8 @@ void kernel_init()
 	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
 	
 	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
+	
+	cache_TLB_flush();
 		
 	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
 	

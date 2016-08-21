@@ -19,6 +19,7 @@
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
 #include "kernel/proc/schd.h"
+#include "arch/ARM11/cpu/coproc.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -73,15 +74,15 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	pg_unmap(&kernel_page, dummy, 4);
 		
 	//*((uint32_t*)dummy) = 0;
+	domain_user_set();
 	
-	//domain_user_set();
-	
-	//printf("Processor state (User): %x\r\n", cpu_get_state());
+	printf("Processor state (User): %x\r\n", cpu_get_state());
+	printf("Memory page: %x\r\n", pg_get_entry(&kernel_page, (void*)0xc0000000));
 	
 	
 	pg_tbl_t* test_tbl = proc_create((char*)0x100000, (char*)0x200000, 0x8000);
 	char* phys = pg_get_phys(test_tbl, (char*)0x100000);
-		
+	
 	//printf("Test proc table set up at %x\r\n", test_tbl);
 	//printf("Test proc phys entry at %x\r\n", phys);
 	//printf("Copying image from %x to %x\r\n", &__end, phys);
