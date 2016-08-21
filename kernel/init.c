@@ -10,6 +10,8 @@
 #include "kernel/kernel.h"
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
+#include "kernel/proc/schd.h"
+#include "kernel/proc/syscall.h"
 #include "kernel/mod/kernel_uart.h"
 #include __PLATFORM__
 
@@ -19,6 +21,11 @@ extern char* __start;
 
 void kernel_init()
 {	
+	syscall_init();
+#ifdef INIT_DEBUG	
+	printf("Set up syscalls\r\n", curr_thread);
+#endif
+
 	mem_phys_init((uint32_t)PLATFORM_TOTAL_MEMORY);
 	mem_phys_reset();
 	#ifdef INIT_DEBUG	
@@ -88,6 +95,10 @@ void kernel_init()
 	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0);
 	
 	curr_thread = &kern_thread;
+	
+	schd_init();
+	
+	schd_add_thread(&kern_thread);
 
 #ifdef INIT_DEBUG	
 	printf("Kernel thread initialized at %x\r\n", curr_thread);

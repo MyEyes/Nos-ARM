@@ -1,5 +1,6 @@
 #include "kernel/proc/schd.h"
 #include "kernel/proc/thread.h"
+#include "kernel/proc/syscall.h"
 #include <stdint.h>
 
 thread_t* threads[20];
@@ -10,6 +11,7 @@ void schd_init()
 	{
 		threads[x] = 0;
 	}
+	syscall_set(15, (void*)schd_chg_thread);
 }
 
 void schd_chg_thread()

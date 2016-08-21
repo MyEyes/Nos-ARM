@@ -105,7 +105,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	printf("Running\r\n");
 		
-	__asm__("swi 0");
+	__asm__("swi 15");
 	
 	while ( true )
 	{

@@ -3,6 +3,6 @@
 void main(uint32_t tid)
 {
 	(void) tid;
-	__asm__("udf 0");
+	__asm__("swi 15");
 	while(1);
 }

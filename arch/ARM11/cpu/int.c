@@ -7,6 +7,7 @@
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
 #include "kernel/proc/schd.h"
+#include "kernel/proc/syscall.h"
 #include <stdint.h>
 //#define  INT_SETUP_DBG
 
@@ -62,10 +63,13 @@ void __attribute__((naked)) test_hnd()
 
 char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 {
-	(void)swi_num;
 	thread_curr_store(pc, sp);
-	printf("SWI pc=%x sp=%x\r\n",pc,sp);
-	schd_chg_thread();
+	printf("SWI pc=%x sp=%x swi=%x\r\n",pc,sp, swi_num);
+	void (*syscall)() = syscall_tbl[swi_num];
+	if(syscall)
+		syscall();
+	else
+		printf("No associated syscall with swi %x\r\n", swi_num);
 	char* test = thread_curr_sp();
 	printf("thread_stored_sp = %x\r\n", test);
 	return test;
@@ -86,6 +90,8 @@ void __attribute__((naked)) swi_hnd()
 	
 	"mov r0, lr\n"						//set up arguments for swi_hnd2 call, r1 already contains the stack pointer		r0=lr_SRV
 	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) r0=lr_SRV		sys stack
+	"ldr r2, [lr,#-4]\n"
+	"bic r2, r2, #0xff000000\n"			//Get swi parameter
 	
 	"bl swi_hnd2\n"						//call swi_hnd2																	r0=lr_SRV, r1=sp_sys
 	
