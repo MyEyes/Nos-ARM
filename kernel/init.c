@@ -10,6 +10,7 @@
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
 #include "kernel/mod/kernel_uart.h"
+#include __PLATFORM__
 
 //#define INIT_DEBUG
 
@@ -17,6 +18,21 @@ extern char* __start;
 
 void kernel_init()
 {	
+
+
+	mem_phys_init((uint32_t)PLATFORM_TOTAL_MEMORY);
+	mem_phys_reset();
+	#ifdef INIT_DEBUG	
+	printf("Started tracking phys mem \r\n");
+	#endif
+	mem_phys_set(0, PLATFORM_KERNEL_PHYS_SIZE);
+	mem_mark_as_kernel(0, PLATFORM_KERNEL_PHYS_SIZE);
+	
+
+#ifdef INIT_DEBUG	
+	printf("Kernel memory marked as used and kernel \r\n");
+#endif
+	
 	#ifdef INIT_DEBUG
 	printf("Setting up page tables\r\n");
 	#endif
@@ -32,12 +48,12 @@ void kernel_init()
 	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
 	
 	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
+		
+	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
 	
 	#ifdef INIT_DEBUG
 	printf("Setting user memory limit\r\n");
 	#endif
-	
-	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
 	
 	//Become the domain manager, so that the MMU won't hate us
 	//Sort of arch dependent wether it exists. But we might as well use it and replace it with a stub
@@ -54,26 +70,18 @@ void kernel_init()
 #ifdef INIT_DEBUG	
 	printf("MMU enabled\r\n");
 #endif
+	
 
-	mem_phys_init(PLATFORM_TOTAL_MEMORY);
-#ifdef INIT_DEBUG	
-	printf("Started tracking phys mem \r\n");
-#endif
-	mem_phys_set(0, PLATFORM_KERNEL_PHYS_SIZE);
-	mem_mark_as_kernel(0, PLATFORM_KERNEL_PHYS_SIZE);
-#ifdef INIT_DEBUG	
-	printf("Kernel memory marked as used and kernel \r\n");
-#endif
 
-#ifdef INIT_DEBUG
+	#ifdef INIT_DEBUG
 	printf("Setting up interrupt handlers\r\n");
-#endif
+	#endif
 
 	int_init();
 	
-#ifdef INIT_DEBUG
+	#ifdef INIT_DEBUG
 	printf("\tDone!\r\n");
-#endif	
+	#endif	
 
 	proc_init(&kern_proc, &user_page, 1, 0);
 	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0);

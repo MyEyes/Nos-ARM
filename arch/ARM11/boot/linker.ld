@@ -10,6 +10,7 @@ SECTIONS
 	    KEEP(*(.text.boot))
 		*start_remap.o(.text)
 	}
+	. = ALIGN(4); /* align to word size */
 	. = . + kernel_base;
 	__text_start = .;
     .text : AT(ADDR(.text) - kernel_base)

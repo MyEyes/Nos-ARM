@@ -28,14 +28,8 @@ extern unsigned char uart_getc();
 extern void uart_putc(unsigned char c);
 extern void uart_mod_init(void*, uint32_t);
 extern int __start;
-extern int __end;
+extern unsigned int __end;
 extern FILE stdout;
-
-void test(uint32_t tid)
-{
-	printf("Proc, started, tid=%x\r\n", tid);
-	while(1);
-}
 
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 {	
@@ -43,8 +37,10 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	uart_mod_init(0, 0);
 	
+	printf("Starting init\r\n");
+	
 	kernel_init();
-
+	
 	printf("Hello, kernel World!\r\n\r\n");
 	
 	if(r1==PLATFORM_CPU_MACHINE_TYPE)
@@ -59,49 +55,55 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 		printf("\r\n\r\n");
 	}
 	
-	printf("ATAGS: %x \r\n\r\n", atags);
+	printf("ATAGS: %x \r\n\r\n", atags);	
 	
-	printf("Look mommy, I'm running on real hardware!\r\n");
+	//printf("Look mommy, I'm running on real hardware!\r\n");
 	
 	//mem_dsb();
 	//mem_dmb();
 	//Change to user mode
 	
 	//printf("Domain Flags: %x\r\n", domain_get_flags());
-	//mem_dsb();
-	//mem_dmb();
+	mem_dsb();
+	mem_dmb();
 	//printf("Processor state: %x\r\n", cpu_get_state());
 	//printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
 	void* dummy = (void*)0xff000000;
 	pg_unmap(&kernel_page, dummy, 4);
-	
+		
 	//*((uint32_t*)dummy) = 0;
 	
-	domain_user_set();
+	//domain_user_set();
 	
-	printf("Processor state (User): %x\r\n", cpu_get_state());
-
+	//printf("Processor state (User): %x\r\n", cpu_get_state());
 	
 	
 	pg_tbl_t* test_tbl = proc_create((char*)0x100000, (char*)0x200000, 0x8000);
 	char* phys = pg_get_phys(test_tbl, (char*)0x100000);
+		
+	//printf("Test proc table set up at %x\r\n", test_tbl);
+	//printf("Test proc phys entry at %x\r\n", phys);
+	//printf("Copying image from %x to %x\r\n", &__end, phys);
+	//printf("__end:%x\r\n", (uint32_t)__end);
 	
-	printf("Test proc table set up at %x\r\n", test_tbl);
-	printf("Test proc phys entry at %x\r\n", phys);
-	printf("Copying image from %x to %x\r\n", &__end, phys);
 	memcpy(phys, (char*)&__end, 0x100000);
 	
 	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
 	proc_init(test_proc, test_tbl, 0, 1);
+	
 	thread_t* test_thread = malloc(sizeof(thread_t));
 	
+	
 	thread_init(test_thread, test_proc, (char*)0x100000, (char*)0x100000-0x8000, (char*)0x100000, 1);
+	
 	thread_ready(test_thread);
+	
 	
 	schd_add_thread(test_thread);
 	
 	printf("Running\r\n");
+		
 	__asm__("swi 0");
 	
 	while ( true )
@@ -118,14 +120,19 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 
 void kernel_panic(uint32_t sp, uint32_t pc)
 {
-	//mem_dsb();
-	//mem_dmb();
-	mmu_set_user_pgtbl(&kernel_page);
-	uart_init();
+	mem_dsb();
+	mem_dmb();
+	mmu_set_user_pgtbl(kernel_page.addr);
+	uart_mod_init(0,0);
 	printf("An interrupt happened and I don't know what to do.\r\nAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHH\r\n");
 	printf("sp: %x\tpc: %x\r\n", sp, pc);
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Saved processor state: %x\r\n", cpu_get_saved_state());
 	
+	for(uint32_t x=10; x>0; x--)
+	{
+		printf("Restart in: %x\r", x);
+		delay(0x1000000);
+	}
 	reset();
 }

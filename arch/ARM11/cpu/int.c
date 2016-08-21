@@ -2,15 +2,19 @@
 #include "kernel/kernel.h"
 #include "kernel/proc/thread.h"
 #include "arch/ARM11/cpu/cpu.h"
+#include "kernel/cpu/cpu.h"
 #include "std/stdio.h"
+#include "kernel/mem/paging.h"
+#include "kernel/mem/perm.h"
 #include "kernel/proc/schd.h"
 #include <stdint.h>
+//#define  INT_SETUP_DBG
 
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
 uint32_t abt_stack[CPU_INT_STACK_SIZE];
 uint32_t und_stack[CPU_INT_STACK_SIZE];
-uint32_t user_stack[2048];
+uint32_t user_stack[SYS_INT_STACK_SIZE];
 
 void __attribute__((naked)) int_h()
 {
@@ -21,7 +25,7 @@ uint32_t int_instr = 0xe59ff018;
 
 void set_int_hnd(char interrupt, void* hnd_addr)
 {
-	void **hnd_loc = (void**)(interrupt + INT_ADDR_LOC);
+	void **hnd_loc = (void**)(interrupt + INT_PHYS_ADDR + INT_ADDR_LOC);
 	*hnd_loc = hnd_addr;
 }
 
@@ -38,7 +42,6 @@ void __attribute__((naked)) panic_hnd()
 void __attribute__((used)) test_hnd2(uint32_t lr)
 {
 	printf("Data abort! @%x\r\n",lr);
-	while(1);
 }
 
 void __attribute__((naked)) test_hnd()
@@ -96,14 +99,15 @@ void __attribute__((naked)) swi_hnd()
 
 void int_init()
 {
-	*((uint32_t*)INT_UND) = int_instr;
-	*((uint32_t*)INT_SWI) = int_instr;
-	*((uint32_t*)INT_PAB) = int_instr;
-	*((uint32_t*)INT_DAB) = int_instr;
-	*((uint32_t*)INT_IRQ) = int_instr;
-	*((uint32_t*)INT_FIQ) = int_instr;
-
+	*((uint32_t*)(INT_PHYS_ADDR+INT_UND)) = int_instr;
+	*((uint32_t*)(INT_PHYS_ADDR+INT_SWI)) = int_instr;
+	*((uint32_t*)(INT_PHYS_ADDR+INT_PAB)) = int_instr;
+	*((uint32_t*)(INT_PHYS_ADDR+INT_DAB)) = int_instr;
+	*((uint32_t*)(INT_PHYS_ADDR+INT_IRQ)) = int_instr;
+	*((uint32_t*)(INT_PHYS_ADDR+INT_FIQ)) = int_instr;
 	
+	
+
 	__asm__ __volatile__(	"mrs r8, cpsr\n"
 							"CPS %0\n"
 							"MOV sp, %1\n"
@@ -120,7 +124,15 @@ void int_init()
 							"i"(CPU_MODE_IRQ), "r"(irq_stack+CPU_INT_STACK_SIZE),
 							"i"(CPU_MODE_ABT), "r"(abt_stack+CPU_INT_STACK_SIZE),
 							"i"(CPU_MODE_UND), "r"(und_stack+CPU_INT_STACK_SIZE),
-							"i"(CPU_MODE_SYS), "r"(user_stack+2000):"r8");
+							"i"(CPU_MODE_SYS), "r"(user_stack+SYS_INT_STACK_SIZE):"r8");
+	#ifdef INT_SETUP_DBG
+	printf("Setting interrupt stacks\r\n");
+	printf("\tsp_fiq=%x\r\n", fiq_stack+CPU_INT_STACK_SIZE);
+	printf("\tsp_irq=%x\r\n", irq_stack+CPU_INT_STACK_SIZE);
+	printf("\tsp_abt=%x\r\n", abt_stack+CPU_INT_STACK_SIZE);
+	printf("\tsp_und=%x\r\n", und_stack+CPU_INT_STACK_SIZE);
+	printf("\tsp_sys=%x\r\n", user_stack+SYS_INT_STACK_SIZE);
+	#endif
 	
 	set_int_hnd(INT_UND, (void*)panic_hnd);
 	set_int_hnd(INT_SWI, (void*)swi_hnd);
@@ -128,4 +140,10 @@ void int_init()
 	set_int_hnd(INT_DAB, (void*)test_hnd);
 	set_int_hnd(INT_IRQ, (void*)panic_hnd);
 	set_int_hnd(INT_FIQ, (void*)panic_hnd);
+	
+	pg_map(&kernel_page,(char*)INT_HIGH_VEC_ADDR, (char*)INT_PHYS_ADDR, 0x1000, 0, PERM_PRW_UR, 0, 1, 0);
+	#ifdef INT_SETUP_DBG
+	uint32_t test_addr = (uint32_t)pg_get_phys(&kernel_page, (char*)INT_HIGH_VEC_ADDR);
+	printf("test = %x\r\n", test_addr);
+	#endif
 }

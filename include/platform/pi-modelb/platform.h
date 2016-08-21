@@ -5,8 +5,6 @@
 #define GPIO_BASE_ADDR 0x20200000
 #define UART0_BASE_ADDR 0x20201000
 
-#define PLATFORM_TOTAL_ADDR_RANGE ((void*)0xFFFFFFFC) //Highest 32 byte aligned address
-
 #define PERIPHERALS_LOW_ADDR 0x20000000		
 
 #define PLATFORM_TOTAL_MEMORY ((void*)0x20000000) //512MB

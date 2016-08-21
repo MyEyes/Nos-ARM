@@ -14,9 +14,9 @@ void __plat_thread_ready(thread_t* thread)
 	
 	mem_dmb();
 	mem_dsb();
-	printf("thread: %x\r\n", thread);
-	printf("thread->proc: %x\r\n", thread->proc);
-	printf("virt_stack_addr = %x\tphys_stack_addr = %x\r\n",thread->stack_start, phys_stack_addr);
+	//printf("thread: %x\r\n", thread);
+	//printf("thread->proc: %x\r\n", thread->proc);
+	//printf("virt_stack_addr = %x\tphys_stack_addr = %x\r\n",thread->stack_start, phys_stack_addr);
 	if(!phys_stack_addr)
 		return;
 	//thread suspend pushes r0-12, then spsr, then lr

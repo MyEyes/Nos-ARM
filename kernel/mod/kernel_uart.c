@@ -100,6 +100,8 @@ void uart_init()
  
 void uart_putc(unsigned char byte)
 {
+	mem_dsb();
+	mem_dmb();
 	// Wait for UART to become ready to transmit.
 	while ( mmio_read(UART0_FR) & (1 << 5) ) { }
 	mmio_write(UART0_DR, byte);

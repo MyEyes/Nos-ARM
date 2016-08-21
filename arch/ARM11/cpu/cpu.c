@@ -34,6 +34,14 @@ uint32_t cpu_get_saved_state()
 	return res;
 }
 
+uint32_t __attribute__((naked)) cpu_get_sp()
+{
+	__asm__(
+	"mov r0, sp\n"
+	"bx lr"
+	);
+}
+
 uint32_t cpu_get_und_instr()
 {
 	uint32_t res = 0;
@@ -49,4 +57,11 @@ uint32_t cpu_get_ctrl_regs()
 	MRC(SYS_CTRL, 0, 1, 0, 0, res);
 	mem_dsb();
 	return res;
+}
+
+uint32_t cpu_get_secure_reg()
+{
+	uint32_t sys_val = 0;
+	MRC(SYS_CTRL, 0, 1, 1, 0, sys_val);
+	return sys_val;
 }

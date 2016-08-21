@@ -3,6 +3,14 @@
 #include "kernel/mem/paging.h"
 #include "kernel/mem/mem.h"
 #include "arch/ARM11/mem/mem.h"
+#include "std/string.h"
+
+//#define MEM_DBG_TBLS
+
+//#ifdef MEM_DBG_TBLS
+#include "std/stdio.h"
+#include "kernel/mod/kernel_uart.h"
+//#endif
 
 uint32_t* free_slds[MEM_SLD_CACHE_SIZE];
 
@@ -18,26 +26,31 @@ uint32_t* get_free_sld()
 		//If there is a free sld to use
 		if(free_slds[i])
 		{
+			
+			#ifdef MEM_DBG_TBLS
+				printf("Found free sld: %x\r\n", free_slds[i]);
+			#endif
 			return free_slds[i];
 		}
 	}
 	#ifdef MEM_DBG_TBLS
-		uart_puts("No free sld found\r\n");
+		printf("No free sld found\r\n");
 	#endif
 	uint32_t* addr = (uint32_t*) mem_phys_find_free(1<<12);
 	//If we got an address we mark the region as used
 	if(addr)
 		mem_phys_set(addr, 1<<12);
 	#ifdef MEM_DBG_TBLS
-	uart_puts("New sld at ");
-	uart_puthex((uint32_t)addr);
-	uart_puts("\r\n");
+	printf("New sld at %x\r\n", addr);
 	#endif
 	return addr;
 }
 
 void free_sld(uint32_t* sld)
 {
+	#ifdef MEM_DBG_TBLS
+	printf("Sld at %x returned\r\n", sld);
+	#endif
 	for(uint32_t i=0; i<MEM_SLD_CACHE_SIZE; i++)
 	{
 		if(free_slds[i]==0)
@@ -55,9 +68,7 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 {
 	uint32_t entry = *fld_entry_addr;
 	#ifdef MEM_DBG_TBLS
-	uart_puts("Creating sld at fld_entry ");
-	uart_puthex((uint32_t)fld_entry_addr);
-	uart_puts("\r\n");
+	printf("Creating sld at fld_entry %x\r\n", fld_entry_addr);
 	#endif
 	//This routine should never be called on a pagetbl
 	if(FLD_IS_PGTBL(entry))
@@ -67,12 +78,8 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 	uint32_t p_base = (uint32_t)phys_base;
 	
 	#ifdef MEM_DBG_TBLS
-	uart_puts("\ts_index ");
-	uart_puthex(s_index);
-	uart_puts("\r\n");
-	uart_puts("\te_index ");
-	uart_puthex(e_index);
-	uart_puts("\r\n");
+	printf("\ts_index %x\r\n", s_index);
+	printf("\te_index %x\r\n", e_index);
 	#endif
 	
 	uint32_t* sld = get_free_sld();
@@ -82,7 +89,7 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 		uint32_t s_base = (entry & FLD_SECTION_MASK);
 		
 		#ifdef MEM_DBG_TBLS
-		uart_puts("FLD was section\r\n");
+		printf("FLD was section\r\n");
 		uart_puthex((uint32_t)s_base);
 		uart_puts("\r\n");
 		uart_puthex(s_index);
@@ -93,7 +100,7 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 		for(uint32_t i = 0; i<256; i++)
 		{
 			if(s_index<=i && i<=e_index)
-				sld[i] = sld_create_small_entry((void*)(p_base+(i<<12)), perm, caching, global, shared);
+				sld[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
 			else
 				sld[i] = sld_create_small_entry((void*)(s_base+(i<<12)), perm, caching, global, shared);
 		}
@@ -108,7 +115,7 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 		for(uint32_t i = 0; i<256; i++)
 		{
 			if(s_index<=i && i<=e_index)
-				sld[i] = sld_create_small_entry((void*)(p_base+(i<<12)), perm, caching, global, shared);
+				sld[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
 			else
 				sld[i] = 0;
 		}
@@ -124,15 +131,27 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 	uint32_t fld_end =  (e_addr-1) >> 20;
 	uint32_t p_addr = ((uint32_t)phys_addr) & (((1<<12)-1)<<20);
 	
+	#ifdef MEM_DBG_TBLS
+	uart_puts("uaddr ");
+	uart_puthex(u_addr);
+	uart_puts("\r\n");
+	uart_puts("fld_start ");
+	uart_puthex(fld_start);
+	uart_puts("\r\n");
+	uart_puts("fld_end ");
+	uart_puthex(fld_end);
+	uart_puts("\r\n");
+	#endif
+	
 	for(uint32_t i = fld_start; i<=fld_end; i++, p_addr+=1<<20)
 	{
 		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
 		uint32_t sec_addr = i<<20;
 			
-		int32_t offset = u_addr-sec_addr;
-		if(offset<0) offset = 0;
+		uint32_t offset = u_addr-sec_addr;
+		if(u_addr<sec_addr) offset = 0;
 		
-		int32_t len = e_addr-sec_addr;
+		uint32_t len = e_addr-sec_addr;
 		if(len>(1<<20)) len = 1<<20;
 		len -= offset;
 				
@@ -149,6 +168,17 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 		//if it's a page table we just set the corresponding values
 		else
 		{
+			#ifdef MEM_DBG_TBLS
+				uart_puts("i ");
+				uart_puthex(i);
+				uart_puts("\r\n");
+				uart_puts("offset ");
+				uart_puthex(offset);
+				uart_puts("\r\n");
+				uart_puts("len ");
+				uart_puthex(len);
+				uart_puts("\r\n");
+			#endif
 			if(FLD_IS_PGTBL(fld_entry))
 			{
 				uint32_t* sld_tbl = (uint32_t*)(fld_entry&FLD_PG_TBL_MASK);	
@@ -157,7 +187,7 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 			
 				for(uint32_t j = sld_start; j<=sld_end; j++)
 				{
-					sld_tbl[j] = sld_create_small_entry((void*)(p_addr+(j<<12)), perm, caching, global, shared);
+					sld_tbl[j] = sld_create_small_entry((void*)(p_addr+((j-sld_start)<<12)), perm, caching, global, shared);
 				}
 			}
 			else
@@ -250,6 +280,15 @@ void* __plat_pg_get_phys(void* fld_tbl, void* virt_addr)
 			return (void*)((sld_entry & SLD_SMALL_ADDR_MASK) | (u_addr & (~SLD_SMALL_ADDR_MASK)));
 	}
 	return (void*)0;
+}
+
+void __plat_pg_clear(void* tbl_addr, size_t mem)
+{
+	uint32_t roundup = mem&((1<<20)-1);
+	uint32_t num = mem>>20;
+	if(roundup)
+		num+=1;
+	memset((char*)tbl_addr,0, num * 4);
 }
 
 uint32_t __plat_pg_get_entry(void* fld_tbl, void* virt_addr)

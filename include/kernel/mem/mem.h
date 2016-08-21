@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include "kernel/mem/paging.h"
 
-#define KERNEL_PHYS_MEM_TBL (void*)(PLATFORM_KERNEL_BASE+0x500000) //4MB after kernel image
+#define KERNEL_PHYS_MEM_TBL (void*)(PLATFORM_KERNEL_BASE+0x500000) //5MB after kernel image
 #define KERNEL_PHYS_MEM_TBL_SIZE (PLATFORM_TOTAL_MEMORY>>14) //64 byte per megabyte (20-6)
 
 #define MEM_DBG_TBLS
@@ -31,7 +31,8 @@ typedef struct
 } fld_desc_t;
 
 //start managing physical memory
-void mem_phys_init();
+void mem_phys_init(size_t total_mem);
+void mem_phys_reset();
 void mem_phys_set(void* phys_addr, size_t mem);
 void mem_phys_clear(void* phys_addr, size_t mem);
 void mem_phys_set_val(void* phys_addr, size_t mem, char val);

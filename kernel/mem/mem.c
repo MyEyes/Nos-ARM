@@ -2,8 +2,9 @@
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
 #include "std/string.h"
+#define MEM_DBG_TBLS
 #ifdef MEM_DBG_TBLS
-#include "kernel/util/kernel_uart.h"
+#include "std/stdio.h"
 #endif
 
 MB_phys_desc_t* desc_tbl = 0;
@@ -16,9 +17,13 @@ void mem_phys_init(size_t total_mem)
 {
 	desc_tbl = KERNEL_PHYS_MEM_TBL;
 	num_descs = total_mem >> 20; //number of entries, if there is a partial MB somehow, we just throw it away
+}
+
+void mem_phys_reset()
+{
 	memset((char*)desc_tbl, 0, num_descs*sizeof(desc_tbl));
 	mem_plat_init();
-} 
+}
 
 void mem_phys_set(void* phys_addr, size_t mem)
 {
@@ -88,6 +93,8 @@ void* mem_phys_find_free(size_t mem)
 			curr_offset >>= 1;
 			curr_size <<= 1;
 		}
+		
+		
 		
 		for(uint32_t curr_desc = 0; curr_desc<num_descs; curr_desc++)
 		{

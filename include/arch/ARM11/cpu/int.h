@@ -1,6 +1,9 @@
 #ifndef __INT_H__
 #define __INT_H__
 
+#define INT_PHYS_ADDR 0x0 //0
+#define INT_HIGH_VEC_ADDR 0xFFFF0000
+
 #define INT_RST 0
 #define INT_UND 0x4
 #define INT_SWI 0x8

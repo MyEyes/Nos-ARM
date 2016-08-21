@@ -41,7 +41,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 		void* phys_addr = mem_phys_find_free(stepsize);
 		if(phys_addr)
 		{
-			printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
+			//printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
 			pg_map(tbl, (char*)(i*stepsize), phys_addr, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
 			mem_phys_set(phys_addr, stepsize);
 		}
@@ -59,7 +59,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 		void* phys_addr = mem_phys_find_free(stepsize);
 		if(phys_addr)
 		{
-			printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
+			//printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
 			pg_map(tbl, (char*)(i*stepsize), phys_addr, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
 			mem_phys_set(phys_addr, stepsize);
 		}

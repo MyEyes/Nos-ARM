@@ -29,7 +29,7 @@ void mmu_disable()
 	uint32_t old_val = 0;
 	MRC(SYS_CTRL,0,MMU_SYSCTL_MAIN,0, 0, old_val);
 	//Clear mmu enable bit
-	old_val &= -2;
+	old_val &= -1-1;
 	#ifdef MMU_DEBUG
 	uart_puthex(old_val);
 	#endif

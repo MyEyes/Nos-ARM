@@ -7,15 +7,16 @@ void* malloc(size_t size)
 {
 	mem_hdr_t* hdr = (mem_hdr_t*)mem_phys_find_free(size+sizeof(mem_hdr_t));
 	void* addr = ((char*)hdr) + sizeof(mem_hdr_t);
-	if(addr)
+	if(hdr)
 	{
 		hdr->location = addr;
 		hdr->size = size+sizeof(mem_hdr_t);
 		hdr->used = 1;
 	
 		mem_phys_set(hdr, hdr->size);
+		return addr;
 	}
-	return addr;
+	return 0;
 }
 
 void* realloc(void *ptr, size_t size)

@@ -5,7 +5,7 @@
 typedef struct
 {
 	uint32_t dev_id;
-	char name[20];
+	char name[24];
 	void* addr;
 } dev_t;
 

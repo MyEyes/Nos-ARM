@@ -13,8 +13,10 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
 	uint32_t* basemap = (void*)((char*)PLATFORM_TOTAL_MEMORY-0x100000);
 	for(uint32_t x = 0; x<PLATFORM_KERNEL_VIRT_BASE_OFFSET; x++)
 		basemap[x] = (x<<20) + 2;
+	
 	for(uint32_t x = 0; x<PLATFORM_KERNEL_VIRT_SIZE; x++)
 		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2;
+	
 	for(uint32_t x = PLATFORM_KERNEL_VIRT_SIZE+PLATFORM_KERNEL_VIRT_BASE_OFFSET; x<((uint32_t)PLATFORM_TOTAL_ADDR_RANGE)>>20; x++)
 		basemap[x] = (x<<20) + 2;
 		
@@ -27,10 +29,10 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
 	//Set up TTBC
 	MCR(SYS_CTRL,0,MMU_TTB_CTRL,0,MMU_TTBC, 0);
 	
-	//Enable MMU
+	//Enable MMU and high vectors //and data alignment checking
 	uint32_t old_val = 0;
 	MRC(SYS_CTRL,0,MMU_SYSCTL_MAIN,0, 0, old_val);
-	old_val |= 1;
+	old_val |= 1|1<<13;//3
 	MCR(SYS_CTRL,0,MMU_SYSCTL_MAIN,0, 0, old_val);
 	
 	kernel_main(r0, r1, atags);

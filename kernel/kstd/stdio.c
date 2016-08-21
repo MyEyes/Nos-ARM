@@ -1,6 +1,7 @@
 #include "std/stdio.h"
 #include "std/string.h"
 #include "kernel/mem/mem.h"
+#include "kernel/mod/kernel_uart.h"
 
 FILE stdout;
 
@@ -10,6 +11,9 @@ int printf(const char *format, ...)
 		return -1;
 	va_list arg;
 	int done;
+	
+	mem_dsb();
+	mem_dmb();
 	
 	va_start(arg, format);
 	done = vprintf(format, arg);
@@ -23,7 +27,9 @@ int printf(const char *format, ...)
 
 int vprintf(const char *format, va_list arg)
 {
-	for(uint32_t i = 0; ; i++)
+	uint32_t len = strlen(format);
+		
+	for(uint32_t i = 0; i<len; i++)
 	{
 		char c = format[i];
 		if(!c)
@@ -38,8 +44,6 @@ int vprintf(const char *format, va_list arg)
 				printf(va_arg(arg, char*));
 			else if(f=='c')
 				fputc((char)va_arg(arg, uint32_t), &stdout);
-			else if(f==0)
-				return -1;
 		}
 		else
 			fputc(c, &stdout);

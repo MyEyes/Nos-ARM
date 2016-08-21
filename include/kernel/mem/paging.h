@@ -31,5 +31,6 @@ void __plat_pg_unmap(void* tbl_addr, void* virt_addr, size_t mem);
 void* __plat_pg_get_phys(void* tbl_addr, void* virt_addr);
 uint32_t __plat_pg_get_entry(void* tbl_addr, void* virt_addr);
 uint32_t __plat_pg_tbl_maxentry();
+void __plat_pg_clear(void* tbl_addr, size_t mem);
 
 #endif

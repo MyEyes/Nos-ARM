@@ -2,6 +2,7 @@
 #define __A_CPU_H__
 
 #define CPU_INT_STACK_SIZE 256
+#define SYS_INT_STACK_SIZE 2048
 
 typedef enum
 {
