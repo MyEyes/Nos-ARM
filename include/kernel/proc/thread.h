@@ -4,14 +4,26 @@
 #include "kernel/proc/proc.h"
 #include __PLATFORM__
 
+typedef enum
+{
+	THREAD_READY,
+	THREAD_SLEEP,
+	THREAD_WAIT,
+	THREAD_RUNNING,
+	THREAD_INIT
+}thread_state_t;
+
 typedef struct
 {
-	uint32_t 	tid;
-	proc_hdr_t*	proc;
-	char*		stack_start;
-	char*		stack_end;
-	char* 		sp;
-	char* 		pc;
+	uint32_t 		tid;
+	proc_hdr_t*		proc;
+	uint32_t		priority;
+	uint32_t		rem_ticks;
+	thread_state_t  state;
+	char*			stack_start;
+	char*			stack_end;
+	char* 			sp;
+	char* 			pc;
 }thread_t;
 
 extern thread_t kern_thread;

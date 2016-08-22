@@ -5,6 +5,8 @@
 #include __PLATFORM__
 #include <stdint.h>
 
+size_t min_alloc = 4096; //have to allocate at least page size
+
 void* malloc(size_t size)
 {
 	mem_hdr_t* hdr = (mem_hdr_t*)mem_phys_find_free(size+sizeof(mem_hdr_t));

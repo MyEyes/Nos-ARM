@@ -32,6 +32,8 @@ void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* st
 {
 	thread->tid=id;
 	thread->proc=proc;
+	thread->priority = 0;
+	thread->state=THREAD_INIT;
 	thread->stack_start = stack_start;
 	thread->stack_end = stack_end;
 	thread->sp=stack_start;
@@ -41,6 +43,7 @@ void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* st
 void thread_ready(thread_t* thread)
 {
 	__plat_thread_ready(thread);
+	thread->state=THREAD_READY;
 }
 
 void thread_change(thread_t* thread)
@@ -52,7 +55,10 @@ void thread_change(thread_t* thread)
 		printf("Setting pagetable to %x\r\n", thread->proc->pg_tbl->addr);
 		mmu_set_user_pgtbl(thread->proc->pg_tbl->addr);
 	}
+	curr_thread->state = THREAD_READY;
+	schd_add_thread(curr_thread);
 	curr_thread = thread;
+	curr_thread->state = THREAD_RUNNING;
 }
 
 void thread_start(thread_t* thread)

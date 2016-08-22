@@ -97,8 +97,6 @@ void kernel_init()
 	curr_thread = &kern_thread;
 	
 	schd_init();
-	
-	schd_add_thread(&kern_thread);
 
 #ifdef INIT_DEBUG	
 	printf("Kernel thread initialized at %x\r\n", curr_thread);

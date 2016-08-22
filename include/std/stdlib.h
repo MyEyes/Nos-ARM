@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+extern size_t min_alloc;
+
 typedef struct
 {
 	void*		location;
