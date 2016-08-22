@@ -92,7 +92,7 @@ void kernel_init()
 	#endif	
 
 	proc_init(&kern_proc, &user_page, 1, 0);
-	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0);
+	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0, SCHD_NUM_PRIORITIES-1);
 	
 	curr_thread = &kern_thread;
 	

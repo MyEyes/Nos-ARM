@@ -36,7 +36,7 @@ void thread_change(thread_t*);
 
 char* thread_curr_sp();
 
-void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* stack_end, char* entry, uint32_t id);
+void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* stack_end, char* entry, uint32_t id, uint32_t priority);
 void thread_ready(thread_t* thread);
 
 void __plat_thread_ready(thread_t* thread);

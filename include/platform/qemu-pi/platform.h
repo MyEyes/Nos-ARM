@@ -1,5 +1,8 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
+#include "platform/qemu-pi/clock.h"
+#include "platform/qemu-pi/bus.h"
+#include "platform/qemu-pi/int.h"
 #include "platform/common.h"
 
 #define PERIPHERALS_LOW_ADDR 0x20000000		

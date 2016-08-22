@@ -18,11 +18,20 @@ void schd_init()
 	syscall_set(15, (void*)schd_chg_thread);
 }
 
+uint32_t schd_get_slice(thread_t* thread)
+{
+	return (SCHD_NUM_PRIORITIES-thread->priority+1)*SCHD_BASE_TIME;
+}
+
 void schd_chg_thread()
 {
+	if(curr_thread->state == THREAD_RUNNING)
+		curr_thread->state = THREAD_READY;
+	schd_add_thread(curr_thread);
+	
 	for(uint32_t i=0; i<SCHD_NUM_PRIORITIES; i++)
 	{
-		printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
+		//printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
 		thread_node_t* test_thread = dequeue_node(queues + i);
 		
 		if(test_thread)
@@ -57,7 +66,7 @@ thread_node_t* schd_get_empty_node()
 			enqueue_node(&open_node_queue, empty_node + i, 0);
 		}
 	}
-	printf("Dequeued node: %x\r\n", empty_node);
+	//printf("Dequeued node: %x\r\n", empty_node);
 	
 	return empty_node;
 }

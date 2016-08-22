@@ -8,6 +8,7 @@
 #include "kernel/mem/perm.h"
 #include "kernel/proc/schd.h"
 #include "kernel/proc/syscall.h"
+#include "kernel/cpu/clock.h"
 #include <stdint.h>
 //#define  INT_SETUP_DBG
 
@@ -30,6 +31,49 @@ void set_int_hnd(char interrupt, void* hnd_addr)
 	*hnd_loc = hnd_addr;
 }
 
+uint32_t __attribute__((used)) irq_hnd2(char* pc, char* sp)
+{
+	thread_curr_store(pc, sp);
+	printf("Clock tick!\r\n");
+	schd_chg_thread();
+	return (uint32_t)thread_curr_sp();
+}
+
+void __attribute__((naked)) irq_hnd()
+{
+	__asm__(
+	"CPS #31\n"							//Change to System mode to get access to user stack								irq
+	"stmfd sp!, {r0-r12}\n"				//push register states onto stack												push(r0-r12) 					sys stack
+	"mov r1, sp\n"						//mov sps value into r1 so it can survive the mode change						r1=sp_sys
+	
+	"CPS #18\n"							//Enter irq mode																irq
+	
+	"mrs r0, spsr\n"					//mov stored process state into r0												r0=spsr
+	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) ro=spsr_irq 	sys stack
+	
+	"mov r0, lr\n"						//set up arguments for swi_hnd2 call, r1 already contains the stack pointer		r0=lr_SRV
+	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) r0=lr_irq		sys stack
+	
+	"bl irq_hnd2\n"						//call swi_hnd2																	r0=lr_irq, r1=sp_sys
+	
+	"CPS #31\n"							//become system again															irq
+	"mov sp, r0\n"						//Set up sp to return value
+	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
+	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
+	
+	"mov r0, #0\n"
+	"MCR p15, 0, r0, c8, c7, 0\n"		//flush TLB
+	
+	"CPS #18\n"							//become irq again
+	"ldmfd r12!, {lr}\n"				//pop stored lr off																lr_sys=lr_irq					sys stack
+	
+	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_irq						sys stack
+	"msr spsr, r0\n"					//Set process state																spsr=r0
+	"ldmfd r12, {r0-r12}\n"				//load registers																pop(r0-r12)						sys stack
+	"movs pc, lr"						//return from interrupt															pc=lr
+	);
+}
+
 
 void __attribute__((naked)) panic_hnd()
 {
@@ -40,12 +84,12 @@ void __attribute__((naked)) panic_hnd()
 	);
 }
 
-void __attribute__((used)) test_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
+void __attribute__((used)) dabt_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
 {
 	printf("Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
 }
 
-void __attribute__((naked)) test_hnd()
+void __attribute__((naked)) dabt_hnd()
 {
 	__asm__	(
 	"sub lr, #4\n"
@@ -53,11 +97,10 @@ void __attribute__((naked)) test_hnd()
 	"mov r0, lr\n"
 	"mrc p15, 0, r1, c6, c0, 0\n"
 	"mrc p15, 0, r2, c5, c0, 0\n"
-	"bl test_hnd2\n"
+	"bl dabt_hnd2\n"
 	"ldmfd sp!, {r0-r12, pc}^\n"
 	);
 }
-
 
 //returns sp of process to return from
 
@@ -71,7 +114,7 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 	else
 		printf("No associated syscall with swi %x\r\n", swi_num);
 	char* test = thread_curr_sp();
-	printf("thread_stored_sp = %x\r\n", test);
+	//printf("thread_stored_sp = %x\r\n", test);
 	return test;
 }
 
@@ -95,7 +138,6 @@ void __attribute__((naked)) swi_hnd()
 	
 	"bl swi_hnd2\n"						//call swi_hnd2																	r0=lr_SRV, r1=sp_sys
 	
-	
 	"CPS #31\n"							//become system again															SYS
 	"mov sp, r0\n"						//Set up sp to return value
 	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
@@ -109,7 +151,7 @@ void __attribute__((naked)) swi_hnd()
 	
 	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_SRV						sys stack
 	"msr spsr, r0\n"					//Set process state																spsr=r0
-	"ldmfd r12, {r0-r12}\n"			//load registers																pop(r0-r12)						sys stack
+	"ldmfd r12, {r0-r12}\n"				//load registers																pop(r0-r12)						sys stack
 	"movs pc, lr"						//return from interrupt															pc=lr
 	);
 }
@@ -154,8 +196,8 @@ void int_init()
 	set_int_hnd(INT_UND, (void*)panic_hnd);
 	set_int_hnd(INT_SWI, (void*)swi_hnd);
 	set_int_hnd(INT_PAB, (void*)panic_hnd);
-	set_int_hnd(INT_DAB, (void*)test_hnd);
-	set_int_hnd(INT_IRQ, (void*)panic_hnd);
+	set_int_hnd(INT_DAB, (void*)dabt_hnd);
+	set_int_hnd(INT_IRQ, (void*)irq_hnd);
 	set_int_hnd(INT_FIQ, (void*)panic_hnd);
 	
 	pg_map(&kernel_page,(char*)INT_HIGH_VEC_ADDR, (char*)INT_PHYS_ADDR, 0x1000, 0, PERM_PRW_UR, 0, 1, 0);

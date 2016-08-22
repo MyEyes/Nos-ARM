@@ -15,11 +15,11 @@
 #include "kernel/proc/sysmap.h"
 #include "kernel/mod/kernel_uart.h"
 #include "kernel/cpu/cpu.h"
+#include "kernel/cpu/clock.h"
 #include "kernel/mem/mmu.h"
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
 #include "kernel/proc/schd.h"
-#include "arch/ARM11/cpu/coproc.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -95,16 +95,19 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	thread_t* test_thread = malloc(sizeof(thread_t));
 	
 	
-	thread_init(test_thread, test_proc, (char*)0x100000, (char*)0x100000-0x8000, (char*)0x100000, 1);
+	thread_init(test_thread, test_proc, (char*)0x100000, (char*)0x100000-0x8000, (char*)0x100000, 1, 0);
 	
 	thread_ready(test_thread);
-	
 	
 	schd_add_thread(test_thread);
 	
 	printf("Running\r\n");
-		
+	
+	clock_enable();
+	
 	__asm__("swi 15");
+	
+	printf("Returned to kernel\r\n");
 	
 	while ( true )
 	{
@@ -112,7 +115,11 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 		if(c=='r')
 			reset();
 		else if(c=='s')
+		{
+			printf("clock int:%x\r\n", *((uint32_t*)0x2000B414));
+			printf("clock time:%x\r\n", *((uint32_t*)0x2000B404));
 			__asm__("swi 15");
+		}
 		else
 			uart_putc(c);
 	}

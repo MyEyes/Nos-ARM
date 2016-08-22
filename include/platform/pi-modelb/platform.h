@@ -1,5 +1,8 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
+#include "platform/pi-modelb/int.h"
+#include "platform/pi-modelb/clock.h"
+#include "platform/pi-modelb/bus.h"
 #include "platform/common.h"
 
 #define GPIO_BASE_ADDR 0x20200000
