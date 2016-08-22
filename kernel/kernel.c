@@ -79,7 +79,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	printf("Processor state (User): %x\r\n", cpu_get_state());
 	printf("Memory page: %x\r\n", pg_get_entry(&kernel_page, (void*)0xc0000000));
 	
-	
 	pg_tbl_t* test_tbl = proc_create((char*)0x100000, (char*)0x200000, 0x8000);
 	char* phys = pg_get_phys(test_tbl, (char*)0x100000);
 	
@@ -112,6 +111,8 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 		char c = uart_getc();
 		if(c=='r')
 			reset();
+		else if(c=='s')
+			__asm__("swi 15");
 		else
 			uart_putc(c);
 	}

@@ -98,24 +98,18 @@ void __attribute__((naked)) swi_hnd()
 	
 	"CPS #31\n"							//become system again															SYS
 	"mov sp, r0\n"						//Set up sp to return value
+	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
 	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
 	
 	"mov r0, #0\n"
 	"MCR p15, 0, r0, c8, c7, 0\n"		//flush TLB
 	
 	"CPS #19\n"							//become supervisor again
-	//"mov r0, r12\n"
-	//"bl uart_puthex\n"
 	"ldmfd r12!, {lr}\n"				//pop stored lr off																lr_sys=lr_SRV					sys stack
-	
-	
-	//"mov r0, lr\n"
-	//"bl uart_puthex\n"
-	
 	
 	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_SRV						sys stack
 	"msr spsr, r0\n"					//Set process state																spsr=r0
-	"ldmfd r12!, {r0-r12}\n"			//load registers																pop(r0-r12)						sys stack
+	"ldmfd r12, {r0-r12}\n"			//load registers																pop(r0-r12)						sys stack
 	"movs pc, lr"						//return from interrupt															pc=lr
 	);
 }
