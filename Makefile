@@ -3,6 +3,11 @@ pi-qemu-all:
 		
 pi-b-all:
 			$(MAKE) -f pi-b.mk pi-b-all
+			
+std-all:	
+			cd usr/std
+			$(MAKE) -f usr/std/Makefile
+			cd ../../
 		
 		
 #General targets

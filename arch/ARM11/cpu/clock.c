@@ -1,5 +1,7 @@
 #include "kernel/cpu/clock.h"
 #include <stdint.h>
+#include <stdio.h>
+#include "kernel/mem/mem.h"
 
 void clock_enable()
 {
@@ -17,4 +19,5 @@ void clock_clear()
 void clock_set(uint32_t time)
 {
 	*((uint32_t*)(PLATFORM_BUS_TO_PHYS((PLATFORM_CLOCK_BASE+PLATFORM_CLOCK_LOAD)))) = time;
+	mem_dmb();
 }

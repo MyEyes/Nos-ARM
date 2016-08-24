@@ -3,12 +3,13 @@
 #endif
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include __PLATFORM__
 #include "kernel/mem/mem.h"
 #include "kernel/module.h"
 #include "kernel/mod/kernel_uart.h"
-#include "std/stdio.h"
-#include "std/string.h"
 
 extern FILE stdout;
 

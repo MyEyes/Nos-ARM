@@ -2,20 +2,25 @@
 #include "kernel/proc/thread.h"
 #include "kernel/proc/syscall.h"
 #include "kernel/proc/threadqueue.h"
-#include "kernel/mem/paging.h"
-#include "std/string.h"
-#include "std/stdlib.h"
-#include "std/stdio.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
+#include "kernel/mem/paging.h"
+#include "kernel/proc/thread.h"
 
 thread_queue_t queues[SCHD_NUM_PRIORITIES];
-thread_queue_t open_node_queue;
+thread_queue_t empty_node_queue;
+thread_queue_t sleep_queue;
 
 void schd_init()
 {
 	memset((char*)queues, 0, SCHD_NUM_PRIORITIES * sizeof(thread_queue_t));
-	memset((char*)&open_node_queue, 0, sizeof(thread_queue_t));
-	syscall_set(15, (void*)schd_chg_thread);
+	memset((char*)&empty_node_queue, 0, sizeof(thread_queue_t));
+	memset((char*)&sleep_queue, 0, sizeof(thread_queue_t));
+	syscall_set(SYSCALL_THREAD_YIELD, (void*)schd_chg_thread);
+	syscall_set(SYSCALL_THREAD_TERM, (void*)schd_term);
+	syscall_set(SYSCALL_THREAD_EXIT, (void*)schd_term);
 }
 
 uint32_t schd_get_slice(thread_t* thread)
@@ -26,8 +31,10 @@ uint32_t schd_get_slice(thread_t* thread)
 void schd_chg_thread()
 {
 	if(curr_thread->state == THREAD_RUNNING)
+	{
 		curr_thread->state = THREAD_READY;
-	schd_add_thread(curr_thread);
+		schd_add_thread(curr_thread);
+	}
 	
 	for(uint32_t i=0; i<SCHD_NUM_PRIORITIES; i++)
 	{
@@ -39,21 +46,30 @@ void schd_chg_thread()
 			thread_change(test_thread->data);
 			test_thread->data = 0;
 			test_thread->next = 0;
-			enqueue_node(&open_node_queue, test_thread, 0);
+			enqueue_node(&empty_node_queue, test_thread, 0);
 			return;
 		}
 	}
 }
 
+void schd_term()
+{
+	curr_thread->state = THREAD_EXIT;
+	uint32_t return_val = __plat_thread_getparam(curr_thread, 1);
+	printf("Process #%x, terminated with code %x\r\n", curr_thread->tid, return_val);
+	schd_chg_thread();
+}
+
 void schd_add_thread(thread_t* thread)
 {
 	thread_node_t* empty_node = schd_get_empty_node();
+	//printf("Adding thread %x to queue %x\r\n",thread->tid, thread->priority);
 	enqueue_node(queues + thread->priority, empty_node, thread);
 }
 
 thread_node_t* schd_get_empty_node()
 {
-	thread_node_t* empty_node = dequeue_node(&open_node_queue);
+	thread_node_t* empty_node = dequeue_node(&empty_node_queue);
 	if (!empty_node)
 	{
 		empty_node = malloc(sizeof(thread_node_t));
@@ -63,7 +79,7 @@ thread_node_t* schd_get_empty_node()
 		//fit as many nodes into queue as possible from allocation
 		for(uint32_t i=1; empty_node + i < (thread_node_t*)end; i++)
 		{
-			enqueue_node(&open_node_queue, empty_node + i, 0);
+			enqueue_node(&empty_node_queue, empty_node + i, 0);
 		}
 	}
 	//printf("Dequeued node: %x\r\n", empty_node);

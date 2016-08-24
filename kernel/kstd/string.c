@@ -1,4 +1,4 @@
-#include "std/string.h"
+#include <string.h>
 
 void memset(char* ptr, int c, size_t n)
 {

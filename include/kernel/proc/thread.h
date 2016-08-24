@@ -10,7 +10,8 @@ typedef enum
 	THREAD_SLEEP,
 	THREAD_WAIT,
 	THREAD_RUNNING,
-	THREAD_INIT
+	THREAD_INIT,
+	THREAD_EXIT
 }thread_state_t;
 
 typedef struct
@@ -40,5 +41,6 @@ void thread_init(thread_t* thread, proc_hdr_t* proc, char* stack_start, char* st
 void thread_ready(thread_t* thread);
 
 void __plat_thread_ready(thread_t* thread);
+uint32_t __plat_thread_getparam(thread_t* thread, uint32_t index);
 
 #endif

@@ -10,10 +10,9 @@
 //Workaround to get macro expansion to work properly
 #define MCR(CPN, OP1, CRN, CRM, OP2, VAL) _MCR(CPN, OP1, CRN, CRM, OP2, VAL)
 #define _MCR(CPN, OP1, CRN, CRM, OP2, VAL) \
-		{uint32_t res = VAL;\
-		__asm__ __volatile__ ( \
+		{__asm__ __volatile__ ( \
 		"mcr p"#CPN", #"#OP1", %0, c"#CRN", c"#CRM", #"#OP2""\
-		: : "r"(res) :"cc");}
+		: : "r"(VAL) :"cc");}
 
 //Workaround to get macro expansion to work properly		
 #define MRC(CPN, OP1, CRN, CRM, OP2, VAL) _MRC(CPN, OP1, CRN, CRM, OP2, VAL)		

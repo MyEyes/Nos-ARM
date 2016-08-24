@@ -3,13 +3,15 @@
 #endif
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include __PLATFORM__
+
 #include "kernel/init.h"
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
-#include "std/stdio.h"
-#include "std/stdlib.h"
-#include "std/string.h"
 #include "kernel/hw/reset.h"
 #include "kernel/proc/elf.h"
 #include "kernel/proc/sysmap.h"
@@ -105,7 +107,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	clock_enable();
 	
-	__asm__("swi 15");
+	__asm__("swi 16"); //switch process syscall
 	
 	printf("Returned to kernel\r\n");
 	

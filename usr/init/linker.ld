@@ -5,9 +5,16 @@ SECTIONS
     /* Starts at LOADER_ADDR. */
     . = orig;
     _start = .;
+	
+	.startup :
+    {
+		startup.o(.text)
+    }
+	
 	__text_start = .;
     .text : AT(ADDR(.text))
     {
+		usr_init.o(.text)
         *(.text)
     }
     . = ALIGN(4096); /* align to page size */

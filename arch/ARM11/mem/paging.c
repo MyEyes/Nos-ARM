@@ -1,14 +1,15 @@
+#include <string.h>
+
 #include "arch/ARM11/mem/sld.h"
 #include "arch/ARM11/mem/fld.h"
 #include "kernel/mem/paging.h"
 #include "kernel/mem/mem.h"
 #include "arch/ARM11/mem/mem.h"
-#include "std/string.h"
 
 //#define MEM_DBG_TBLS
 
 //#ifdef MEM_DBG_TBLS
-#include "std/stdio.h"
+#include <stdio.h>
 #include "kernel/mod/kernel_uart.h"
 //#endif
 

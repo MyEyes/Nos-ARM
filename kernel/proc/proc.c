@@ -2,8 +2,8 @@
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
-#include "std/stdlib.h"
-#include "std/stdio.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include __PLATFORM__
 
 proc_hdr_t kern_proc;
@@ -25,11 +25,11 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 	
 	uint32_t stepsize = __plat_pg_tbl_maxentry();
 	
-	void* entry_loc = mem_phys_find_free(stepsize);
+	void* entry_loc = mem_phys_find_free(stepsize)+(uint32_t)PLATFORM_KERNEL_BASE;
 	if(!entry_loc)
 		return (pg_tbl_t*)0;
 	
-	mem_phys_set(entry_loc, stepsize);
+	mem_phys_set(entry_loc - (uint32_t)PLATFORM_KERNEL_BASE, stepsize);
 	
 	pg_create(tbl, entry_loc, (size_t)PLATFORM_PROC_MAX_MEM);
 	
@@ -38,12 +38,12 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 	uint32_t fail = 0;
 	for(uint32_t i = start_virt; i<=end_virt && !fail; i++)
 	{
-		void* phys_addr = mem_phys_find_free(stepsize);
+		void* phys_addr = mem_phys_find_free(stepsize)+(uint32_t)PLATFORM_KERNEL_BASE;
 		if(phys_addr)
 		{
-			printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
+			//printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
 			pg_map(tbl, (char*)(i*stepsize), phys_addr, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
-			mem_phys_set(phys_addr, stepsize);
+			mem_phys_set(phys_addr - (uint32_t)PLATFORM_KERNEL_BASE, stepsize);
 		}
 		else
 		{
@@ -56,12 +56,12 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 	stack_end /= stepsize;
 	for(uint32_t i=stack_end; i<start_virt && !fail; i++)
 	{
-		void* phys_addr = mem_phys_find_free(stepsize);
+		void* phys_addr = mem_phys_find_free(stepsize)+(uint32_t)PLATFORM_KERNEL_BASE;
 		if(phys_addr)
 		{
-			printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
+			//printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
 			pg_map(tbl, (char*)(i*stepsize), phys_addr, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
-			mem_phys_set(phys_addr, stepsize);
+			mem_phys_set(phys_addr - (uint32_t)PLATFORM_KERNEL_BASE, stepsize);
 		}
 		else
 		{

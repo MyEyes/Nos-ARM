@@ -1,11 +1,13 @@
 #include <stdint.h>
+#include <string.h>
+
+//#define MEM_DBG_TBLS
+#ifdef MEM_DBG_TBLS
+#include <stdio.h>
+#endif
+
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
-#include "std/string.h"
-#define MEM_DBG_TBLS
-#ifdef MEM_DBG_TBLS
-#include "std/stdio.h"
-#endif
 
 MB_phys_desc_t* desc_tbl = 0;
 size_t num_descs = 0;

@@ -1,9 +1,11 @@
+#include <stdio.h>
+#include <string.h>
+
+#include __PLATFORM__
+
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
 #include "kernel/mem/mem.h"
-#include "std/stdio.h"
-#include "std/string.h"
-#include __PLATFORM__
 
 pg_tbl_t kernel_page;
 pg_tbl_t user_page;

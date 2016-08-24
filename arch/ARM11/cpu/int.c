@@ -34,7 +34,9 @@ void set_int_hnd(char interrupt, void* hnd_addr)
 uint32_t __attribute__((used)) irq_hnd2(char* pc, char* sp)
 {
 	thread_curr_store(pc, sp);
-	printf("Clock tick!\r\n");
+	//printf("SWI pc=%x sp=%x\r\n",pc,sp);
+	//printf("Clock tick!\r\n");
+	clock_clear();
 	schd_chg_thread();
 	return (uint32_t)thread_curr_sp();
 }
@@ -42,6 +44,7 @@ uint32_t __attribute__((used)) irq_hnd2(char* pc, char* sp)
 void __attribute__((naked)) irq_hnd()
 {
 	__asm__(
+	"sub lr, lr, #4\n"
 	"CPS #31\n"							//Change to System mode to get access to user stack								irq
 	"stmfd sp!, {r0-r12}\n"				//push register states onto stack												push(r0-r12) 					sys stack
 	"mov r1, sp\n"						//mov sps value into r1 so it can survive the mode change						r1=sp_sys
@@ -107,12 +110,18 @@ void __attribute__((naked)) dabt_hnd()
 char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 {
 	thread_curr_store(pc, sp);
-	printf("SWI pc=%x sp=%x swi=%x\r\n",pc,sp, swi_num);
-	void (*syscall)() = syscall_tbl[swi_num];
-	if(syscall)
-		syscall();
+	//printf("SWI pc=%x sp=%x swi=%x\r\n",pc,sp, swi_num);
+	if(swi_num<SYSCALL_TBL_MAX)
+	{
+		void (*syscall)() = syscall_tbl[swi_num];
+		if(syscall)
+			syscall();
+		else
+			printf("No associated syscall with swi %x\r\n", swi_num);
+	}
 	else
 		printf("No associated syscall with swi %x\r\n", swi_num);
+	
 	char* test = thread_curr_sp();
 	//printf("thread_stored_sp = %x\r\n", test);
 	return test;

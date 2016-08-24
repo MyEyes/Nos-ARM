@@ -1,5 +1,5 @@
 #include "kernel/proc/elf.h"
-#include "std/stdio.h"
+#include <stdio.h>
 
 void elf_print_headerinfo(elf_header_t* header)
 {

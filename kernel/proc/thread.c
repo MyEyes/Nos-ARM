@@ -1,10 +1,10 @@
+#include <stdio.h>
 #include "kernel/proc/thread.h"
 #include "kernel/cpu/reg.h"
 #include "kernel/cpu/clock.h"
 #include "kernel/proc/schd.h"
 #include "kernel/mem/mmu.h"
 #include "kernel/mem/mem.h"
-#include "std/stdio.h"
 #include "kernel/mem/cache.h"
 
 thread_t kern_thread;

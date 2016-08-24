@@ -4,10 +4,13 @@
 #include "kernel/proc/thread.h"
 #include "kernel/proc/threadqueue.h"
 #define SCHD_NUM_PRIORITIES 7
-#define SCHD_BASE_TIME 0x1000
+#define SCHD_BASE_TIME 0x10000
 
 void schd_init();
+
 void schd_chg_thread();
+void schd_term();
+
 void schd_add_thread(thread_t*);
 thread_node_t* schd_get_empty_node();
 

@@ -1,8 +1,9 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 void main(uint32_t tid)
 {
 	(void) tid;
-	__asm__("swi 15");
-	while(1);
+	
+	exit(5);
 }

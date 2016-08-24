@@ -1,5 +1,5 @@
 #include "kernel/hw/atag.h"
-#include "std/stdio.h"
+#include <stdio.h>
 
 void atags_print()
 {

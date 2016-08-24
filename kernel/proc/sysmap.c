@@ -1,5 +1,5 @@
 #include "kernel/proc/sysmap.h"
-#include "std/stdio.h"
+#include <stdio.h>
 
 void sysmap_print(sysmap_t* map)
 {

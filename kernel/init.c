@@ -1,11 +1,12 @@
 #include "kernel/init.h"
 
 #include <stdint.h>
+#include <stdio.h>
+
 #include "kernel/mem/mmu.h"
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
 #include "kernel/mem/cache.h"
-#include "std/stdio.h"
 #include "kernel/cpu/int.h"
 #include "kernel/kernel.h"
 #include "kernel/proc/proc.h"
@@ -95,6 +96,7 @@ void kernel_init()
 	thread_init(&kern_thread, &kern_proc, (char*)__start, (char*)0, (char*)__start, 0, SCHD_NUM_PRIORITIES-1);
 	
 	curr_thread = &kern_thread;
+	curr_thread->state = THREAD_RUNNING;
 	
 	schd_init();
 

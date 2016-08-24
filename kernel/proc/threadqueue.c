@@ -1,6 +1,6 @@
 #include "kernel/proc/threadqueue.h"
-#include "std/stdlib.h"
-#include "std/stdio.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 
 void enqueue_node(thread_queue_t* queue, thread_node_t* node, thread_t* thread) 

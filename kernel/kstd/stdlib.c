@@ -1,9 +1,11 @@
-#include "std/stdlib.h"
-#include "std/string.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
+#include __PLATFORM__
+
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
-#include __PLATFORM__
-#include <stdint.h>
 
 size_t min_alloc = 4096; //have to allocate at least page size
 

@@ -7,4 +7,5 @@ nos.bin
 *.bin
 *.img
 *.log
+*.a
 payload

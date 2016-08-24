@@ -1,5 +1,5 @@
-#include "std/stdio.h"
-#include "std/string.h"
+#include <stdio.h>
+#include <string.h>
 #include "kernel/mem/mem.h"
 #include "kernel/mod/kernel_uart.h"
 
