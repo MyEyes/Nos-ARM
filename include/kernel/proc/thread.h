@@ -42,5 +42,6 @@ void thread_ready(thread_t* thread);
 
 void __plat_thread_ready(thread_t* thread);
 uint32_t __plat_thread_getparam(thread_t* thread, uint32_t index);
+void __plat_thread_setparam(thread_t* thread, uint32_t index, uint32_t val);
 
 #endif

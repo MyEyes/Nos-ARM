@@ -8,6 +8,8 @@
 #define SYSCALL_THREAD_EXIT 17
 #define SYSCALL_THREAD_TERM 18
 
+#define SYSCALL_PROC_SBRK 24
+
 #define SYSCALL_TBL_MAX 512
 extern void *syscall_tbl[];
 

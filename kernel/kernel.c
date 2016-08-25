@@ -92,7 +92,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	memcpy(phys, (char*)&__end, 0x100000);
 	
 	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
-	proc_init(test_proc, test_tbl, 0, 1);
+	proc_init(test_proc, test_tbl, 0x200000, 0, 1);
 	
 	thread_t* test_thread = malloc(sizeof(thread_t));
 	

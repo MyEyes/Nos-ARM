@@ -110,12 +110,12 @@ void __attribute__((naked)) dabt_hnd()
 char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 {
 	thread_curr_store(pc, sp);
-	//printf("SWI pc=%x sp=%x swi=%x\r\n",pc,sp, swi_num);
+	printf("SWI pc=%x sp=%x swi=%x\r\n",pc,sp, swi_num);
 	if(swi_num<SYSCALL_TBL_MAX)
 	{
-		void (*syscall)() = syscall_tbl[swi_num];
+		uint32_t (*syscall)() = syscall_tbl[swi_num];
 		if(syscall)
-			syscall();
+			__plat_thread_setparam(curr_thread, 1, syscall());
 		else
 			printf("No associated syscall with swi %x\r\n", swi_num);
 	}
