@@ -5,8 +5,15 @@
 void main(uint32_t tid)
 {
 	(void) tid;
-	char* test = sbrk(4096);
-	test[1]='x';
+	std_init();
+	int* test = malloc(sizeof(int));
 	
-	exit((int)test);
+	test[0]=tid;
+	
+	free(test);
+	
+	int* test_2 = malloc(sizeof(int));
+	*test_2 = 32;
+	
+	exit((int)test_2);
 }

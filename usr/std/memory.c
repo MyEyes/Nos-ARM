@@ -50,6 +50,9 @@ mem_area_t* mem_split_area(mem_area_t* area, size_t size)
 	area->next = new_area;
 	new_area->free = area->free;
 	
+	if (area == tail)
+		tail = new_area;
+	
 	return new_area;
 }
 
@@ -60,6 +63,9 @@ void mem_join_area(mem_area_t* area)
 		return;
 	
 	area->size = area->size + area->next->size;
+	if(area->next == tail)
+		tail = area;
+	
 	area->next = area->next->next;
 }
 
@@ -75,6 +81,7 @@ mem_area_t* mem_extend_heap(size_t size)
 	new->next = 0;
 	new->size = size;
 	new->free = 1;
+	tail->next = new;
 	tail = new;
 	
 	return new;

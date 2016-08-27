@@ -4,10 +4,16 @@
 #include "usr/std/memory.h"
 #include __PLATFORM__
 
+void std_init()
+{
+	mem_init();
+}
+
 void* calloc(size_t nmemb, size_t size)
 {
-	mem_area_t* alloc_area = mem_find_free_area(size*nmemb);
-	memset((char*)(alloc_area + MEM_HEADER_SIZE), 0, (size*nmemb - MEM_HEADER_SIZE));
+	size_t total_size = MEM_ALIGN_BY_4(nmemb*size);
+	mem_area_t* alloc_area = malloc(total_size);
+	memset((char*)(alloc_area), 0, total_size);
 	return alloc_area;
 }
 
@@ -28,7 +34,7 @@ void* malloc(size_t size)
 	
 	alloc_area->free = 0;
 	
-	return (void*)alloc_area;
+	return (void*)alloc_area + MEM_HEADER_SIZE;
 }
 
 void free(void *ptr)
@@ -37,8 +43,8 @@ void free(void *ptr)
 		return;
 	
 	//try to add it to later segments of memory, and set it to freed
-	mem_join_area((mem_area_t*)ptr);
-	((mem_area_t*)ptr)->free = 1;
+	mem_join_area(((mem_area_t*)ptr) - 1); //subtract the size of the header
+	(((mem_area_t*)ptr) - 1)->free = 1;
 }
 
 void* realloc(void *ptr, size_t size)
