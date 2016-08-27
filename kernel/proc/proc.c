@@ -82,7 +82,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 void* sbrk()
 {
 	int extra = (int)__plat_thread_getparam(curr_thread, 1);
-	printf("sbrk called with parameter: %x\r\n", extra);
+	printf("sbrk called with parameter: %x and pg_tbl: %x\r\n", extra, curr_thread->proc->pg_tbl);
 	void* obrk = (void*)curr_thread->proc->brk;
 	//If we don't need to get or remove memory from the process
 	if(!extra)

@@ -44,7 +44,7 @@ uint32_t* get_free_sld()
 	#ifdef MEM_DBG_TBLS
 	printf("New sld at %x\r\n", addr);
 	#endif
-	return addr;
+	return (uint32_t*)TO_KERNEL_ADDR_SPACE(addr);
 }
 
 void free_sld(uint32_t* sld)
@@ -144,6 +144,8 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 	uart_puts("\r\n");
 	#endif
 	
+	fld_tbl = __plat_pg_get_kern(fld_tbl,fld_tbl);
+	
 	for(uint32_t i = fld_start; i<=fld_end; i++, p_addr+=1<<20)
 	{
 		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
@@ -205,6 +207,8 @@ void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
 	uint32_t e_addr = (u_addr + mem);
 	uint32_t fld_start = u_addr >> 20;
 	uint32_t fld_end =  (e_addr-1) >> 20;
+	
+	fld_tbl = __plat_pg_get_kern(fld_tbl,fld_tbl);
 		
 	for(uint32_t i = fld_start; i<=fld_end; i++)
 	{
@@ -281,6 +285,16 @@ void* __plat_pg_get_phys(void* fld_tbl, void* virt_addr)
 			return (void*)((sld_entry & SLD_SMALL_ADDR_MASK) | (u_addr & (~SLD_SMALL_ADDR_MASK)));
 	}
 	return (void*)0;
+}
+
+void* __plat_pg_get_kern(void* fld_tbl, void* virt_addr)
+{
+	if(virt_addr<PLATFORM_PROC_MAX_MEM)
+		return (void*)TO_KERNEL_ADDR_SPACE(__plat_pg_get_phys(fld_tbl, virt_addr));
+	else if((uint32_t)virt_addr<PLATFORM_KERNEL_BASE)
+		return (void*)TO_KERNEL_ADDR_SPACE(virt_addr);
+	else
+		return virt_addr;
 }
 
 void __plat_pg_clear(void* tbl_addr, size_t mem)

@@ -5,6 +5,8 @@
 void main(uint32_t tid)
 {
 	(void) tid;
-	void* test = sbrk(0);
+	char* test = sbrk(4096);
+	test[1]='x';
+	
 	exit((int)test);
 }
