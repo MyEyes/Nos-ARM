@@ -5,5 +5,5 @@ cd usr/init
 make
 make install
 cd ../..
-make -B
+make -B pi-qemu-all
 make install
