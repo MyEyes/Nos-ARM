@@ -10,7 +10,7 @@
 #include "kernel/cpu/clock.h"
 #include <stdint.h>
 #include <stdio.h>
-#define  INT_SETUP_DBG
+//#define  INT_SETUP_DBG
 
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
@@ -215,8 +215,5 @@ void int_init()
 	uint32_t test_addr = (uint32_t)pg_get_phys(&kernel_page, (char*)INT_HIGH_VEC_ADDR);
 	uint32_t test_val = (uint32_t)pg_get_entry(&kernel_page, (char*)INT_HIGH_VEC_ADDR);
 	printf("test = %x:%x\r\n", test_addr, test_val);
-	uint32_t test_addr2 = (uint32_t)pg_get_phys(&kernel_page, (char*)INT_HIGH_VEC_ADDR+4096);
-	uint32_t test_val2 = (uint32_t)pg_get_entry(&kernel_page, (char*)INT_HIGH_VEC_ADDR+4096);
-	printf("test2 = %x:%x\r\n", test_addr2, test_val2);
 	#endif
 }
