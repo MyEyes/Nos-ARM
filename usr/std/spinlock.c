@@ -1,4 +1,4 @@
-#include "std/spinlock.h"
+#include "usr/std/spinlock.h"
 #include <stdint.h>
 
 void init_spin_lock(uint32_t* lk)
