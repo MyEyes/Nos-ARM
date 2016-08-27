@@ -22,4 +22,4 @@ all: all-ld
 
 
 all-ld: $(OBJ_FILES)
-		$(AR) -cvq lib/libstd.a $^
+		$(AR) -rcs lib/libstd.a $^
