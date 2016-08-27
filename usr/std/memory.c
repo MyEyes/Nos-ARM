@@ -8,7 +8,7 @@ mem_area_t* tail = 0;
 
 void mem_init()
 {
-	uint32_t p_break = sbrk(4096); //guarantee at least 4KB can be used by the process
+	uint32_t p_break = (uint32_t)sbrk(4096); //guarantee at least 4KB can be used by the process
 	head = (mem_area_t*)p_break;
 	tail = (mem_area_t*)p_break;
 	head->next = 0;
@@ -69,7 +69,7 @@ mem_area_t* mem_extend_heap(size_t size)
 	//the new area goes at the end of the tail pointer
 	mem_area_t* new = (mem_area_t*)((char*)tail + tail->size);
 	
-	if (sbrk(size + MEM_HEADER_SIZE) == -1)
+	if (sbrk(size + MEM_HEADER_SIZE) == (void*)-1)
 		return 0;
 	
 	new->next = 0;
