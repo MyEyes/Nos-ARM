@@ -1,12 +1,13 @@
 #include <stdlib.h>
+#include "std/string.h"
 #include <kernel/proc/syscall.h>
-#include <memory.h>
+#include "usr/std/memory.h"
 #include __PLATFORM__
 
 void* calloc(size_t nmemb, size_t size)
 {
 	mem_area_t* alloc_area = mem_find_free_area(size*nmemb);
-	memset(alloc_area + MEM_HEADER_SIZE, 0, (size*nmemb - MEM_HEADER_SIZE));
+	memset((char*)(alloc_area + MEM_HEADER_SIZE), 0, (size*nmemb - MEM_HEADER_SIZE));
 	return alloc_area;
 }
 
@@ -37,7 +38,7 @@ void free(void *ptr)
 	
 	//try to add it to later segments of memory, and set it to freed
 	mem_join_area((mem_area_t*)ptr);
-	(mem_area_t*)ptr->free = 1;
+	((mem_area_t*)ptr)->free = 1;
 }
 
 void* realloc(void *ptr, size_t size)
