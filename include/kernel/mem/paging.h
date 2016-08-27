@@ -18,6 +18,7 @@ typedef struct
 
 extern pg_tbl_t kernel_page;
 extern pg_tbl_t user_page;
+extern uint32_t pg_initialized;
 
 void pg_create_default(void* loc, void* usr_loc);
 

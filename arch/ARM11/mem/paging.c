@@ -44,7 +44,7 @@ uint32_t* get_free_sld()
 	#ifdef MEM_DBG_TBLS
 	printf("New sld at %x\r\n", addr);
 	#endif
-	return (uint32_t*)TO_KERNEL_ADDR_SPACE(addr);
+	return (uint32_t*)addr;
 }
 
 void free_sld(uint32_t* sld)
@@ -84,6 +84,7 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 	#endif
 	
 	uint32_t* sld = get_free_sld();
+	uint32_t* sld_v = (uint32_t*)TO_KERNEL_ADDR_SPACE(sld);
 	
 	if(FLD_IS_SECTION(entry))
 	{
@@ -101,9 +102,9 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 		for(uint32_t i = 0; i<256; i++)
 		{
 			if(s_index<=i && i<=e_index)
-				sld[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
+				sld_v[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
 			else
-				sld[i] = sld_create_small_entry((void*)(s_base+(i<<12)), perm, caching, global, shared);
+				sld_v[i] = sld_create_small_entry((void*)(s_base+(i<<12)), perm, caching, global, shared);
 		}
 		*fld_entry_addr = fld_construct_sld(sld, domain);
 	}
@@ -116,9 +117,9 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 		for(uint32_t i = 0; i<256; i++)
 		{
 			if(s_index<=i && i<=e_index)
-				sld[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
+				sld_v[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
 			else
-				sld[i] = 0;
+				sld_v[i] = 0;
 		}
 		*fld_entry_addr = fld_construct_sld(sld, domain);
 	}
@@ -289,6 +290,9 @@ void* __plat_pg_get_phys(void* fld_tbl, void* virt_addr)
 
 void* __plat_pg_get_kern(void* fld_tbl, void* virt_addr)
 {
+	if(!pg_initialized)
+		return virt_addr;
+		
 	if(virt_addr<PLATFORM_PROC_MAX_MEM)
 		return (void*)TO_KERNEL_ADDR_SPACE(__plat_pg_get_phys(fld_tbl, virt_addr));
 	else if((uint32_t)virt_addr<PLATFORM_KERNEL_BASE)

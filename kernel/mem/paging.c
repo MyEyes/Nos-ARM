@@ -9,6 +9,7 @@
 
 pg_tbl_t kernel_page;
 pg_tbl_t user_page;
+uint32_t pg_initialized = 0;
 
 void pg_create_default(void* ker_loc, void* usr_loc)
 {
@@ -28,6 +29,7 @@ void pg_create_default(void* ker_loc, void* usr_loc)
 	
 	__plat_pg_clear(usr_loc, (size_t)PLATFORM_PROC_MAX_MEM);
 	__plat_pg_map(usr_loc, 0, 0, num_user_entries*ent_size,0, PERM_PRW_URW, 0, 1, 0);
+	pg_initialized = 1;
 }
 
 void pg_create(pg_tbl_t* tbl, void* entry_loc, size_t mem)

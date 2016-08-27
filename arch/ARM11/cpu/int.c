@@ -3,14 +3,14 @@
 #include "kernel/proc/thread.h"
 #include "arch/ARM11/cpu/cpu.h"
 #include "kernel/cpu/cpu.h"
-#include "std/stdio.h"
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
 #include "kernel/proc/schd.h"
 #include "kernel/proc/syscall.h"
 #include "kernel/cpu/clock.h"
 #include <stdint.h>
-//#define  INT_SETUP_DBG
+#include <stdio.h>
+#define  INT_SETUP_DBG
 
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
@@ -213,6 +213,10 @@ void int_init()
 	pg_map(&kernel_page,(char*)INT_HIGH_VEC_ADDR, (char*)INT_PHYS_ADDR, 0x1000, 0, PERM_PRW_UR, 0, 1, 0);
 	#ifdef INT_SETUP_DBG
 	uint32_t test_addr = (uint32_t)pg_get_phys(&kernel_page, (char*)INT_HIGH_VEC_ADDR);
-	printf("test = %x\r\n", test_addr);
+	uint32_t test_val = (uint32_t)pg_get_entry(&kernel_page, (char*)INT_HIGH_VEC_ADDR);
+	printf("test = %x:%x\r\n", test_addr, test_val);
+	uint32_t test_addr2 = (uint32_t)pg_get_phys(&kernel_page, (char*)INT_HIGH_VEC_ADDR+4096);
+	uint32_t test_val2 = (uint32_t)pg_get_entry(&kernel_page, (char*)INT_HIGH_VEC_ADDR+4096);
+	printf("test2 = %x:%x\r\n", test_addr2, test_val2);
 	#endif
 }

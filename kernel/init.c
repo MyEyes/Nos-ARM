@@ -55,10 +55,10 @@ void kernel_init()
 	mmu_set_kern_pgtbl(KERNEL_DEF_PG_LOC);
 	
 	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
-	
-	cache_TLB_flush();
 		
 	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
+	
+	cache_TLB_flush();
 	
 	#ifdef INIT_DEBUG
 	printf("Setting user memory limit\r\n");
