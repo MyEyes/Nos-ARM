@@ -54,8 +54,8 @@ void thread_change(thread_t* thread)
 	
 	if(curr_thread->proc->pg_tbl!=thread->proc->pg_tbl)
 	{
-		//printf("Setting pagetable to %x\r\n", thread->proc->pg_tbl->addr);
-		mmu_set_user_pgtbl(thread->proc->pg_tbl->addr);
+		//printf("Setting pagetable to %x\r\n", pg_get_phys(&kernel_page, thread->proc->pg_tbl->addr));
+		mmu_set_user_pgtbl(pg_get_phys(&kernel_page, thread->proc->pg_tbl->addr));
 	}
 	
 	curr_thread = thread;

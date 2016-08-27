@@ -27,6 +27,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 	
 	uint32_t stepsize = __plat_pg_tbl_maxentry();
 	
+	//Note: If this is changed, physical address calculations for setting up the pagetable have to be adjusted
 	void* entry_loc = mem_phys_find_free(stepsize)+(uint32_t)PLATFORM_KERNEL_BASE;
 	if(!entry_loc)
 		return (pg_tbl_t*)0;
@@ -44,7 +45,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 		if(phys_addr)
 		{
 			//printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
-			pg_map(tbl, (char*)(i*stepsize), phys_addr, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
+			pg_map(tbl, (char*)(i*stepsize), phys_addr - (uint32_t)PLATFORM_KERNEL_BASE, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
 			mem_phys_set(phys_addr - (uint32_t)PLATFORM_KERNEL_BASE, stepsize);
 		}
 		else
@@ -62,7 +63,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 		if(phys_addr)
 		{
 			//printf("mapping %x to %x\r\n", (char*)(i*stepsize), phys_addr);
-			pg_map(tbl, (char*)(i*stepsize), phys_addr, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
+			pg_map(tbl, (char*)(i*stepsize), phys_addr - (uint32_t)PLATFORM_KERNEL_BASE, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
 			mem_phys_set(phys_addr - (uint32_t)PLATFORM_KERNEL_BASE, stepsize);
 		}
 		else

@@ -66,7 +66,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//mem_dmb();
 	//Change to user mode
 	
-	printf("Domain Flags: %x\r\n", domain_get_flags());
+	//printf("Domain Flags: %x\r\n", domain_get_flags());
 	mem_dsb();
 	mem_dmb();
 	//printf("Processor state: %x\r\n", cpu_get_state());
@@ -82,7 +82,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	printf("Memory page: %x\r\n", pg_get_entry(&kernel_page, (void*)0xc0000000));
 	
 	pg_tbl_t* test_tbl = proc_create((char*)0x100000, (char*)0x200000, 0x8000);
-	printf("tbl_entry: %x", pg_get_entry(test_tbl, (void*)0x000FFFC4));
+	//printf("tbl_entry: %x\r\n", pg_get_entry(test_tbl, (void*)0x000FFFC4));
 	char* phys = pg_get_phys(test_tbl, (char*)0x100000);
 	
 	//printf("Test proc table set up at %x\r\n", test_tbl);
