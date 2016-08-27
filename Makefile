@@ -1,3 +1,11 @@
+no:
+	@echo "This is now how you want to build!"
+	@echo ""
+	@echo "Use make std-all to build the standard library for user mode"
+	@echo "Build the payload in usr/init"
+	@echo "Build for your target of choice with pi-qemu-all or pi-b-all"
+	@echo "Then make install to combine the kernel and payload into a binary image"
+
 pi-qemu-all: 
 			$(MAKE) -f pi-qemu.mk pi-qemu-all
 		
