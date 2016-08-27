@@ -1,4 +1,5 @@
 #!/bin/sh
+mkdir -p lib
 make std-all
 cd usr/init
 make
