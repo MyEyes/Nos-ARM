@@ -12,6 +12,7 @@ void mem_init()
 	head = (mem_area_t*)p_break;
 	tail = (mem_area_t*)p_break;
 	head->next = 0;
+	head->prev = 0;
 	head->size = 4096;
 	head->free = 1;
 }
@@ -47,6 +48,7 @@ mem_area_t* mem_split_area(mem_area_t* area, size_t size)
 	
 	new_area->size = total_size - area->size;
 	new_area->next = area->next;
+	new_area->prev = area;
 	area->next = new_area;
 	new_area->free = area->free;
 	
@@ -58,15 +60,22 @@ mem_area_t* mem_split_area(mem_area_t* area, size_t size)
 
 void mem_join_area(mem_area_t* area)
 {
-	//if there's nothing to join with or the next space is already taken, just return
-	if(!area->next || !area->next->free)
-		return;
-	
-	area->size = area->size + area->next->size;
-	if(area->next == tail)
-		tail = area;
-	
-	area->next = area->next->next;
+	if(area->next && area->next->free)
+	{
+		area->size = area->size + area->next->size;
+		if(area->next == tail)
+			tail = area;
+		
+		area->next = area->next->next;
+	}
+	else if(area->prev && area->prev->free)
+	{
+		area->prev->size = area->size + area->prev->size;
+		if(area == tail)
+			tail = area->prev;
+		
+		area->prev->next = area->next->next;
+	}
 }
 
 mem_area_t* mem_extend_heap(size_t size) 
@@ -79,6 +88,7 @@ mem_area_t* mem_extend_heap(size_t size)
 		return 0;
 	
 	new->next = 0;
+	new->prev = tail;
 	new->size = size;
 	new->free = 1;
 	tail->next = new;
