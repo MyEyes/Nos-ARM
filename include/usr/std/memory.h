@@ -10,6 +10,7 @@
 typedef struct mem_area_tt
 {
 	struct mem_area_tt* next;
+	struct mem_area_tt* prev;
 	size_t 				size;
 	uint32_t 			free; //0 is false, 1 is true
 } mem_area_t;
