@@ -90,7 +90,6 @@ void __attribute__((naked)) panic_hnd()
 void __attribute__((used)) dabt_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
 {
 	printf("Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
-	while(1);
 }
 
 void __attribute__((naked)) dabt_hnd()

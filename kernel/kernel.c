@@ -123,8 +123,8 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	printf("Returned to kernel\r\n");
 	
-	char* p2 = pg_get_phys(test_tbl, (char*)0x200000);
-	printf("0x200000->%x\r\n", p2);
+	char* p2 = pg_get_phys(test_tbl, (char*)0x201000);
+	printf("0x201000->%x\r\n", p2);
 	
 	while ( true )
 	{

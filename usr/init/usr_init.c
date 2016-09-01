@@ -15,10 +15,10 @@ void main(uint32_t tid)
 	int* test_2 = malloc(sizeof(int));
 	*test_2 = 32;
 	
-		char* dev = req_dev("bcm2385_uart0");
+	char* dev = req_dev("bcm2385_uart0");
 	
 	//Wait for uart to be ready
-	while(dev[0x18] & (1 << 5));
+	while(dev[0x18] & (1 << 5)){ }
 	*dev = 'A';
 	
 	exit((int)dev);

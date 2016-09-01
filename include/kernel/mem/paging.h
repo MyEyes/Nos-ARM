@@ -9,7 +9,7 @@
 #define KERNEL_DEF_PG_LOC PLATFORM_PROC_MAX_MEM
 #define KERNEL_DEF_USR_PG_LOC ((char*)KERNEL_DEF_PG_LOC+0x100000)
 
-#define TO_KERNEL_ADDR_SPACE(u) ((uint32_t)u<(uint32_t)PLATFORM_KERNEL_BASE?(uint32_t)u+PLATFORM_KERNEL_BASE:(uint32_t)u)
+#define TO_KERNEL_ADDR_SPACE(u) ((((uint32_t)u)<((uint32_t)PLATFORM_KERNEL_BASE))?(((uint32_t)u)+PLATFORM_KERNEL_BASE):((uint32_t)u))
 
 typedef struct
 {

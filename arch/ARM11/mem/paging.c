@@ -185,7 +185,7 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 			#endif
 			if(FLD_IS_PGTBL(fld_entry))
 			{
-				uint32_t* sld_tbl = (uint32_t*)(fld_entry&FLD_PG_TBL_MASK);	
+				uint32_t* sld_tbl = (uint32_t*)TO_KERNEL_ADDR_SPACE(fld_entry&FLD_PG_TBL_MASK);	
 				uint32_t sld_start = offset>>12;
 				uint32_t sld_end = (offset+len-1)>>12;
 			
@@ -238,7 +238,7 @@ void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
 		{
 			if(FLD_IS_PGTBL(fld_entry))
 			{
-				uint32_t* sld_tbl = (uint32_t*)(fld_entry&FLD_PG_TBL_MASK);	
+				uint32_t* sld_tbl = (uint32_t*)TO_KERNEL_ADDR_SPACE(fld_entry&(FLD_PG_TBL_MASK));	
 				uint32_t sld_start = offset>>12;
 				uint32_t sld_end = (offset+len-1)>>12;
 			
