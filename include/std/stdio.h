@@ -17,6 +17,8 @@ int vprintf(const char *format, va_list arg);
 int printf(const char *format, ...);
 int fputc(int c, FILE* stream);
 
+void* req_dev(char* dev_name);
+
 int print_hex(uint32_t u, FILE* stream);
 void print_hexbyte(char byte, FILE* stream);
 

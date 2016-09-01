@@ -191,12 +191,12 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 			
 				for(uint32_t j = sld_start; j<=sld_end; j++)
 				{
-					sld_tbl[j] = sld_create_small_entry((void*)(p_addr+((j-sld_start)<<12)), perm, caching, global, shared);
+					sld_tbl[j] = sld_create_small_entry((void*)(phys_addr+((j-sld_start)<<12)), perm, caching, global, shared);
 				}
 			}
 			else
 			{
-				mem_create_sld(((uint32_t*)fld_tbl)+i, offset, len, (void*)p_addr, domain, perm, caching, global, shared);
+				mem_create_sld(((uint32_t*)fld_tbl)+i, offset, len, (void*)phys_addr, domain, perm, caching, global, shared);
 			}
 		}
 	}

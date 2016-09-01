@@ -4,6 +4,7 @@
 #include __PLATFORM__
 #include <stdint.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 #define KERNEL_DEF_PG_LOC PLATFORM_PROC_MAX_MEM
 #define KERNEL_DEF_USR_PG_LOC ((char*)KERNEL_DEF_PG_LOC+0x100000)
@@ -36,5 +37,7 @@ void* __plat_pg_get_kern(void* tbl_addr, void* virt_addr);
 uint32_t __plat_pg_get_entry(void* tbl_addr, void* virt_addr);
 uint32_t __plat_pg_tbl_maxentry();
 void __plat_pg_clear(void* tbl_addr, size_t mem);
+
+void* sys_pmap(void* phys_addr, size_t mem);
 
 #endif

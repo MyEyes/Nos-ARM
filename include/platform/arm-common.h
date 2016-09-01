@@ -11,3 +11,6 @@
 	#define _PLATFORM_SYSCALL1(id, p1, r) __asm__ __volatile__("mov r0, %1\nswi "#id"\n bx lr\n":"=r"(r):"r"(p1))
 #define PLATFORM_SYSCALL2(id, p1, p2, r) _PLATFORM_SYSCALL2(id, p1, p2, r)
 	#define _PLATFORM_SYSCALL2(id, p1, p2, r) __asm__ __volatile__("mov r0, %1\nmov r1, %2\nswi "#id"\n bx lr\n":"=r"(r):"r"(p1), "r"(p2))
+	
+	
+#define __DEV_MAP

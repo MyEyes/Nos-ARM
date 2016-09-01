@@ -20,4 +20,6 @@ mem_area_t* mem_split_area(mem_area_t* area, size_t size);
 void mem_join_area(mem_area_t* area);
 mem_area_t* mem_extend_heap(size_t size);
 
+void mem_extend(size_t size, int free);
+
 #endif

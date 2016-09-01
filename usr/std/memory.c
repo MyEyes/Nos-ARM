@@ -80,3 +80,14 @@ mem_area_t* mem_extend_heap(size_t size)
 	return new;
 }
 
+void mem_extend(size_t size, int free)
+{
+	size = MEM_ALIGN_BY_4(size);
+	//the new area goes at the end of the tail pointer
+	mem_area_t* new = (mem_area_t*)((char*)tail + tail->size);
+	
+	new->next = 0;
+	new->size = size;
+	new->free = free;
+	tail = new;
+}

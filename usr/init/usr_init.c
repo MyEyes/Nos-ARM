@@ -1,12 +1,16 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 
 void main(uint32_t tid)
 {
 	(void) tid;
-	char* test = sbrk(4096);
-	test[1]='x';
+	char* dev = req_dev("bcm2385_uart0");
 	
-	exit((int)test);
+	//Wait for uart to be ready
+	while(dev[0x18] & (1 << 5));
+	*dev = 'A';
+	
+	exit((int)dev);
 }
