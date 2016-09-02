@@ -38,7 +38,7 @@ void* sys_dev_rq()
 	if(dev)
 	{
 		uint32_t virt_s = curr_thread->proc->brk;
-		pg_map(curr_thread->proc->pg_tbl, (void*)virt_s, (void*)dev->addr, 4096, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 0);
+		pg_map(curr_thread->proc->pg_tbl, (void*)virt_s, (void*)dev->addr, 4096, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 1);
 	
 		void* old_brk = (void*)curr_thread->proc->brk;
 		curr_thread->proc->brk = virt_s + 4096;

@@ -2,6 +2,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+
+void putc(int c, volatile char* dev)
+{
+	while((dev[0x18] & (1 << 5))){ }
+	*dev = c;
+}
+
+void puts(char* s, volatile char* dev)
+{
+	while(*s)
+		putc(*s++, dev);
+}
+
 void main(uint32_t tid)
 {
 	(void) tid;
@@ -15,11 +28,9 @@ void main(uint32_t tid)
 	int* test_2 = malloc(sizeof(int));
 	*test_2 = 32;
 	
-	char* dev = req_dev("bcm2385_uart0");
+	volatile char* dev = req_dev("bcm2385_uart0");
 	
-	//Wait for uart to be ready
-	while(dev[0x18] & (1 << 5)){ }
-	*dev = 'A';
+	puts("Hellooooo from Usermode\r\n", dev);
 	
 	exit((int)dev);
 }
