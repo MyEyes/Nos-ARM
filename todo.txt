@@ -1,3 +1,9 @@
-kernel_uart.c should become a module
-module management does not exist yet
-kstd should be the kernel side implementation of the standard library
+-proc creation has some bugs related to checking if memory exists
+and should generally be double checked since the mapping of physical
+to virtual memory seems very risky potentially if we are going to have more than 1Gig of phys memory
+
+-ipc_ports should be able to be created and destroyed, kernel needs to keep track of the owners of ipc_ports
+
+-There should probably be a general ressource manager for kernel ressources held by threads/processes
+
+-Not sure how to handle files/streams yet. Through IPC message passing?

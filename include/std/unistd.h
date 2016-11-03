@@ -2,6 +2,7 @@
 #define __UNISTD_H__
 #include <stdint.h>
 #include <stddef.h>
+#include <lock.h>
 
 typedef uint32_t pid_t;
 

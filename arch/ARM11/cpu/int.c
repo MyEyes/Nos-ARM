@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdio.h>
 //#define  INT_SETUP_DBG
-
+//#define INT_DEBUG
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
 uint32_t abt_stack[CPU_INT_STACK_SIZE];
@@ -34,7 +34,9 @@ void set_int_hnd(char interrupt, void* hnd_addr)
 uint32_t __attribute__((used)) irq_hnd2(char* pc, char* sp)
 {
 	thread_curr_store(pc, sp);
+	#ifdef INT_DEBUG
 	printf("IRQ pc=%x sp=%x\r\n",pc,sp);
+	#endif
 	//printf("Clock tick!\r\n");
 	clock_clear();
 	schd_chg_thread();
@@ -110,7 +112,9 @@ void __attribute__((naked)) dabt_hnd()
 char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 {
 	thread_curr_store(pc, sp);
+	#ifdef INT_DEBUG
 	printf("SWI pc=%x sp=%x swi=%x\r\n",pc,sp, swi_num);
+	#endif
 	if(swi_num<SYSCALL_TBL_MAX)
 	{
 		uint32_t (*syscall)() = syscall_tbl[swi_num];

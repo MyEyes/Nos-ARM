@@ -1,18 +1,19 @@
 #include "usr/std/spinlock.h"
 #include <stdint.h>
+#include <lock.h>
 
-void init_spin_lock(uint32_t* lk)
+void spinlock_init(spinlock_t* lk)
 {
 	*lk = 0;
 }
 
-void lock(uint32_t* lk)
+void spinlock_lock(spinlock_t* lk)
 {
 	while(__sync_lock_test_and_set(lk, 1))
 		;
 }
 
-void unlock(uint32_t* lk)
+void spinlock_unlock(spinlock_t* lk)
 {
 	*lk = 0;
 }

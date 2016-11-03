@@ -5,8 +5,6 @@
 
 int main(int argc, char **argv)
 {
-	int x=1,y=1, z=1;
-	printf("%d %d %d\r\n", ++x++, (++x)++, ++(x++));
 	if(argc != 3)
 	{
 		printf("You need to specify an input and output file\r\n");

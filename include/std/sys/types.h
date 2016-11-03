@@ -7,4 +7,6 @@ typedef void* v_addr_t;
 
 typedef uint32_t syscall_id_t;
 
+typedef unsigned long res_hndl;
+
 #endif

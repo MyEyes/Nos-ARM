@@ -49,7 +49,7 @@ void thread_ready(thread_t* thread)
 
 void thread_change(thread_t* thread)
 {
-	printf("Switching to thread %x\r\n", thread->tid);
+	//printf("Switching to thread %x\r\n", thread->tid);
 	//printf("sp=%x\tpc=%x\r\n", thread->sp, thread->pc);
 	
 	if(curr_thread->proc->pg_tbl!=thread->proc->pg_tbl)
