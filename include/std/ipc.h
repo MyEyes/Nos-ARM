@@ -1,5 +1,6 @@
 #ifndef __IPC_H__
 #define __IPC_H__
+#include <stdint.h>
 #include <stddef.h>
 #include <lock.h>
 
@@ -21,7 +22,7 @@ typedef struct{
 //Should never be passed as value, due to the buffer trick
 typedef struct{
 	port_id		response_port; 	//If not 0 specifies a response port
-	tid			sender_thread; 	//If not 0 specifies the senders thread id
+	uint32_t	sender_thread; 	//If not 0 specifies the senders thread id
 	size_t		length;			//Specifies the length of the message
 	char		msg[1];			//Start of the message buffer
 } ipc_msg_t;

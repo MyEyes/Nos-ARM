@@ -1,35 +1,46 @@
 #include <ipc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 ipc_port_t* ipc_create_port(port_id id, size_t buffer_size)
 {
-	
+	(void)id;
+	(void)buffer_size;
+	return (ipc_port_t*)0;
 }
 
 ipc_port_t* ipc_bind_port(port_id id)
 {
-	
+	(void)id;
+	return (ipc_port_t*)0;
 }
 
 int ipc_free_port(ipc_port_t* port)
 {
-	
+	(void)port;
+	return 0;
 }
 
 ipc_msg_t* ipc_read_msg(ipc_port_t* port)
 {
-	
+	(void)port;
+	return (ipc_msg_t*)0;
 }
 
 //helper function to copy to a ringbuffer
-void __attribute__((inline)) rbuffer_cpy(char* buffer, size_t offset, size_t buffer_size, char* src, size_t bytes)
+void rbuffer_cpy(char* buffer, size_t offset, size_t buffer_size, char* src, size_t bytes)
 {
-	
+	(void)buffer;
+	(void)offset;
+	(void)buffer_size;
+	(void)src;
+	(void)bytes;
 }
 
 int	ipc_send_msg(ipc_port_t* port, port_id resp_port, size_t length, char* msg)
 {
+	(void)resp_port;
 	//acquire lock
 	spinlock_lock(&(port->lock));
 	
@@ -67,5 +78,6 @@ int	ipc_send_msg(ipc_port_t* port, port_id resp_port, size_t length, char* msg)
 	//Move buffer offset
 	port->buffer_off_w += length;
 	
-	spinlock_unlock(&(port->lock);
+	spinlock_unlock(&(port->lock));
+	return 0;
 }
