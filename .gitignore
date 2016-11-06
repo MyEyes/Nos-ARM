@@ -9,3 +9,4 @@ nos.bin
 *.log
 *.a
 payload
+*.un~
