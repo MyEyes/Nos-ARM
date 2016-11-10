@@ -9,12 +9,14 @@
 #include __PLATFORM__
 
 proc_hdr_t kern_proc;
+uint32_t pid_cnt = 0;
 
-void proc_init(proc_hdr_t* proc, pg_tbl_t* tbl, uint32_t virt_end, uint32_t priv, uint32_t pid)
+void proc_init(proc_hdr_t* proc, pg_tbl_t* tbl, uint32_t virt_start, uint32_t virt_end, uint32_t priv)
 {
-	proc->pid = pid;
+	proc->pid = pid_cnt++;
 	proc->pg_tbl = tbl;
 	proc->priv = priv;
+	proc->vs = virt_start;
 	proc->brk = virt_end;
 }
 
@@ -129,4 +131,9 @@ void* sbrk()
 		curr_thread->proc->brk += extra - offset;
 	}
 	return obrk;
+}
+
+uint32_t fork()
+{
+	return 0;
 }

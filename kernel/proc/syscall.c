@@ -13,6 +13,7 @@ void syscall_init()
 	memset((char*)syscall_tbl, 0, sizeof(void*)*SYSCALL_TBL_MAX);
 	
 	syscall_set(SYSCALL_PROC_SBRK, sbrk);
+	syscall_set(SYSCALL_PROC_FORK, fork);
 	syscall_set(SYSCALL_DEV_RQ, sys_dev_rq);
 }
 
