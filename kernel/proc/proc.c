@@ -79,10 +79,16 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 	return tbl;
 }
 
+//#define SBRK_DBG
 void* sbrk()
 {
 	int extra = (int)__plat_thread_getparam(curr_thread, 1);
-	printf("sbrk called with parameter: %x and pg_tbl: %x\r\n", extra, curr_thread->proc->pg_tbl);
+	
+	//align extra with pagesize
+	extra = (extra+(PAGE_SIZE-1))&~(PAGE_SIZE-1);
+	#ifdef SBRK_DBG
+		printf("sbrk called with parameter: %x and pg_tbl: %x\r\n", extra, curr_thread->proc->pg_tbl);
+	#endif
 	void* obrk = (void*)curr_thread->proc->brk;
 	//If we don't need to get or remove memory from the process
 	if(!extra)
@@ -97,11 +103,17 @@ void* sbrk()
 			p_addr_t start = mem_phys_find_free(stepsize);
 			if(!start)
 				return (void*)-1;
+			#ifdef SBRK_DBG
+				printf("sbrk: Mapping %x bytes from %x to %x in pg_tbl at %x\n", stepsize, (obrk+offset), start, curr_thread->proc->pg_tbl);
+			#endif
 			pg_map(curr_thread->proc->pg_tbl, (void*)(obrk+offset), start, stepsize, 0, PERM_PRW_URW, 0, 0, 0);
 			extra-=stepsize;
 			offset+=stepsize;
 		}
 		p_addr_t start = mem_phys_find_free(extra);
+		#ifdef SBRK_DBG
+			printf("sbrk: Mapping %x bytes from %x to %x in pg_tbl at %x\n", extra, (obrk+offset), start, curr_thread->proc->pg_tbl);
+		#endif
 		pg_map(curr_thread->proc->pg_tbl, (void*)(obrk+offset), start, extra, 0, PERM_PRW_URW, 0, 0, 0);
 		curr_thread->proc->brk += offset + extra;
 	}

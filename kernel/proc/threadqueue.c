@@ -22,7 +22,7 @@ void enqueue_node(thread_queue_t* queue, thread_node_t* node, thread_t* thread)
 
 thread_node_t* dequeue_node(thread_queue_t* queue) 
 {
-	//printf("Dequeue Head: %x\r\n", queue->head);
+	//printf("Dequeue Head: %x->%x\r\n", queue, queue->head);
 	thread_node_t* dequeued_node = queue->head;
 	
 	if(dequeued_node == queue->tail) 

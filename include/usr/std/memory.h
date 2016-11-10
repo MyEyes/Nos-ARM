@@ -5,7 +5,7 @@
 
 #define MEM_ALIGNMENT 4 //must be a power of 2
 #define MEM_ALIGN_BY_4(x) (((x) + (MEM_ALIGNMENT-1)) & ~(MEM_ALIGNMENT-1)) //round up to multiple of 4
-#define MEM_HEADER_SIZE MEM_ALIGN_BY_4(sizeof(struct mem_area_tt))
+#define MEM_HEADER_SIZE (MEM_ALIGN_BY_4(sizeof(struct mem_area_tt)))
 
 typedef struct mem_area_tt
 {

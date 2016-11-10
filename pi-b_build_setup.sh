@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 mkdir -p lib
 make std-all
 cd usr/init

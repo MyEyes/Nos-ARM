@@ -91,7 +91,9 @@ void __attribute__((naked)) panic_hnd()
 
 void __attribute__((used)) dabt_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
 {
-	printf("Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
+	printf("DABT: Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
+	printf("DABT: u_pg_tbl: %x, %x->%x\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
+	printf("DABT: k_pg_tbl: %x, %x->%x\n", &kernel_page, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
 }
 
 void __attribute__((naked)) dabt_hnd()

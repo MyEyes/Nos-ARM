@@ -2,18 +2,19 @@
 #include "usr/std/memory.h"
 #include "std/unistd.h"
 #include <stdint.h>
+#include __PLATFORM__
 
 mem_area_t* head = 0;
 mem_area_t* tail = 0;
 
 void mem_init()
 {
-	uint32_t p_break = (uint32_t)sbrk(4096);    //guarantee at least 4KB can be used by the process
+	uint32_t p_break = (uint32_t)sbrk(PAGE_SIZE);    //guarantee at least one page can be used by the process
 	head = (mem_area_t*)p_break;                //head and tail should both point to the newly allocated space
 	tail = (mem_area_t*)p_break;
 	head->next = 0;
 	head->prev = 0;
-	head->size = 4096;
+	head->size = PAGE_SIZE;
 	head->free = 1;
 }
 
@@ -91,13 +92,14 @@ mem_area_t* mem_extend_heap(size_t size)
 	
     //sbrk returns (void*)-1 on failure
     //so return null pointer if we see failure to allocate new space
-	if (sbrk(size + MEM_HEADER_SIZE) == (void*)-1)
+	char* brk;
+	if ((brk = (char*)sbrk(size + MEM_HEADER_SIZE)) == (void*)-1)
 		return 0;
 	
     //initialize values for the new area
 	new->next = 0;
 	new->prev = tail;
-	new->size = size;
+	new->size = brk-((char*)new);
 	new->free = 1;
 	tail->next = new;
 	tail = new;

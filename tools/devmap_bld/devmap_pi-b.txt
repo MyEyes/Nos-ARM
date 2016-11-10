@@ -1,0 +1,5 @@
+0x20201000 mm   bcm2385_uart0
+0x20007200 mm   bcm2385_dma_ct
+0x20E05000 mm   bcm2385_dma_15
+0x20300000 mm   bcm2385_emmc
+0x2000B200 mm   bcm2385_int

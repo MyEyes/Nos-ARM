@@ -39,6 +39,8 @@ void schd_chg_thread()
 	for(uint32_t i=0; i<SCHD_NUM_PRIORITIES; i++)
 	{
 		//printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
+		//thread_node_t* dbg = (thread_node_t*)0xC0A04FFC;
+		//printf("dbg: %x\n", dbg->next);
 		thread_node_t* test_thread = dequeue_node(queues + i);
 		
 		if(test_thread)
@@ -77,10 +79,12 @@ thread_node_t* schd_get_empty_node()
 		memset((char*)empty_node, 0, end - (uint32_t)empty_node);
 		
 		//fit as many nodes into queue as possible from allocation
-		for(uint32_t i=1; empty_node + i < (thread_node_t*)end; i++)
+		for(uint32_t i=1; empty_node + i + 1 < (thread_node_t*)end; i++)
 		{
 			enqueue_node(&empty_node_queue, empty_node + i, 0);
 		}
+		//printf("tail: %x\n", empty_node_queue.tail);
+		//printf("tail->next: %x\n", empty_node_queue.tail->next);
 	}
 	//printf("Dequeued node: %x\r\n", empty_node);
 	

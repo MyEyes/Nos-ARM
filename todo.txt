@@ -7,3 +7,5 @@ to virtual memory seems very risky potentially if we are going to have more than
 -There should probably be a general ressource manager for kernel ressources held by threads/processes
 
 -Not sure how to handle files/streams yet. Through IPC message passing?
+
+-Allocating a whole page is tricky because the memory_area_t header will use up the first few bytes (Extra region for mmapped)
