@@ -38,6 +38,6 @@ uint32_t __plat_pg_get_entry(void* tbl_addr, void* virt_addr);
 uint32_t __plat_pg_tbl_maxentry();
 void __plat_pg_clear(void* tbl_addr, size_t mem);
 
-void* sys_pmap(void* phys_addr, size_t mem);
+void* sys_pmap();
 
 #endif

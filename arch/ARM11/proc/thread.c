@@ -34,6 +34,8 @@ uint32_t __plat_thread_getparam(thread_t* thread, uint32_t index)
 	//thread suspend pushes r0-r12 then spsr then lr
 	//so if we want parameter 0 aka r0, we read from the current sp-13+index
 	//r0 parameter 1 etc
+    //Is this right? Shouldn't we be using the kernels page table?
+    //It doesn't make sense to use the processes page table, since the threads state shouldn't be accessible to the process
 	uint32_t* phys_loc = PLATFORM_KERNEL_BASE + pg_get_phys(thread->proc->pg_tbl, thread->sp+(1+index)*sizeof(uint32_t));
 	return *phys_loc;
 }

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #define DEV_NAME_MAX_LENGTH 20
 #define DEV_TYPE_MAX_LENGTH 4

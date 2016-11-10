@@ -10,6 +10,7 @@
 
 #define PROC_KRES_LOC	0x80000
 #define PROC_KRES_SIZE	0x80000
+#define PROC_KRES_END   (PROC_KRES_LOC+PROC_KRES_SIZE)
 
 typedef struct
 {

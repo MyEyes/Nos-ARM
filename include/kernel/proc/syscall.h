@@ -24,5 +24,5 @@ void syscall_init();
 void syscall_set(syscall_id id, void* target);
 
 void* sys_dev_rq();
-
+void* sys_pmap();
 #endif
