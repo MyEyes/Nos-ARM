@@ -89,11 +89,38 @@ void __attribute__((naked)) panic_hnd()
 	);
 }
 
+void dabt_show_info(uint32_t lr, uint32_t addr, uint32_t fault)
+{
+	uint32_t fault_id = fault&0xF;
+	char* error_str;
+	switch(fault_id)
+	{
+		case 0: error_str = "Vector Exception"; break;
+		case 2: error_str = "Terminal Exception"; break;
+		case 1:
+		case 3: error_str = "Alignment Error"; break;
+		case 4: error_str = "SEC: Ext Abort LF"; break;
+		case 5: error_str = "SEC: Translation Error"; break;
+		case 6: error_str = "PG: Ext Abort LF"; break;
+		case 7: error_str = "PG: Translation Error"; break;
+		case 8: error_str = "SEC: Ext Abort NLF"; break;
+		case 9: error_str = "SEC: Domain Error"; break;
+		case 10: error_str = "PG: Ext Abort NLF"; break;
+		case 11: error_str = "PG: Domain Error"; break;
+		case 12: error_str = "PG: Ext Abort Trans1"; break;
+		case 13: error_str = "SEC: Permission error"; break;
+		case 14: error_str = "PG: Ext Abort Trans2"; break;
+		case 15: error_str = "PG: Permission error"; break;
+	}
+	printf("DABT: Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
+	printf("%s\n", error_str);
+	printf("DABT: u_pg_tbl: %x, %x->%x\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
+	printf("DABT: k_pg_tbl: %x, %x->%x\n", &kernel_page, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));	
+}
+
 void __attribute__((used)) dabt_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
 {
-	printf("DABT: Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
-	printf("DABT: u_pg_tbl: %x, %x->%x\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
-	printf("DABT: k_pg_tbl: %x, %x->%x\n", &kernel_page, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
+	dabt_show_info(lr, addr, fault);
 }
 
 void __attribute__((naked)) dabt_hnd()

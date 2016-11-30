@@ -13,5 +13,6 @@ int execve(const char *path, char *const argv[]);
 int execvp(const char *path, char *const argv[]);
 
 void* sbrk(size_t size);
+void* pmap(void* p_addr, void* v_addr, size_t mem);
 
 #endif

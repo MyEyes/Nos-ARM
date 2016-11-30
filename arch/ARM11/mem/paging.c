@@ -40,7 +40,10 @@ uint32_t* get_free_sld()
 	uint32_t* addr = (uint32_t*) mem_phys_find_free(1<<12);
 	//If we got an address we mark the region as used
 	if(addr)
+	{
 		mem_phys_set(addr, 1<<12);
+		//Physical address might not be mapped
+	}
 	#ifdef MEM_DBG_TBLS
 	printf("New sld at %x\r\n", addr);
 	#endif
@@ -106,6 +109,11 @@ void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, voi
 			else
 				sld_v[i] = sld_create_small_entry((void*)(s_base+(i<<12)), perm, caching, global, shared);
 		}
+		#ifdef MEM_DBG_TBLS
+		printf("last sld_v at %x with val %x\r\n",sld_v+255, sld_v[255]);
+		printf("test %x\r\n",*((uint32_t*)0x100063FC));
+		printf("Creating sld def at %x with dom %x\r\n", sld, domain);
+		#endif
 		*fld_entry_addr = fld_construct_sld(sld, domain);
 	}
 	//If the section isn't mapped at all
@@ -196,6 +204,7 @@ void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, 
 			}
 			else
 			{
+				printf("creating second level pagetable for %x\n", ((uint32_t*)fld_tbl)+i);
 				mem_create_sld(((uint32_t*)fld_tbl)+i, offset, len, (void*)phys_addr, domain, perm, caching, global, shared);
 			}
 		}
@@ -278,6 +287,7 @@ void* __plat_pg_get_phys(void* fld_tbl, void* virt_addr)
 	else if(FLD_IS_PGTBL(entry))
 	{
 		uint32_t* sld_tbl = (uint32_t*)(entry&FLD_PG_TBL_MASK);
+		sld_tbl = (uint32_t*)TO_KERNEL_ADDR_SPACE(sld_tbl);
 		uint32_t sld_index = u_addr - (fld_index<<20); //Get offset inside 1MB
 		sld_index >>= 12;							 //Get 4kb offset
 		uint32_t sld_entry = sld_tbl[sld_index];

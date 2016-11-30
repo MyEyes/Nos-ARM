@@ -40,7 +40,9 @@ void main(uint32_t tid)
 	*test_2 = 32;
 	
 	volatile char* dev = req_dev("bcm2385_uart0");
-    //volatile char* dev2 = (char*) pmap(0x20201000, 0x80000, 0x1000);
+	
+    volatile char* dev2 = (char*) pmap((void*)0x20201000, (void*)0x80000, 0x1000);
+	(void)dev2;
 	
 	puts("Hellooooo from Usermode\r\n", dev);
 	char c;
