@@ -2,17 +2,18 @@
 #include "kernel/mem/perm.h"
 #include "arch/ARM11/mem/cache.h"
 
-void fld_set(uint32_t* fld_addr, uint32_t value)
+void fld_set(v_addr_t fld_addr, uint32_t value)
 {
-	*fld_addr = value;
+	
+	*((uint32_t*)fld_addr) = value;
 }
 
-void fld_clear(void* fld_addr)
+void fld_clear(v_addr_t fld_addr)
 {
 	fld_set(fld_addr, 0);
 }
 
-uint32_t fld_construct_section(void* base_addr, char domain, char perm, char caching, char global, char shared)
+uint32_t fld_construct_section(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared)
 {
 	uint32_t fld = ((uint32_t)base_addr) & (FLD_SECTION_MASK);
 	fld |= (domain<<5);
@@ -31,13 +32,13 @@ uint32_t fld_construct_section(void* base_addr, char domain, char perm, char cac
 	return fld;
 }
 
-uint32_t fld_construct_sld(void* base_addr, char domain)
+uint32_t fld_construct_sld(p_addr_t base_addr, char domain)
 {
 	return ((((uint32_t)base_addr)&(FLD_PG_TBL_BASE_ADDR_MASK<<FLD_PG_TBL_BASE_ADDR_OFFSET)) | (domain<<5) | FLD_ENTRY_PG_TBL_BASE_ADDR);
 }
 
 //Identity map a region of physical memory
-uint32_t* create_flat_fld0(uint32_t* location, uint32_t* start_phys_addr, uint32_t* end_phys_addr)
+uint32_t* create_flat_fld0(v_addr_t location, uint32_t* start_phys_addr, uint32_t* end_phys_addr)
 {
 	//Mask start location to be aligned
 	uint32_t* startLoc = (uint32_t*)(((uint32_t)location)&FLD0_ADDR_MASK);
@@ -55,7 +56,7 @@ uint32_t* create_flat_fld0(uint32_t* location, uint32_t* start_phys_addr, uint32
 }
 
 //Identity map a region of physical memory
-uint32_t* create_flat_fld1(uint32_t* location, uint32_t* start_phys_addr, uint32_t* end_phys_addr)
+uint32_t* create_flat_fld1(v_addr_t location, uint32_t* start_phys_addr, uint32_t* end_phys_addr)
 {
 	//Mask start location to be aligned
 	uint32_t* startLoc = (uint32_t*)(((uint32_t)location)&FLD1_ADDR_MASK);

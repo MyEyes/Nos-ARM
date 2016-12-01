@@ -2,6 +2,7 @@
 #define __FLD_H__
 
 #include <stdint.h>
+#include <sys/types.h>
 #include __PLATFORM__
 
 //First level descriptor
@@ -39,13 +40,13 @@
 #define FLD_IS_PGTBL(u) ((u&0x3)==FLD_ENTRY_PG_TBL_BASE_ADDR)
 
 
-uint32_t* create_flat_fld0(uint32_t* location, uint32_t* start_phys_addr, uint32_t* end_phys_addr);
-uint32_t* create_flat_fld1(uint32_t* location, uint32_t* start_phys_addr, uint32_t* end_phys_addr);
+uint32_t* create_flat_fld0(v_addr_t location, uint32_t* start_phys_addr, uint32_t* end_phys_addr);
+uint32_t* create_flat_fld1(v_addr_t location, uint32_t* start_phys_addr, uint32_t* end_phys_addr);
 
-void fld_set(uint32_t* fld_addr, uint32_t value);
-void fld_clear(void* fld_addr);
-uint32_t fld_construct_section(void* base_addr, char domain, char perm, char caching, char global, char shared);
-uint32_t fld_construct_sld(void* base_addr, char domain);
+void fld_set(v_addr_t fld_addr, uint32_t value);
+void fld_clear(v_addr_t fld_addr);
+uint32_t fld_construct_section(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared);
+uint32_t fld_construct_sld(p_addr_t base_addr, char domain);
 
 
 

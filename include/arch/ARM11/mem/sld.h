@@ -2,6 +2,7 @@
 #define __SLD_H__
 
 #include <stdint.h>
+#include <sys/types.h>
 
 #define SLD_TYPE_LARGE_PAGE 1
 #define SLD_TYPE_SMALL_PAGE 2
@@ -27,6 +28,6 @@
 
 #define SLD_SMALL_ADDR_MASK (((1<<20)-1)<<12)
 
-uint32_t sld_create_small_entry(void* phys_addr, char perm, char caching, char global, char shared);
+uint32_t sld_create_small_entry(p_addr_t phys_addr, char perm, char caching, char global, char shared);
 	
 #endif

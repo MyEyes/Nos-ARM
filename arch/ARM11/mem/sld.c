@@ -3,7 +3,7 @@
 #include "arch/ARM11/mem/cache.h"
 
 
-uint32_t sld_create_small_entry(void* phys_addr, char perm, char caching, char global, char shared)
+uint32_t sld_create_small_entry(p_addr_t phys_addr, char perm, char caching, char global, char shared)
 {
 	uint32_t u_addr = (uint32_t) phys_addr;
 	u_addr &= SLD_SMALL_ADDR_MASK;

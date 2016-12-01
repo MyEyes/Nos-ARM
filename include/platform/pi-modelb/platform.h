@@ -3,7 +3,7 @@
 #include "platform/pi-modelb/int.h"
 #include "platform/pi-modelb/clock.h"
 #include "platform/pi-modelb/bus.h"
-#include "platform/arm-common.h"
+#include "arch/ARM11/arch.h"
 
 #define GPIO_BASE_ADDR 0x20200000
 #define UART0_BASE_ADDR 0x20201000
