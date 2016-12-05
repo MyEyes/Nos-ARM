@@ -344,3 +344,43 @@ uint32_t __plat_pg_tbl_maxentry()
 {
 	return 1<<20;
 }
+
+pg_fld_t __plat_fld_big(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared)
+{
+	return (pg_fld_t) fld_construct_section(base_addr, domain, perm, caching, global, shared);
+}
+
+int __plat_is_big_page(pg_fld_t desc)
+{
+	return FLD_IS_SECTION(desc);
+}
+
+int __plat_get_fld_parms(pg_fld_t desc, p_addr_t* addr, char* domain, char* perm, char* caching, char* global, char* shared)
+{
+	if(!desc)
+		return -1;
+	*addr = desc & FLD_SECTION_MASK;
+	*domain = desc & 
+		fld |= (domain<<5);
+	/*
+	fld |= FLD_ENTRY_SECTION_BASE_ADDR;
+	//Set permissions
+	fld |= PERM_NX(perm)<<FLD_ENTRY_XN_OFFSET; //Set NX bit if in perm
+	fld |= PERM_AP(perm)<<FLD_ENTRY_AP_OFFSET;
+	fld |= PERM_APX(perm)<<FLD_ENTRY_APX_OFFSET;
+	//Set caching
+	fld |= CACHE_TEX(caching)<<FLD_ENTRY_TEX_OFFSET;
+	fld |= CACHE_C(caching)<<FLD_ENTRY_C_OFFSET;
+	fld |= CACHE_B(caching)<<FLD_ENTRY_B_OFFSET;
+	//Set global and shared flags
+	fld |= global?0:1<<FLD_ENTRY_NG_OFFSET; //Since the flag is actually NG(not global)
+	fld |= shared?1<<FLD_ENTRY_S_OFFSET:0;
+	*/
+	return 0;
+}
+#endif
+
+pg_fld_t __plat_fld_create(pg_sld_t* desc_addr, char domain, char perm, char caching, char global, char shared);
+pg_sld_t* __plat_sld_of_fld(pg_fld_t fld);
+pg_sld_t __plat_sld_create(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared);
+p_addr_t __plat_get_sld_addr(pg_sld_t sld);

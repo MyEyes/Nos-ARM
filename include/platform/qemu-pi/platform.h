@@ -3,7 +3,7 @@
 #include "platform/qemu-pi/clock.h"
 #include "platform/qemu-pi/bus.h"
 #include "platform/qemu-pi/int.h"
-#include "platform/arm-common.h"
+#include "arch/ARM11/arch.h"
 
 #define PERIPHERALS_LOW_ADDR 0x20000000		
 

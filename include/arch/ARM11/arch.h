@@ -20,8 +20,8 @@
 #define __DEV_MAP
 
 //Defined so we know the width of descriptors
-typedef uint32_t pg_fo_desc_t;
-typedef uint32_t pg_so_desc_t;
+typedef uint32_t pg_fld_t;
+typedef uint32_t pg_sld_t;
 
 #define PLATFORM_HAS_BIG_PAGES	//We can map memory with just a first order descriptor
 #define BIG_PAGE_SIZE 	(1<<20)	//The resolution of that is 1MB
