@@ -27,4 +27,4 @@ typedef uint32_t pg_sld_t;
 #define BIG_PAGE_SIZE 	(1<<20)	//The resolution of that is 1MB
 #define PAGE_SIZE		(1<<12) //The resolution of second level descriptors is 4kb so we have 256 second level
 								//descriptors under each first order that isn't big
-#define SO_PAGES		256
+#define SO_PAGES		(BIG_PAGE_SIZE/PAGE_SIZE)

@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "kernel/mem/paging.h"
 #include "kernel/proc/thread.h"
+//#define DBG_SCHD
 
 thread_queue_t queues[SCHD_NUM_PRIORITIES];
 thread_queue_t empty_node_queue;
@@ -38,7 +39,9 @@ void schd_chg_thread()
 	
 	for(uint32_t i=0; i<SCHD_NUM_PRIORITIES; i++)
 	{
-		//printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
+		#ifdef DBG_SCHD
+		printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
+		#endif
 		//thread_node_t* dbg = (thread_node_t*)0xC0A04FFC;
 		//printf("dbg: %x\n", dbg->next);
 		thread_node_t* test_thread = dequeue_node(queues + i);
@@ -65,7 +68,9 @@ void schd_term()
 void schd_add_thread(thread_t* thread)
 {
 	thread_node_t* empty_node = schd_get_empty_node();
-	//printf("Adding thread %x to queue %x\r\n",thread->tid, thread->priority);
+	#ifdef DBG_SCHD
+	printf("Adding thread %x to queue %x\r\n",thread->tid, thread->priority);
+	#endif
 	enqueue_node(queues + thread->priority, empty_node, thread);
 }
 
@@ -83,10 +88,14 @@ thread_node_t* schd_get_empty_node()
 		{
 			enqueue_node(&empty_node_queue, empty_node + i, 0);
 		}
-		//printf("tail: %x\n", empty_node_queue.tail);
-		//printf("tail->next: %x\n", empty_node_queue.tail->next);
+		#ifdef DBG_SCHD
+		printf("tail: %x\n", empty_node_queue.tail);
+		printf("tail->next: %x\n", empty_node_queue.tail->next);
+		#endif
 	}
-	//printf("Dequeued node: %x\r\n", empty_node);
+	#ifdef DBG_SCHD
+	printf("Dequeued node: %x\r\n", empty_node);
+	#endif
 	
 	return empty_node;
 }

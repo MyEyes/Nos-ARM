@@ -7,6 +7,8 @@
 #include "kernel/mem/mem.h"
 #include "kernel/mem/cache.h"
 
+//#define DBG_THREADS
+
 thread_t kern_thread;
 
 thread_t* curr_thread;
@@ -49,12 +51,16 @@ void thread_ready(thread_t* thread)
 
 void thread_change(thread_t* thread)
 {
-	//printf("Switching to thread %x\r\n", thread->tid);
-	//printf("sp=%x\tpc=%x\r\n", thread->sp, thread->pc);
+	#ifdef DBG_THREADS
+	printf("Switching to thread %x\r\n", thread->tid);
+	printf("sp=%x\tpc=%x\r\n", thread->sp, thread->pc);
+	#endif
 	
 	if(curr_thread->proc->pg_tbl!=thread->proc->pg_tbl)
 	{
-		//printf("Setting pagetable to %x\r\n", pg_get_phys(&kernel_page, thread->proc->pg_tbl->addr));
+		#ifdef DBG_THREADS
+		printf("Setting pagetable to %x\r\n", pg_get_phys(&kernel_page, thread->proc->pg_tbl->addr));
+		#endif
 		mmu_set_user_pgtbl(pg_get_phys(&kernel_page, thread->proc->pg_tbl->addr));
 	}
 	

@@ -148,7 +148,11 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 	{
 		uint32_t (*syscall)() = syscall_tbl[swi_num];
 		if(syscall)
-			__plat_thread_setparam(curr_thread, 1, syscall());
+		{
+			uint32_t ret = syscall();
+			printf("Returning: %x\r\n", ret);
+			__plat_thread_setparam(curr_thread, 1, ret);
+		}
 		else
 			printf("No associated syscall with swi %x\r\n", swi_num);
 	}

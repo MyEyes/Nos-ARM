@@ -7,6 +7,8 @@
 #include "kernel/mem/perm.h"
 #include "kernel/mem/mem.h"
 
+//#define MEM_DBG_TBLS
+
 pg_tbl_t kernel_page;
 pg_tbl_t user_page;
 uint32_t pg_initialized = 0;
@@ -40,6 +42,54 @@ void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem)
 	tbl->size = mem;
 	uint32_t pages = mem/BIG_PAGE_SIZE;
 	memset((char*)tbl->addr, 0, pages*sizeof(pg_fld_t));
+}
+
+uint32_t* pg_get_sld()
+{
+	for(uint32_t i=0; i<SLD_CACHE_SIZE; i++)
+	{
+		//If there is a free sld to use
+		if(free_slds[i])
+		{
+			
+			#ifdef MEM_DBG_TBLS
+				printf("Found free sld: %x\r\n", free_slds[i]);
+			#endif
+			return free_slds[i];
+		}
+	}
+	#ifdef MEM_DBG_TBLS
+		printf("No free sld found\r\n");
+	#endif
+	uint32_t* addr = (uint32_t*) mem_phys_find_free(1<<12);
+	//If we got an address we mark the region as used
+	if(addr)
+	{
+		mem_phys_set(addr, SO_PAGES*sizeof(pg_sld_t));
+		//Physical address might not be mapped
+	}
+	#ifdef MEM_DBG_TBLS
+	printf("New sld at %x\r\n", addr);
+	#endif
+	return (uint32_t*)addr;
+}
+
+void pg_free_sld(uint32_t* sld)
+{
+	#ifdef MEM_DBG_TBLS
+	printf("Sld at %x returned\r\n", sld);
+	#endif
+	for(uint32_t i=0; i<SLD_CACHE_SIZE; i++)
+	{
+		if(free_slds[i]==0)
+		{
+			free_slds[i] = sld;
+			return;
+		}
+	}
+	//If the buffer already contains the maximum amount of slds we want to cache
+	//We just mark the physical memory as free
+	mem_phys_clear(sld, SO_PAGES*sizeof(pg_sld_t));
 }
 
 void pg_free(pg_fld_t* fld)
@@ -76,38 +126,93 @@ int pg_map_secondary(pg_fld_t* fld, v_addr_t virt_addr, p_addr_t phys_addr, size
 	}
 	#endif
 	
+	//If the page isn't mapped yet we just map it
 	if(!*fld)
 	{
 		sld = pg_get_sld();
+		//If we can't allocate a second level descriptor we error out
+		if(!sld)
+			return -1;
 		*fld = __plat_fld_create(sld, domain, perm, caching, global, shared);
 	}
 	else
+	{
 		sld = __plat_sld_of_fld(*fld);
+		//If fetching the sld failed we error out
+		if(!sld)
+			return -1;
+	}
+	sld = (pg_sld_t*)TO_KERNEL_ADDR_SPACE(sld);
+	#ifdef MEM_DBG_TBLS
+	printf("v_addr: %x, mem: %x\r\n", v_addr, mem);
+	#endif
+	//Find out the offsets inside the slds that we need to map
+	uint32_t start = (v_addr & (BIG_PAGE_SIZE - 1))/PAGE_SIZE;
+	uint32_t num = ((mem+PAGE_SIZE-1))/PAGE_SIZE;
+	if(num+start>SO_PAGES)
+		num = SO_PAGES-start;
+	#ifdef MEM_DBG_TBLS
+	printf("Mapping to %x\r\n", phys_addr);
+	printf("Start: %x, Num: %x\r\n", start, num);
+	#endif
+	for(uint32_t i = start; i<start+num; i++)
+		sld[i] = __plat_sld_create(phys_addr + (i-start)*PAGE_SIZE, domain, perm, caching, global, shared);
+	return 0;
+}
+
+int pg_unmap_secondary(pg_fld_t* fld, v_addr_t virt_addr, size_t mem)
+{
+	pg_sld_t* sld = (pg_sld_t*)0;
+	uint32_t v_addr = (uint32_t) virt_addr;
+	
+	#ifdef PLATFORM_HAS_BIG_PAGES
+	if(__plat_is_big_page(*fld))
+	{
+		p_addr_t rphys;
+		char rd;
+		char rp;
+		char rc;
+		char rg;
+		char rs;
+		__plat_get_fld_parms(*fld, &rphys, &rd, &rp, &rc, &rg, &rs);
+		*fld = 0;
+		//Mapping from zero, cause we only care about the virtual address bits below PAGE_SIZE
+		//And we want to map the whole page
+		pg_map_secondary(fld, 0, rphys, BIG_PAGE_SIZE, rd, rp, rc, rg, rs);
+		//After return, *fld will be set to be an sld page
+	}
+	#endif
+	
+	//If the page isn't mapped yet we're done
+	if(!*fld)
+	{
+		return 0;
+	}
+	else
+	{
+		sld = __plat_sld_of_fld(*fld);
+		//If fetching the sld failed we error out
+		if(!sld)
+			return -1;
+	}
 	
 	//Find out the offsets inside the slds that we need to map
 	uint32_t start = (v_addr & ~(PAGE_SIZE - 1))/PAGE_SIZE;
 	uint32_t end = ((v_addr+mem+PAGE_SIZE-1) & ~(PAGE_SIZE - 1))/PAGE_SIZE;
 	
 	for(uint32_t i = start; i<end; i++)
-		sld[i] = __plat_sld_create(phys_addr + i*PAGE_SIZE, domain, perm, caching, global, shared);
+		sld[i] = 0;
 	return 0;
 }
 
 int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
-{
-	/*
-	if((uint32_t)virt_addr+mem > tbl->size && tbl->size)
-	{
-		return -1;
-	}
-	__plat_pg_map(tbl->addr, virt_addr, phys_addr, mem, domain, perm, caching, global, shared);
-	return 0;
-	*/
-	
+{	
 	if((uint32_t)virt_addr+mem > tbl->size && tbl->size)
 		return -1;
 	
 	pg_fld_t* flds = tbl->addr;
+	//fld_t	|fld_t|fld_t
+	//MEM	|sld_t
 	
 	size_t u_addr = (size_t) virt_addr;				//virtual address start cast as uint
 	size_t e_addr = (u_addr + mem);					//virtual address end
@@ -115,7 +220,7 @@ int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, ch
 	size_t fld_end =  (e_addr-1) / BIG_PAGE_SIZE;		//last first level descriptor
 	
 	size_t start_virt = fld_start*BIG_PAGE_SIZE;						//starting v_address of current descriptor
-	size_t p_address = ((size_t)phys_addr) & ~(BIG_PAGE_SIZE-1);	//big page aligned physical address
+	size_t p_address = ((size_t)phys_addr) & ~(PAGE_SIZE-1);	//big page aligned physical address
 	
 	//Be ready to modify all the first level descriptors we need to touch
 	for(uint32_t i = fld_start; i<=fld_end; i++, p_address+=BIG_PAGE_SIZE, start_virt+=BIG_PAGE_SIZE)
@@ -129,11 +234,20 @@ int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, ch
 			v_addr_t s = (v_addr_t) start_virt;
 			v_addr_t e = (v_addr_t) start_virt + BIG_PAGE_SIZE;
 			if((size_t)s < u_addr)
+			{
 				s = (v_addr_t)u_addr;
-			if(e_addr < (size_t)e)
+			}
+			if(e_addr < (size_t)e || !e)
 				e = (v_addr_t)e_addr;
 			//Map a secondary page table with the correct start and end address
-			pg_map_secondary(flds + i, s, (p_addr_t)p_address, e-s, domain, perm, caching, global, shared);
+			#ifdef MEM_DBG_TBLS
+			printf("Mapping secondary page: %x -> %x\r\n", s, p_address);
+			printf("Range: %x-%x:%x\r\n", s, e, e-s);
+			#endif
+			int ret = pg_map_secondary(flds + i, s, (p_addr_t)p_address, e-s, domain, perm, caching, global, shared);
+			//If mapping any page here fails we return -1
+			if(ret == -1)
+				return -1;
 		#ifdef PLATFORM_HAS_BIG_PAGES
 		}
 		else
@@ -149,11 +263,53 @@ int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, ch
 	return 0;
 }
 
-
-void pg_unmap(pg_tbl_t* tbl, v_addr_t virt_addr, size_t mem)
-{
-	if((uint32_t)virt_addr+mem <= tbl->size || !tbl->size)
-		__plat_pg_unmap(tbl->addr, virt_addr, mem);
+int pg_unmap(pg_tbl_t* tbl, v_addr_t virt_addr, size_t mem)
+{	
+	if((uint32_t)virt_addr+mem > tbl->size && tbl->size)
+		return -1;
+	
+	pg_fld_t* flds = tbl->addr;
+	
+	size_t u_addr = (size_t) virt_addr;				//virtual address start cast as uint
+	size_t e_addr = (u_addr + mem);					//virtual address end
+	size_t fld_start = u_addr / BIG_PAGE_SIZE;		//starting first level descriptor
+	size_t fld_end =  (e_addr-1) / BIG_PAGE_SIZE;		//last first level descriptor
+	
+	size_t start_virt = fld_start*BIG_PAGE_SIZE;						//starting v_address of current descriptor
+	
+	//Be ready to modify all the first level descriptors we need to touch
+	for(uint32_t i = fld_start; i<=fld_end; i++, start_virt+=BIG_PAGE_SIZE)
+	{
+		#ifdef PLATFORM_HAS_BIG_PAGES
+		//If we are not mapping the full page
+		if(start_virt<u_addr || e_addr<start_virt+BIG_PAGE_SIZE)
+		{
+		#endif
+			//Figure out the correct start and end address
+			v_addr_t s = (v_addr_t) start_virt;
+			v_addr_t e = (v_addr_t) start_virt + BIG_PAGE_SIZE;
+			if((size_t)s < u_addr)
+				s = (v_addr_t)u_addr;
+			if(e_addr < (size_t)e)
+				e = (v_addr_t)e_addr;
+			//unmap a secondary page table with the correct start and end address
+			int ret = pg_unmap_secondary(flds + i, s,  e-s);
+			//If mapping any page here fails we return -1
+			if(ret == -1)
+				return -1;
+		#ifdef PLATFORM_HAS_BIG_PAGES
+		}
+		else
+		{
+			//If this page was mapped we need to clean it up
+			if(flds[i])
+				pg_free(flds + i);
+			//otherwise unmap the whole large page
+			flds[i] = 0;
+		}
+		#endif
+	}
+	return 0;
 }
 
 void* pg_get_phys(pg_tbl_t* tbl, v_addr_t virt_addr)

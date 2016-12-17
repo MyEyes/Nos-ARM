@@ -24,7 +24,6 @@ void mem_phys_init(size_t total_mem)
 void mem_phys_reset()
 {
 	memset((char*)desc_tbl, 0, num_descs*sizeof(desc_tbl));
-	mem_plat_init();
 }
 
 void mem_phys_set(void* phys_addr, size_t mem)

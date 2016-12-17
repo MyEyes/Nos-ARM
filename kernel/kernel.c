@@ -107,8 +107,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	thread_t* test_thread = malloc(sizeof(thread_t));
 	
-	
-	
 	thread_init(test_thread, test_proc, (char*)0x100000, (char*)0x100000-0x8000, (char*)0x100000, 1, 0);
 	
 	thread_ready(test_thread);

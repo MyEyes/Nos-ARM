@@ -28,6 +28,7 @@ void syscall_set(syscall_id_t id, void* trg)
 
 void* sys_pmap()
 {
+	printf("Doing pmap!\r\n");
     p_addr_t phys_addr = (p_addr_t)__plat_thread_getparam(curr_thread, 1);
     v_addr_t virt = (v_addr_t)__plat_thread_getparam(curr_thread, 2);
     size_t mem = (size_t) __plat_thread_getparam(curr_thread, 3);
@@ -46,13 +47,15 @@ void* sys_pmap()
 
 void* sys_dev_rq()
 {
+	printf("Doing dev_rq!\r\n");
 	char* dev_name = (char*)__plat_thread_getparam(curr_thread, 1);
 	dev_t* dev = devmap_get_dev(dev_name);
 	if(dev)
 	{
 		uint32_t virt_s = curr_thread->proc->brk;
+		printf("Trying to map %x to %x\r\n", virt_s, dev->addr);
 		pg_map(curr_thread->proc->pg_tbl, (void*)virt_s, (void*)dev->addr, 4096, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 1);
-	
+		printf("Phys: %x", pg_get_phys(curr_thread->proc->pg_tbl, (void*) virt_s));
 		void* old_brk = (void*)curr_thread->proc->brk;
 		curr_thread->proc->brk = virt_s + 4096;
 		return old_brk;

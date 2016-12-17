@@ -16,7 +16,7 @@
 #include "kernel/mod/kernel_uart.h"
 #include __PLATFORM__
 
-//#define INIT_DEBUG
+#define INIT_DEBUG
 
 extern char* __start;
 
@@ -79,8 +79,6 @@ void kernel_init()
 #ifdef INIT_DEBUG	
 	printf("MMU enabled\r\n");
 #endif
-	
-
 
 	#ifdef INIT_DEBUG
 	printf("Setting up interrupt handlers\r\n");

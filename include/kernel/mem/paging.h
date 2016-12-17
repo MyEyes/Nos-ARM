@@ -17,6 +17,11 @@
 #if !PAGE_SIZE || (PAGE_SIZE & (PAGE_SIZE - 1)) != 0
 	#error PAGE_SIZE is not a power of 2
 #endif
+//Check that BIG_PAGE_SIZE is a power of two
+#if !BIG_PAGE_SIZE || (BIG_PAGE_SIZE & (BIG_PAGE_SIZE - 1)) != 0
+	#error BIG_PAGE_SIZE is not a power of 2
+#endif
+
 
 typedef struct
 {
@@ -33,7 +38,7 @@ void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem);
 
 int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
 int pg_map_secondary(pg_fld_t* fld, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
-void pg_unmap(pg_tbl_t* tbl, v_addr_t virt_addr, size_t mem);
+int pg_unmap(pg_tbl_t* tbl, v_addr_t virt_addr, size_t mem);
 void* pg_get_phys(pg_tbl_t* tbl, v_addr_t virt_addr);
 uint32_t pg_get_entry(pg_tbl_t* tbl, v_addr_t virt_addr);
 
@@ -41,8 +46,8 @@ void pg_free(pg_fld_t* fld);
 void pg_free_sld(pg_sld_t* sld);
 pg_sld_t* pg_get_sld();
 
-void __plat_pg_map(void* tbl_addr, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
-void __plat_pg_unmap(void* tbl_addr, v_addr_t virt_addr, size_t mem);
+//void __plat_pg_map(void* tbl_addr, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared);
+//void __plat_pg_unmap(void* tbl_addr, v_addr_t virt_addr, size_t mem);
 void* __plat_pg_get_phys(void* tbl_addr, v_addr_t virt_addr);
 void* __plat_pg_get_kern(void* tbl_addr, v_addr_t virt_addr);
 uint32_t __plat_pg_get_entry(void* tbl_addr, v_addr_t virt_addr);

@@ -13,270 +13,6 @@
 #include "kernel/mod/kernel_uart.h"
 //#endif
 
-uint32_t* free_slds[MEM_SLD_CACHE_SIZE];
-
-void mem_plat_init()
-{
-	for(uint32_t i=0; i<MEM_SLD_CACHE_SIZE; i++) free_slds[i] = 0;
-}
-
-uint32_t* get_free_sld()
-{
-	for(uint32_t i=0; i<MEM_SLD_CACHE_SIZE; i++)
-	{
-		//If there is a free sld to use
-		if(free_slds[i])
-		{
-			
-			#ifdef MEM_DBG_TBLS
-				printf("Found free sld: %x\r\n", free_slds[i]);
-			#endif
-			return free_slds[i];
-		}
-	}
-	#ifdef MEM_DBG_TBLS
-		printf("No free sld found\r\n");
-	#endif
-	uint32_t* addr = (uint32_t*) mem_phys_find_free(1<<12);
-	//If we got an address we mark the region as used
-	if(addr)
-	{
-		mem_phys_set(addr, 1<<12);
-		//Physical address might not be mapped
-	}
-	#ifdef MEM_DBG_TBLS
-	printf("New sld at %x\r\n", addr);
-	#endif
-	return (uint32_t*)addr;
-}
-
-void free_sld(uint32_t* sld)
-{
-	#ifdef MEM_DBG_TBLS
-	printf("Sld at %x returned\r\n", sld);
-	#endif
-	for(uint32_t i=0; i<MEM_SLD_CACHE_SIZE; i++)
-	{
-		if(free_slds[i]==0)
-		{
-			free_slds[i] = sld;
-			return;
-		}
-	}
-	//If the buffer already contains the maximum amount of slds we want to cache
-	//We just mark the physical memory as free
-	mem_phys_clear(sld, 1<<12);
-}
-
-void mem_create_sld(uint32_t* fld_entry_addr, uint32_t offset, uint32_t len, void* phys_base, char domain, char perm, char caching, char global, char shared)
-{
-	uint32_t entry = *fld_entry_addr;
-	#ifdef MEM_DBG_TBLS
-	printf("Creating sld at fld_entry %x\r\n", fld_entry_addr);
-	#endif
-	//This routine should never be called on a pagetbl
-	if(FLD_IS_PGTBL(entry))
-		return;
-	uint32_t s_index = offset>>12;
-	uint32_t e_index = (offset+len-1)>>12;
-	uint32_t p_base = (uint32_t)phys_base;
-	
-	#ifdef MEM_DBG_TBLS
-	printf("\ts_index %x\r\n", s_index);
-	printf("\te_index %x\r\n", e_index);
-	#endif
-	
-	uint32_t* sld = get_free_sld();
-	uint32_t* sld_v = (uint32_t*)TO_KERNEL_ADDR_SPACE(sld);
-	
-	if(FLD_IS_SECTION(entry))
-	{
-		uint32_t s_base = (entry & FLD_SECTION_MASK);
-		
-		#ifdef MEM_DBG_TBLS
-		printf("FLD was section\r\n");
-		uart_puthex((uint32_t)s_base);
-		uart_puts("\r\n");
-		uart_puthex(s_index);
-		uart_puts("\r\n");
-		uart_puthex(e_index);
-		uart_puts("\r\n\r\n");
-		#endif
-		for(uint32_t i = 0; i<256; i++)
-		{
-			if(s_index<=i && i<=e_index)
-				sld_v[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
-			else
-				sld_v[i] = sld_create_small_entry((void*)(s_base+(i<<12)), perm, caching, global, shared);
-		}
-		#ifdef MEM_DBG_TBLS
-		printf("last sld_v at %x with val %x\r\n",sld_v+255, sld_v[255]);
-		printf("test %x\r\n",*((uint32_t*)0x100063FC));
-		printf("Creating sld def at %x with dom %x\r\n", sld, domain);
-		#endif
-		*fld_entry_addr = fld_construct_sld(sld, domain);
-	}
-	//If the section isn't mapped at all
-	else
-	{
-		#ifdef MEM_DBG_TBLS
-		uart_puts("FLD was unmapped\r\n");
-		#endif
-		for(uint32_t i = 0; i<256; i++)
-		{
-			if(s_index<=i && i<=e_index)
-				sld_v[i] = sld_create_small_entry((void*)(p_base+((i-s_index)<<12)), perm, caching, global, shared);
-			else
-				sld_v[i] = 0;
-		}
-		*fld_entry_addr = fld_construct_sld(sld, domain);
-	}
-}
-
-void __plat_pg_map(void* fld_tbl, void* virt_addr, void* phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
-{	
-	uint32_t u_addr = (uint32_t) virt_addr;
-	uint32_t e_addr = (u_addr + mem);
-	uint32_t fld_start = u_addr >> 20;
-	uint32_t fld_end =  (e_addr-1) >> 20;
-	uint32_t p_addr = ((uint32_t)phys_addr) & (((1<<12)-1)<<20);
-	
-	#ifdef MEM_DBG_TBLS
-	uart_puts("uaddr ");
-	uart_puthex(u_addr);
-	uart_puts("\r\n");
-	uart_puts("fld_start ");
-	uart_puthex(fld_start);
-	uart_puts("\r\n");
-	uart_puts("fld_end ");
-	uart_puthex(fld_end);
-	uart_puts("\r\n");
-	#endif
-	
-	fld_tbl = __plat_pg_get_kern(fld_tbl,fld_tbl);
-	
-	for(uint32_t i = fld_start; i<=fld_end; i++, p_addr+=1<<20)
-	{
-		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
-		uint32_t sec_addr = i<<20;
-			
-		uint32_t offset = u_addr-sec_addr;
-		if(u_addr<sec_addr) offset = 0;
-		
-		uint32_t len = e_addr-sec_addr;
-		if(len>(1<<20)) len = 1<<20;
-		len -= offset;
-				
-		//If we are mapping the whole MB
-		if(offset == 0 && len == 1<<20)
-		{
-			if(FLD_IS_PGTBL(fld_entry))
-				free_sld((uint32_t*)(fld_entry & FLD_PG_TBL_MASK));
-			((uint32_t*)fld_tbl)[i] = fld_construct_section((void*)p_addr, domain, perm, caching, global, shared);
-		}
-		//otherwise we need to create a second level page table
-		//if it was a section before we need to transfer all of those values over
-		//if it was unmapped before we can just map the stuff we wanted before
-		//if it's a page table we just set the corresponding values
-		else
-		{
-			#ifdef MEM_DBG_TBLS
-				uart_puts("i ");
-				uart_puthex(i);
-				uart_puts("\r\n");
-				uart_puts("offset ");
-				uart_puthex(offset);
-				uart_puts("\r\n");
-				uart_puts("len ");
-				uart_puthex(len);
-				uart_puts("\r\n");
-			#endif
-			if(FLD_IS_PGTBL(fld_entry))
-			{
-				uint32_t* sld_tbl = (uint32_t*)TO_KERNEL_ADDR_SPACE(fld_entry&FLD_PG_TBL_MASK);	
-				uint32_t sld_start = offset>>12;
-				uint32_t sld_end = (offset+len-1)>>12;
-			
-				for(uint32_t j = sld_start; j<=sld_end; j++)
-				{
-					sld_tbl[j] = sld_create_small_entry((void*)(phys_addr+((j-sld_start)<<12)), perm, caching, global, shared);
-				}
-			}
-			else
-			{
-				printf("creating second level pagetable for %x\n", ((uint32_t*)fld_tbl)+i);
-				mem_create_sld(((uint32_t*)fld_tbl)+i, offset, len, (void*)phys_addr, domain, perm, caching, global, shared);
-			}
-		}
-	}
-}
-
-void __plat_pg_unmap(void* fld_tbl, void* virt_addr, size_t mem)
-{	
-	uint32_t u_addr = (uint32_t) virt_addr;
-	uint32_t e_addr = (u_addr + mem);
-	uint32_t fld_start = u_addr >> 20;
-	uint32_t fld_end =  (e_addr-1) >> 20;
-	
-	fld_tbl = __plat_pg_get_kern(fld_tbl,fld_tbl);
-		
-	for(uint32_t i = fld_start; i<=fld_end; i++)
-	{
-		uint32_t fld_entry = ((uint32_t*)fld_tbl)[i];
-		uint32_t sec_addr = i<<20;
-			
-		int32_t offset = u_addr-sec_addr;
-		if(offset<0) offset = 0;
-		
-		int32_t len = e_addr-sec_addr;
-		if(len>(1<<20)) len = 1<<20;
-		len -= offset;
-				
-		//If we are unmapping the whole MB
-		if(offset == 0 && len == 1<<20)
-		{
-			if(FLD_IS_PGTBL(fld_entry))
-				free_sld((uint32_t*)(fld_entry & FLD_PG_TBL_MASK));
-			((uint32_t*)fld_tbl)[i] = 0;
-		}
-		//otherwise we need to create a second level page table
-		//if it was a section before we need to transfer all of those values over
-		//if it is already a table we just set the values
-		//If it isn't mapped there is nothing to unmap
-		else
-		{
-			if(FLD_IS_PGTBL(fld_entry))
-			{
-				uint32_t* sld_tbl = (uint32_t*)TO_KERNEL_ADDR_SPACE(fld_entry&(FLD_PG_TBL_MASK));	
-				uint32_t sld_start = offset>>12;
-				uint32_t sld_end = (offset+len-1)>>12;
-			
-				for(uint32_t j = sld_start; j<=sld_end; j++)
-					sld_tbl[j] = 0;
-			}
-			else if(FLD_IS_SECTION(fld_entry))
-			{
-				//should map with fld entries attributes instead of 0
-				mem_create_sld((uint32_t*)fld_tbl+i, offset, len, (void*)0, 0, 0, 0, 0, 0);
-				uint32_t* sld_tbl = (uint32_t*)(((uint32_t*)fld_tbl)[i]&FLD_PG_TBL_MASK);
-				uint32_t sld_start = offset>>12;
-				uint32_t sld_end = (offset+len-1)>>12;
-				#ifdef MEM_DBG_TBLS
-				uart_puts("Entries SLD at ");
-				uart_puthex((uint32_t)sld_tbl);
-				uart_puts("\r\n");
-				uart_puthex(sld_start);
-				uart_puts("\r\n");
-				uart_puthex(sld_end);
-				uart_puts("\r\n\r\n");
-				#endif
-				for(uint32_t j = sld_start; j<=sld_end; j++)
-					sld_tbl[j] = 0;
-			}
-		}
-	}
-}
-
 void* __plat_pg_get_phys(void* fld_tbl, void* virt_addr)
 {
 	uint32_t u_addr = (uint32_t) virt_addr;
@@ -359,28 +95,49 @@ int __plat_get_fld_parms(pg_fld_t desc, p_addr_t* addr, char* domain, char* perm
 {
 	if(!desc)
 		return -1;
-	*addr = desc & FLD_SECTION_MASK;
-	*domain = desc & 
-		fld |= (domain<<5);
-	/*
-	fld |= FLD_ENTRY_SECTION_BASE_ADDR;
-	//Set permissions
-	fld |= PERM_NX(perm)<<FLD_ENTRY_XN_OFFSET; //Set NX bit if in perm
-	fld |= PERM_AP(perm)<<FLD_ENTRY_AP_OFFSET;
-	fld |= PERM_APX(perm)<<FLD_ENTRY_APX_OFFSET;
-	//Set caching
-	fld |= CACHE_TEX(caching)<<FLD_ENTRY_TEX_OFFSET;
-	fld |= CACHE_C(caching)<<FLD_ENTRY_C_OFFSET;
-	fld |= CACHE_B(caching)<<FLD_ENTRY_B_OFFSET;
-	//Set global and shared flags
-	fld |= global?0:1<<FLD_ENTRY_NG_OFFSET; //Since the flag is actually NG(not global)
-	fld |= shared?1<<FLD_ENTRY_S_OFFSET:0;
-	*/
+	*addr = (p_addr_t)(desc & FLD_SECTION_MASK);
+	*domain = (desc >> FLD_ENTRY_DOMAIN_OFFSET) & FLD_ENTRY_DOMAIN_MASK;
+	//fld |= (domain<<5);
+		
+	char nx = (desc >> FLD_ENTRY_XN_OFFSET) & 1;
+	char ap = (desc >> FLD_ENTRY_AP_OFFSET) & 3;
+	char apx = (desc >> FLD_ENTRY_APX_OFFSET) & 1;
+	
+	*perm = (nx<<3) | (apx<<2) | ap;
+	
+	char tex = (desc >> FLD_ENTRY_TEX_OFFSET) & 7;
+	char c = (desc >> FLD_ENTRY_C_OFFSET) & 1;
+	char b = (desc >> FLD_ENTRY_B_OFFSET) & 1;
+	
+	*caching = tex<<2 | c<<1 | b;
+	
+	*global = !((desc>>FLD_ENTRY_NG_OFFSET) & 1);
+	*shared = (desc >> FLD_ENTRY_S_OFFSET) & 1;
 	return 0;
 }
-#endif
 
-pg_fld_t __plat_fld_create(pg_sld_t* desc_addr, char domain, char perm, char caching, char global, char shared);
-pg_sld_t* __plat_sld_of_fld(pg_fld_t fld);
-pg_sld_t __plat_sld_create(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared);
-p_addr_t __plat_get_sld_addr(pg_sld_t sld);
+pg_fld_t __plat_fld_create(pg_sld_t* desc_addr, char domain, char perm, char caching, char global, char shared)
+{
+	(void)domain;
+	(void)perm;
+	(void)caching;
+	(void)global;
+	(void)shared;
+	return fld_construct_sld((p_addr_t)desc_addr, domain);
+}
+
+pg_sld_t* __plat_sld_of_fld(pg_fld_t fld)
+{
+	return (pg_sld_t*)(fld&FLD_PG_TBL_MASK);
+}
+
+pg_sld_t __plat_sld_create(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared)
+{
+	(void)domain;
+	return sld_create_small_entry(base_addr, perm, caching, global, shared);
+}
+
+p_addr_t __plat_get_sld_addr(pg_sld_t sld)
+{
+	return (p_addr_t)(sld & SLD_SMALL_ADDR_MASK);
+}
