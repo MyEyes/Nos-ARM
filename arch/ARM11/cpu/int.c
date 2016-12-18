@@ -113,26 +113,65 @@ void dabt_show_info(uint32_t lr, uint32_t addr, uint32_t fault)
 		case 15: error_str = "PG: Permission error"; break;
 	}
 	printf("DABT: Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
-	printf("%s\n", error_str);
-	printf("DABT: u_pg_tbl: %x, %x->%x\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
-	printf("DABT: k_pg_tbl: %x, %x->%x\n", &kernel_page, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));	
+	printf("%s\r\n", error_str);
+	printf("DABT: u_pg_tbl: %x, %x->%x\r\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
+	printf("DABT: k_pg_tbl: %x, %x->%x\r\n", &kernel_page, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));	
 }
 
-void __attribute__((used)) dabt_hnd2(uint32_t lr, uint32_t addr, uint32_t fault)
+uint32_t __attribute__((used)) dabt_hnd2(char* pc, char* sp)
 {
-	dabt_show_info(lr, addr, fault);
+	thread_curr_store(pc, sp);
+	uint32_t addr;
+	uint32_t fault;
+	__asm__
+	(
+		"mrc p15, 0, %0, c6, c0, 0\n"
+		"mrc p15, 0, %1, c5, c0, 0\n"
+		:"=r"(addr), "=r"(fault)
+	);
+	dabt_show_info((uint32_t)pc, addr, fault);
+	if(!curr_thread->proc->priv)
+	{
+		printf("Access violation, killing user process!\r\n");
+		__plat_thread_setparam(curr_thread, 1, -1);
+		schd_term();
+	}
+	return (uint32_t)thread_curr_sp();
 }
 
 void __attribute__((naked)) dabt_hnd()
 {
 	__asm__	(
-	"sub lr, #4\n"
-	"stmfd sp!, {r0-r12, lr}\n"
-	"mov r0, lr\n"
-	"mrc p15, 0, r1, c6, c0, 0\n"
-	"mrc p15, 0, r2, c5, c0, 0\n"
-	"bl dabt_hnd2\n"
-	"ldmfd sp!, {r0-r12, pc}^\n"
+	"sub lr, lr, #4\n"
+	"CPS #31\n"							//Change to System mode to get access to user stack								sys
+	"stmfd sp!, {r0-r12}\n"				//push register states onto stack												push(r0-r12) 					sys stack
+	"mov r1, sp\n"						//mov sps value into r1 so it can survive the mode change						r1=sp_sys
+	
+	"CPS #23\n"							//Enter abt mode																abt
+	
+	"mrs r0, spsr\n"					//mov stored process state into r0												r0=spsr
+	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) ro=spsr_abt 	sys stack
+	
+	"mov r0, lr\n"						//set up arguments for swi_hnd2 call, r1 already contains the stack pointer		r0=lr_SRV
+	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) r0=lr_abt		sys stack
+	
+	"bl dabt_hnd2\n"					//call dabt_hnd2																r0=lr_abt, r1=sp_sys
+	
+	"CPS #31\n"							//become system again															irq
+	"mov sp, r0\n"						//Set up sp to return value
+	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
+	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
+	
+	"mov r0, #0\n"
+	"MCR p15, 0, r0, c8, c7, 0\n"		//flush TLB
+	
+	"CPS #23\n"							//become abt again
+	"ldmfd r12!, {lr}\n"				//pop stored lr off																lr_sys=lr_irq					sys stack
+	
+	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_irq						sys stack
+	"msr spsr, r0\n"					//Set process state																spsr=r0
+	"ldmfd r12, {r0-r12}\n"				//load registers																pop(r0-r12)						sys stack
+	"movs pc, lr"						//return from interrupt															pc=lr
 	);
 }
 

@@ -39,12 +39,15 @@ void main(uint32_t tid)
 	int* test_2 = malloc(sizeof(int));
 	*test_2 = 32;
 	
+	char* test3 = (void*)0xFFFFFF00;
+	*test3 = 'a';
+	
 	volatile char* dev = req_dev("bcm2385_uart0");
 	
     volatile char* dev2 = (char*) pmap((void*)0x20201000, (void*)0x80000, 0x1000);
 	(void)dev2;
 	
-	puts("Hellooooo from Usermode\r\n", dev);
+	puts("Hellooooo from Usermode\r\n", dev2);
 	char c;
 	char input[512];
 	unsigned short position = 0;

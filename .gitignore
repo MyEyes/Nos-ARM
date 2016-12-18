@@ -10,3 +10,4 @@ nos.bin
 *.a
 payload
 *.un~
+*.txt
