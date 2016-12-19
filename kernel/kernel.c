@@ -120,26 +120,10 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	__asm__("swi 16"); //switch process syscall
 	
 	printf("Returned to kernel\r\n");
+	printf("Rebooting\r\n");
 	
 	char* p2 = pg_get_phys(test_tbl, (char*)0x201000);
 	printf("0x201000->%x\r\n", p2);
-	
-	reset();
-	
-	while ( true )
-	{
-		char c = uart_getc();
-		if(c=='r')
-			reset();
-		else if(c=='s')
-		{
-			printf("clock int:%x\r\n", *((uint32_t*)0x2000B414));
-			printf("clock time:%x\r\n", *((uint32_t*)0x2000B404));
-			__asm__("swi 15");
-		}
-		else
-			uart_putc(c);
-	}
 	
 	reset();
 }
