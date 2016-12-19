@@ -61,11 +61,13 @@ uint32_t __plat_pg_get_entry(void* fld_tbl, void* virt_addr)
 	uint32_t u_addr = (uint32_t) virt_addr;
 	uint32_t fld_index = u_addr >> 20; //how many MBs
 	uint32_t entry = ((uint32_t*)fld_tbl)[fld_index];
+    return entry;
 	if(FLD_IS_SECTION(entry))
 		return entry;
 	else if(FLD_IS_PGTBL(entry))
 	{
 		uint32_t* sld_tbl = (uint32_t*)(entry&FLD_PG_TBL_MASK);
+        sld_tbl = (uint32_t*)TO_KERNEL_ADDR_SPACE(sld_tbl);
 		uint32_t sld_index = u_addr - (fld_index<<20); //Get offset inside 1MB
 		sld_index >>= 12;							 //Get 4kb offset
 		uint32_t sld_entry = sld_tbl[sld_index];
@@ -97,7 +99,6 @@ int __plat_get_fld_parms(pg_fld_t desc, p_addr_t* addr, char* domain, char* perm
 		return -1;
 	*addr = (p_addr_t)(desc & FLD_SECTION_MASK);
 	*domain = (desc >> FLD_ENTRY_DOMAIN_OFFSET) & FLD_ENTRY_DOMAIN_MASK;
-	//fld |= (domain<<5);
 		
 	char nx = (desc >> FLD_ENTRY_XN_OFFSET) & 1;
 	char ap = (desc >> FLD_ENTRY_AP_OFFSET) & 3;

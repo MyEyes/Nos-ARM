@@ -117,7 +117,13 @@ int pg_map_secondary(pg_fld_t* fld, v_addr_t virt_addr, p_addr_t phys_addr, size
 		char rc;
 		char rg;
 		char rs;
+
 		__plat_get_fld_parms(*fld, &rphys, &rd, &rp, &rc, &rg, &rs);
+
+        #ifdef MEM_DBG_TBLS
+        printf("Remapping FLD into SLDs!\r\nParams: phys:%x domain:%x permissions:%x", 
+        #endif
+
 		*fld = 0;
 		//Mapping from zero, cause we only care about the virtual address bits below PAGE_SIZE
 		//And we want to map the whole page

@@ -41,7 +41,8 @@ void* sys_pmap()
     //Check that target virtual address is in reserved region
     if((uint32_t)virt<PROC_KRES_LOC || (uint32_t)virt>=PROC_KRES_END)
         return (void*)-1;
-	pg_map(curr_thread->proc->pg_tbl, (void*)virt,  phys_addr, mem, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 0);
+
+    pg_map(curr_thread->proc->pg_tbl, (void*)virt,  phys_addr, mem, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 0);
     return (void*)virt;
 }
 

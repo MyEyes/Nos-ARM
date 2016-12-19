@@ -114,8 +114,7 @@ void dabt_show_info(uint32_t lr, uint32_t addr, uint32_t fault)
 	}
 	printf("DABT: Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
 	printf("%s\r\n", error_str);
-	printf("DABT: u_pg_tbl: %x, %x->%x\r\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));
-	printf("DABT: k_pg_tbl: %x, %x->%x\r\n", &kernel_page, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr));	
+	printf("DABT: u_pg_tbl: %x, %x->%x (%x)\r\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr),pg_get_entry(curr_thread->proc->pg_tbl, (void*) addr));
 }
 
 uint32_t __attribute__((used)) dabt_hnd2(char* pc, char* sp)

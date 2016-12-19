@@ -9,3 +9,7 @@ to virtual memory seems very risky potentially if we are going to have more than
 -Not sure how to handle files/streams yet. Through IPC message passing?
 
 -Allocating a whole page is tricky because the memory_area_t header will use up the first few bytes (Extra region for mmapped)
+
+-req_dev currently maps the whole page containing the malloc descriptor, this isn't acceptablea
+
+-pg_map currently corrupts access permissions when remapping an FLD into SLDs

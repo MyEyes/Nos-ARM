@@ -38,33 +38,36 @@ void main(uint32_t tid)
 	
 	int* test_2 = malloc(sizeof(int));
 	*test_2 = 32;
+
+    char* input = malloc(512);
 	
-	char* test3 = (void*)0xFFFFFF00;
-	*test3 = 'a';
+    volatile char* dev2 = req_dev("bcm2385_uart0");
 	
-	volatile char* dev = req_dev("bcm2385_uart0");
-	
-    volatile char* dev2 = (char*) pmap((void*)0x20201000, (void*)0x80000, 0x1000);
+    //volatile char* dev2 = (char*) pmap((void*)0x20201000, (void*)0xA0000000, 0x1000);
 	(void)dev2;
+
+    if(dev2 == (char*)-1)
+    {
+        exit(-1);
+    }
 	
 	puts("Hellooooo from Usermode\r\n", dev2);
 	char c;
-	char input[512];
 	unsigned short position = 0;
 	char quit = 0;
 	while(!quit)
 	{
-		while((c = getc(dev))!='\n')
+		while((c = getc(dev2))!='\n')
 		{
-			putc(c, dev);
+			putc(c, dev2);
 			input[position++] = c;
 		}
 		input[position++] = 0;
-		puts("\n", dev);
+		puts("\n", dev2);
 		position = 0;
 		if(!strcmp(input, "quit"))
 			quit = 1;
 	}
 	
-	exit((int)dev);
+	exit((int)dev2);
 }
