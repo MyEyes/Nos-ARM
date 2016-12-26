@@ -11,3 +11,5 @@ nos.bin
 payload
 *.un~
 *.txt
+*.swp
+*.swo

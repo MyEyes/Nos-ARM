@@ -1,6 +1,7 @@
 #include "arch/ARM11/mem/sld.h"
 #include "kernel/mem/perm.h"
 #include "arch/ARM11/mem/cache.h"
+#include <stdio.h>
 
 
 uint32_t sld_create_small_entry(p_addr_t phys_addr, char perm, char caching, char global, char shared)

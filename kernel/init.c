@@ -56,7 +56,7 @@ void kernel_init()
 	
 	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
 		
-	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
+    mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
 	
 	cache_TLB_flush();
 	

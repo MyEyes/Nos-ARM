@@ -31,7 +31,7 @@ extern "C" /* Use C linkage for kernel_main. */
 extern unsigned char uart_getc();
 extern void uart_putc(unsigned char c);
 extern void uart_mod_init(void*, uint32_t);
-extern int __start;
+extern unsigned int __start;
 extern unsigned int __end;
 extern FILE stdout;
 
@@ -70,14 +70,16 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//printf("Domain Flags: %x\r\n", domain_get_flags());
 	mem_dsb();
 	mem_dmb();
-	//printf("Processor state: %x\r\n", cpu_get_state());
-	//printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
+	printf("Processor state: %x\r\n", cpu_get_state());
+	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
-	void* dummy = (void*)0xff000000;
-	pg_unmap(&kernel_page, dummy, 4);
-		
-	//*((uint32_t*)dummy) = 0;
-	domain_user_set();
+	//void* dummy = (void*)0xff000000;
+	//pg_unmap(&kernel_page, dummy, 4);
+    
+    //domain_user_set();
+
+	printf("Processor state: %x\r\n", cpu_get_state());
+	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
 	
 	void* kern_end = &__end;
 	
@@ -115,7 +117,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	printf("Running\r\n");
 	
-	clock_enable();
+	//clock_enable();
 	
 	__asm__("swi 16"); //switch process syscall
 	

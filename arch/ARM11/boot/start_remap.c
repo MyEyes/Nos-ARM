@@ -17,8 +17,9 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
 	for(uint32_t x = 0; x<PLATFORM_KERNEL_VIRT_SIZE; x++)
 		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2;
 	
-	for(uint32_t x = PLATFORM_KERNEL_VIRT_SIZE+PLATFORM_KERNEL_VIRT_BASE_OFFSET; x<((uint32_t)PLATFORM_TOTAL_ADDR_RANGE)>>20; x++)
-		basemap[x] = (x<<20) + 2;
+    //Map the last GB to the first GB
+	for(uint32_t x = 0; x<(1<<10); x++)
+		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2;
 		
 	//Become domain manager
 	MCR(SYS_CTRL, 0, 3, 0, 0, 3);

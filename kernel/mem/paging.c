@@ -6,8 +6,10 @@
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
 #include "kernel/mem/mem.h"
+#include "kernel/mem/cache.h"
+#include "kernel/mem/cache.h"
 
-//#define MEM_DBG_TBLS
+#define MEM_DBG_TBLS
 
 pg_tbl_t kernel_page;
 pg_tbl_t user_page;
@@ -15,25 +17,36 @@ uint32_t pg_initialized = 0;
 
 pg_sld_t* free_slds[SLD_CACHE_SIZE];	//Cache for second level page descriptors that are unused
 
+extern char __start;
+extern char __end;
+
 void pg_create_default(p_addr_t ker_loc, p_addr_t usr_loc)
 {
-	uint32_t ent_size = BIG_PAGE_SIZE;
+	memset((char*)free_slds, 0, SLD_CACHE_SIZE*sizeof(pg_sld_t*));
 	
 	//Set up kernel pages
 	pg_create(&kernel_page, ker_loc, (size_t)PLATFORM_TOTAL_ADDR_RANGE);
-	
-	pg_map(&kernel_page, 0, 0, ((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size), 0, PERM_PRW_URW, 0, 1, 0);
-	pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size), 0, (uint32_t)PLATFORM_TOTAL_MEMORY, 0, PERM_PRW_UNA, 0, 1, 0);
-	pg_map(&kernel_page,(void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size+(uint32_t)PLATFORM_TOTAL_MEMORY), (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size+(uint32_t)PLATFORM_TOTAL_MEMORY), (uint32_t)PLATFORM_TOTAL_ADDR_RANGE-((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*ent_size+(uint32_t)PLATFORM_TOTAL_MEMORY), 0, PERM_PRW_URW, 0, 1, 0);
+	printf("Kernel page (%x)->%x\r\n", &kernel_page, kernel_page.addr);
+    pg_map_kernel();
 	
 	//Set up user pages
 	pg_create(&user_page, usr_loc, (uint32_t)PLATFORM_PROC_MAX_MEM);
 	pg_map(&user_page, 0, 0, (size_t)PLATFORM_PROC_MAX_MEM, 0, PERM_PRW_URW, 0, 1, 0);
 	
-	//Clear cache of so descs
-	memset((char*)free_slds, 0, SLD_CACHE_SIZE*sizeof(pg_sld_t*));
-	
 	pg_initialized = 1;
+}
+
+void pg_map_kernel()
+{
+    //Identity map everything
+	pg_map(&kernel_page, 0, 0, (size_t) PLATFORM_TOTAL_ADDR_RANGE, 0, PERM_PRW_URW, 0, 1, 0);
+    //Map higher half kernel start to 0 up to total phys memory
+	pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*BIG_PAGE_SIZE), 0, (uint32_t)PLATFORM_TOTAL_MEMORY, 0, PERM_PRW_UNA, 0, 1, 0);
+    void* start = &__start;
+    void* end = (&__end)-PLATFORM_KERNEL_BASE;
+    printf("Making %x to %x read-only\r\n", start, end);
+    //Map kernel code pages as read only
+    pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET*BIG_PAGE_SIZE)+start), start, (end-start), 0, PERM_PR_UNA, 0, 1, 0);
 }
 
 void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem)
@@ -41,6 +54,10 @@ void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem)
 	tbl->addr = entry_loc;
 	tbl->size = mem;
 	uint32_t pages = mem/BIG_PAGE_SIZE;
+    if(mem==(size_t)-1)
+    {
+        pages = 0x1000;
+    }
 	memset((char*)tbl->addr, 0, pages*sizeof(pg_fld_t));
 }
 
@@ -121,7 +138,7 @@ int pg_map_secondary(pg_fld_t* fld, v_addr_t virt_addr, p_addr_t phys_addr, size
 		__plat_get_fld_parms(*fld, &rphys, &rd, &rp, &rc, &rg, &rs);
 
         #ifdef MEM_DBG_TBLS
-        printf("Remapping FLD into SLDs!\r\nParams: phys:%x domain:%x permissions:%x", 
+        printf("Remapping FLD into SLDs!\r\nParams: phys:%x domain:%x permissions:%x cache:%x global:%x shared:%x\r\n",rphys, rd, rp, rc, rg, rs); 
         #endif
 
 		*fld = 0;
@@ -162,7 +179,10 @@ int pg_map_secondary(pg_fld_t* fld, v_addr_t virt_addr, p_addr_t phys_addr, size
 	printf("Start: %x, Num: %x\r\n", start, num);
 	#endif
 	for(uint32_t i = start; i<start+num; i++)
+    {
 		sld[i] = __plat_sld_create(phys_addr + (i-start)*PAGE_SIZE, domain, perm, caching, global, shared);
+    }
+    data_cache_clean();
 	return 0;
 }
 
@@ -208,6 +228,7 @@ int pg_unmap_secondary(pg_fld_t* fld, v_addr_t virt_addr, size_t mem)
 	
 	for(uint32_t i = start; i<end; i++)
 		sld[i] = 0;
+    data_cache_clean();
 	return 0;
 }
 
@@ -266,6 +287,7 @@ int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, ch
 		}
 		#endif
 	}
+    data_cache_clean();
 	return 0;
 }
 
@@ -315,6 +337,9 @@ int pg_unmap(pg_tbl_t* tbl, v_addr_t virt_addr, size_t mem)
 		}
 		#endif
 	}
+    mem_dmb();
+    mem_dsb();
+    data_cache_clean();
 	return 0;
 }
 
@@ -327,3 +352,19 @@ uint32_t pg_get_entry(pg_tbl_t* tbl, v_addr_t virt_addr)
 {
 	return __plat_pg_get_entry(tbl->addr, virt_addr);
 }
+
+#ifdef MEM_DBG_TBLS
+void pg_fld_sld_dbg(pg_tbl_t* tbl, v_addr_t virt)
+{
+    uint32_t virt_low = (uint32_t)virt & ~(BIG_PAGE_SIZE-1 );
+    pg_fld_t fld = tbl->addr[virt_low/BIG_PAGE_SIZE];
+    pg_sld_t* slds = __plat_sld_of_fld(fld);
+    printf("fld: %x\r\n", fld);
+    printf("%x->%x\r\n", TO_KERNEL_ADDR_SPACE(slds+0xFF*4), pg_get_phys(&kernel_page, (void*)TO_KERNEL_ADDR_SPACE(slds+0xFF*4)));
+    for(uint32_t x=0; x<256; x++)
+    {
+        uint32_t sld = pg_get_entry(tbl, (void*)virt_low+x*PAGE_SIZE);
+        printf("sld: %x %x\r\n", x, sld);
+    }
+}
+#endif

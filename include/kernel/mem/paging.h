@@ -33,6 +33,8 @@ extern pg_tbl_t kernel_page;
 extern pg_tbl_t user_page;
 extern uint32_t pg_initialized;
 
+void pg_map_kernel();
+
 void pg_create_default(void* loc, void* usr_loc);
 void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem);
 
@@ -64,6 +66,8 @@ pg_fld_t __plat_fld_create(pg_sld_t* desc_addr, char domain, char perm, char cac
 pg_sld_t* __plat_sld_of_fld(pg_fld_t fld);
 pg_sld_t __plat_sld_create(p_addr_t base_addr, char domain, char perm, char caching, char global, char shared);
 p_addr_t __plat_get_sld_addr(pg_sld_t sld);
+
+void pg_fld_sld_dbg(pg_tbl_t* tbl, v_addr_t virt);
 
 void* sys_pmap();
 

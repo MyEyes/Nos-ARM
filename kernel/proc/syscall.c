@@ -3,6 +3,7 @@
 #include "kernel/mem/paging.h"
 #include "kernel/mem/perm.h"
 #include "kernel/hw/devmap.h"
+#include "kernel/mem/mmu.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -42,7 +43,10 @@ void* sys_pmap()
     if((uint32_t)virt<PROC_KRES_LOC || (uint32_t)virt>=PROC_KRES_END)
         return (void*)-1;
 
-    pg_map(curr_thread->proc->pg_tbl, (void*)virt,  phys_addr, mem, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 0);
+    pg_map(curr_thread->proc->pg_tbl, (void*)virt,  phys_addr, mem, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 0, 0);
+
+//    pg_fld_sld_dbg(curr_thread->proc->pg_tbl, virt);
+
     return (void*)virt;
 }
 
@@ -55,7 +59,7 @@ void* sys_dev_rq()
 	{
 		uint32_t virt_s = curr_thread->proc->brk;
 		printf("Trying to map %x to %x\r\n", virt_s, dev->addr);
-		pg_map(curr_thread->proc->pg_tbl, (void*)virt_s, (void*)dev->addr, 4096, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 1);
+		pg_map(curr_thread->proc->pg_tbl, (void*)virt_s, (void*)dev->addr, PAGE_SIZE, 0, curr_thread->proc->priv?PERM_PRW_UNA:PERM_PRW_URW, 0, 1, 1);
 		printf("Phys: %x", pg_get_phys(curr_thread->proc->pg_tbl, (void*) virt_s));
 		void* old_brk = (void*)curr_thread->proc->brk;
 		curr_thread->proc->brk = virt_s + 4096;

@@ -17,7 +17,7 @@
 #define CACHE_POL_WTNW			0b10	//write through, no write allocate
 #define CACHE_POL_WBNW			0b11	//write back, no write allocate
 
-#define CACHE_TEX(u)			(u>>2)		//returns the TEX portion of the cache value
+#define CACHE_TEX(u)			((u>>2)&7)		//returns the TEX portion of the cache value
 #define CACHE_C(u)				((u>>1)&1)	//returns the C bit of the cache value
 #define CACHE_B(u)				(u&1)		//returns the B bit of the cache value
 

@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#define PLATFORM_TOTAL_ADDR_RANGE ((void*)0xFFFFFFFF) //Highest 32 byte aligned address
+#define PLATFORM_TOTAL_ADDR_RANGE ((void*)-1) //No limit on address range
 
 #define PLATFORM_KERNEL_BASE (0xC0000000)
 #define PLATFORM_KERNEL_PHYS_SIZE (10<<20) //Reserve 10 Megs for the kernel

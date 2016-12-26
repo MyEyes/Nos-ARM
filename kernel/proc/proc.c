@@ -105,6 +105,7 @@ void* sbrk()
 			p_addr_t start = mem_phys_find_free(stepsize);
 			if(!start)
 				return (void*)-1;
+            mem_phys_set(start, stepsize);
 			#ifdef SBRK_DBG
 				printf("sbrk: Mapping %x bytes from %x to %x in pg_tbl at %x\n", stepsize, (obrk+offset), start, curr_thread->proc->pg_tbl);
 			#endif
@@ -113,6 +114,9 @@ void* sbrk()
 			offset+=stepsize;
 		}
 		p_addr_t start = mem_phys_find_free(extra);
+        if(!start)
+            return (void*)-1;
+        mem_phys_set(start, stepsize);
 		#ifdef SBRK_DBG
 			printf("sbrk: Mapping %x bytes from %x to %x in pg_tbl at %x\n", extra, (obrk+offset), start, curr_thread->proc->pg_tbl);
 		#endif

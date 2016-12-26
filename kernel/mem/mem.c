@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 
-//#define MEM_DBG_TBLS
+#define MEM_DBG_TBLS
 #ifdef MEM_DBG_TBLS
 #include <stdio.h>
 #endif
@@ -101,7 +101,11 @@ void* mem_phys_find_free(size_t mem)
 		{
 			for(uint32_t curr_entry = 0; curr_entry<curr_len; curr_entry++)
 				if(!mem_bit_set((char*)(desc_tbl+curr_desc), curr_offset+curr_entry))
-					return (void*)((curr_desc<<20)+curr_size*curr_entry);
+                {
+                    void* res = (void*)((curr_desc<<20)+curr_size*curr_entry);
+                    printf("Free mem at %x\r\n", res);
+					return  res;           
+                }
 		}
 		//If we can't find an entry that fits, we do this
 		return 0;

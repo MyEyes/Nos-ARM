@@ -10,8 +10,8 @@
 #include "kernel/cpu/clock.h"
 #include <stdint.h>
 #include <stdio.h>
-//#define  INT_SETUP_DBG
-//#define INT_DEBUG
+#define  INT_SETUP_DBG
+#define INT_DEBUG
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
 uint32_t abt_stack[CPU_INT_STACK_SIZE];
@@ -114,7 +114,7 @@ void dabt_show_info(uint32_t lr, uint32_t addr, uint32_t fault)
 	}
 	printf("DABT: Data abort! @%x->%x\r\nFault: %x\r\n",lr, addr, fault);
 	printf("%s\r\n", error_str);
-	printf("DABT: u_pg_tbl: %x, %x->%x (%x)\r\n", curr_thread->proc->pg_tbl, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr),pg_get_entry(curr_thread->proc->pg_tbl, (void*) addr));
+	printf("DABT: u_pg_tbl: %x, %x->%x (%x)\r\n", curr_thread->proc->pg_tbl->addr, addr, pg_get_phys(curr_thread->proc->pg_tbl, (void*) addr),pg_get_entry(curr_thread->proc->pg_tbl, (void*) addr));
 }
 
 uint32_t __attribute__((used)) dabt_hnd2(char* pc, char* sp)
@@ -192,7 +192,11 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 			__plat_thread_setparam(curr_thread, 1, ret);
 		}
 		else
+        {
 			printf("No associated syscall with swi %x\r\n", swi_num);
+            printf("Terminationg process!\r\n");
+            schd_term();
+        }
 	}
 	else
 		printf("No associated syscall with swi %x\r\n", swi_num);
