@@ -41,9 +41,9 @@ void main(uint32_t tid)
 
     char *input = malloc(512);
 	
-    volatile char* dev2 = req_dev("bcm2385_uart0");
+    //volatile char* dev2 = req_dev("bcm2385_uart0");
 	
-    //volatile char* dev2 = (char*) pmap((void*)0x20201000, (void*)0x80000, 0x1000);
+    volatile char* dev2 = (char*) pmap((void*)0x3F201000, (void*)0x80000, 0x1000);
 	(void)dev2;
 
     if(dev2 == (char*)-1)

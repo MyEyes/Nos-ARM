@@ -20,7 +20,7 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
     //Map the last GB to the first GB
 	for(uint32_t x = 0; x<(1<<10); x++)
 		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2;
-		
+
 	//Become domain manager
 	MCR(SYS_CTRL, 0, 3, 0, 0, 3);
 	
@@ -28,7 +28,7 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
 	MCR(SYS_CTRL, 0, MMU_TTB_CTRL, 0, MMU_TTB0, (uint32_t)basemap);
 	
 	//Set up TTBC
-	MCR(SYS_CTRL,0,MMU_TTB_CTRL,0,MMU_TTBC, 0);
+	MCR(SYS_CTRL, 0, MMU_TTB_CTRL, 0, MMU_TTBC, 0);
 	
 	//Enable MMU and high vectors //and data alignment checking
 	uint32_t old_val = 0;
