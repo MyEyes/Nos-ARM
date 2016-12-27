@@ -76,7 +76,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//void* dummy = (void*)0xff000000;
 	//pg_unmap(&kernel_page, dummy, 4);
     
-    //domain_user_set();
+    domain_user_set();
 
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
@@ -123,9 +123,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	
 	printf("Returned to kernel\r\n");
 	printf("Rebooting\r\n");
-	
-	char* p2 = pg_get_phys(test_tbl, (char*)0x201000);
-	printf("0x201000->%x\r\n", p2);
 	
 	reset();
 }

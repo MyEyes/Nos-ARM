@@ -15,6 +15,10 @@
 
 #define SYSCALL_DEV_RQ 128
 
+#define SYSCALL_IPC_REG_PRT 192
+#define SYSCALL_IPC_UNREG_PRT 193
+#define SYSCALL_IPC_MAP_PRT 194
+
 #define SYSCALL_TBL_MAX 512
 extern void *syscall_tbl[];
 

@@ -10,6 +10,7 @@
 #include "kernel/cpu/int.h"
 #include "kernel/kernel.h"
 #include "kernel/proc/proc.h"
+#include "kernel/res/ipc.h"
 #include "kernel/proc/thread.h"
 #include "kernel/proc/schd.h"
 #include "kernel/proc/syscall.h"
@@ -56,7 +57,7 @@ void kernel_init()
 	
 	mmu_set_user_pgtbl(KERNEL_DEF_PG_LOC);
 		
-    mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
+	mmu_set_user_limit((uint32_t)PLATFORM_PROC_MAX_MEM);
 	
 	cache_TLB_flush();
 	
@@ -95,6 +96,8 @@ void kernel_init()
 	
 	curr_thread = &kern_thread;
 	curr_thread->state = THREAD_RUNNING;
+
+    kipc_init();
 	
 	schd_init();
 

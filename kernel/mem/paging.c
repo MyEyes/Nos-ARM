@@ -46,7 +46,7 @@ void pg_map_kernel()
     void* end = (&__end)-PLATFORM_KERNEL_BASE;
     printf("Making %x to %x read-only\r\n", start, end);
     //Map kernel code pages as read only
-    pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET*BIG_PAGE_SIZE)+start), start, (end-start), 0, PERM_PR_UNA, 0, 1, 0);
+    pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET*BIG_PAGE_SIZE)+start),start, (end-start), 0, PERM_PRW_UNA, 0, 1, 0);
 }
 
 void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem)

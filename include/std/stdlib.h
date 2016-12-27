@@ -13,6 +13,8 @@ typedef struct
 } mem_hdr_t;
 
 void std_init();
+
+uint32_t get_pid();
 void* calloc(size_t nmemb, size_t size);
 void* malloc(size_t size);
 void free(void *ptr);

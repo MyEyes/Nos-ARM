@@ -2,7 +2,7 @@ CC = arm-none-eabi-gcc
 AR = arm-none-eabi-ar
 
 PI_B_GCCFLAGS = -mcpu=arm1176jzf-s -fpic -fpie -pie -std=gnu99 -ffreestanding -nostdlib -O2 -Wall -Wextra -Werror -I include/std
-PI_B_CFLAGS = $(PI_B_GCCFLAGS) -c -D__PLATFORM__=\"platform/arm-common.h\"
+PI_B_CFLAGS = $(PI_B_GCCFLAGS) -c -D__PLATFORM__=\"arch/ARM11/arch.h\"
 PI_B_LDFLAGS = $(PI_B_GCCFLAGS)
 
 #General rules for files

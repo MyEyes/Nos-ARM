@@ -9,6 +9,11 @@ void std_init()
 	mem_init();
 }
 
+uint32_t get_pid()
+{
+    return 1;
+}
+
 void* calloc(size_t nmemb, size_t size)
 {
 	size_t total_size = MEM_ALIGN_BY_4(nmemb*size);
