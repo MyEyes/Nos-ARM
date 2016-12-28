@@ -9,7 +9,7 @@
 #include "kernel/mem/cache.h"
 #include "kernel/mem/cache.h"
 
-#define MEM_DBG_TBLS
+//#define MEM_DBG_TBLS
 
 pg_tbl_t kernel_page;
 pg_tbl_t user_page;

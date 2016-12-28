@@ -59,14 +59,14 @@ void main(uint32_t tid)
 
 
     const char* test_s = "This is a test message\r\n";
-    if(ipc_send_msg(port, 1, strlen(test_s), test_s))
+    if(ipc_send_msg(port, 1, strlen(test_s), (char*)test_s))
         exit(-1);
     puts("Sent!\r\n", dev2);
-    puts(test_s, dev2);
+    puts((char*)test_s, dev2);
     if(ipc_read_msg(port, input, 512))
         exit(-1);
     puts("Received\r\n", dev2);
-    ipc_msg_t* msg = input;
+    ipc_msg_t* msg = (ipc_msg_t*) input;
     puts(msg->msg, dev2);
 
 

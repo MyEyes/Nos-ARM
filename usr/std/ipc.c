@@ -7,7 +7,7 @@
 
 ipc_port_t* ipc_create_port(port_id id, size_t buffer_size)
 {
-    volatile int res = 0;
+    int res = 0;
     PLATFORM_SYSCALL2(SYSCALL_IPC_REG_PRT, id, buffer_size, res);
     if(res)
         return (ipc_port_t*)-1;
@@ -25,7 +25,7 @@ ipc_port_t* ipc_create_port(port_id id, size_t buffer_size)
 
 ipc_port_t* ipc_bind_port(port_id id)
 {
-    volatile int res = 0;
+    int res = 0;
     v_addr_t buffer = (v_addr_t)0x81000;
 	PLATFORM_SYSCALL2(SYSCALL_IPC_MAP_PRT, id, buffer, res);
     if(res)

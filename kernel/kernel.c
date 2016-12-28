@@ -23,6 +23,8 @@
 #include "kernel/proc/proc.h"
 #include "kernel/proc/thread.h"
 #include "kernel/proc/schd.h"
+
+#include "kernel/res/res_mgr.h"
  
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -84,11 +86,13 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	void* kern_end = &__end;
 	
 	#ifdef __DEV_MAP
-		devmap = (devmap_t*)kern_end;
+        set_devmap((devmap_t*)kern_end);
+        parse_devmap();
 		printf("Devmap at %x\r\n", devmap);
 		for(uint32_t x=0; x<devmap->num_devs; x++)
 			printf("\t%x %s\t%s\r\n", devmap->devs[x].addr, devmap->devs[x].type, devmap->devs[x].name);
 		kern_end += devmap->total_size;
+        res_tbl_dbg();
 	#endif
 	
 	printf("Memory page: %x\r\n", pg_get_entry(&kernel_page, (void*)0xc0000000));

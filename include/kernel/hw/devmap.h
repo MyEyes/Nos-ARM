@@ -15,5 +15,7 @@ typedef struct
 extern devmap_t* devmap;
 
 dev_t* devmap_get_dev(char* dev_name);
+int parse_devmap();
+int set_devmap(devmap_t* devmap);
 
 #endif

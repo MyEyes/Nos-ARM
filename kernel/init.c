@@ -15,6 +15,7 @@
 #include "kernel/proc/schd.h"
 #include "kernel/proc/syscall.h"
 #include "kernel/mod/kernel_uart.h"
+#include "kernel/res/res_mgr.h"
 #include __PLATFORM__
 
 #define INIT_DEBUG
@@ -98,6 +99,8 @@ void kernel_init()
 	curr_thread->state = THREAD_RUNNING;
 
     kipc_init();
+
+    res_mgr_init();
 	
 	schd_init();
 
