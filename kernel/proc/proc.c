@@ -74,7 +74,7 @@ pg_tbl_t* proc_create(char* virt_start, char* virt_end, uint32_t stack_size)
 			break;
 		}
 	}
-	
+	//TODO free memory
 	if(fail)
 		return (pg_tbl_t*)0;
 	

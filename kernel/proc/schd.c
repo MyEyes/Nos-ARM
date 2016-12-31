@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include "kernel/mem/paging.h"
 #include "kernel/proc/thread.h"
-//#define DBG_SCHD
+#define DBG_SCHD
 
 thread_queue_t queues[SCHD_NUM_PRIORITIES];
 thread_queue_t empty_node_queue;
@@ -31,6 +31,7 @@ uint32_t schd_get_slice(thread_t* thread)
 
 void schd_chg_thread()
 {
+    printf("Scheduler running!\r\n");
 	if(curr_thread->state == THREAD_RUNNING)
 	{
 		curr_thread->state = THREAD_READY;
@@ -42,8 +43,8 @@ void schd_chg_thread()
 		#ifdef DBG_SCHD
 		printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
 		#endif
-		//thread_node_t* dbg = (thread_node_t*)0xC0A04FFC;
-		//printf("dbg: %x\n", dbg->next);
+		thread_node_t* dbg = (thread_node_t*)0xC0A04FFC;
+		printf("dbg: %x\n", dbg->next);
 		thread_node_t* test_thread = dequeue_node(queues + i);
 		
 		if(test_thread)

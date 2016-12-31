@@ -8,6 +8,7 @@
 void res_mgr_init();
 res_id res_register(res_t* res, char* name);
 res_hnd* res_req(res_id hndl);
+res_hnd* res_req_nm(char* name);
 
 res_hnd* res_tbl_get_free();
 int res_tbl_grw(size_t new_sz);

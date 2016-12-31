@@ -1,5 +1,6 @@
 #include "arch/ARM11/mem/cache.h"
 #include "kernel/mem/cache.h"
+#include "kernel/mem/mem.h"
 
 void cache_TLB_flush()
 {
@@ -13,5 +14,8 @@ void data_cache_clean_va(v_addr_t v_addr)
 
 void data_cache_clean()
 {
+    mem_dsb();
+    mem_dmb();
+
     MCR(15, 0, 7, 10, 0, 0);
 }

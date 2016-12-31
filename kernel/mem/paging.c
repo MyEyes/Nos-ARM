@@ -18,7 +18,7 @@ uint32_t pg_initialized = 0;
 pg_sld_t* free_slds[SLD_CACHE_SIZE];	//Cache for second level page descriptors that are unused
 
 extern char __start;
-extern char __end;
+extern char __text_end;
 
 void pg_create_default(p_addr_t ker_loc, p_addr_t usr_loc)
 {
@@ -39,14 +39,14 @@ void pg_create_default(p_addr_t ker_loc, p_addr_t usr_loc)
 void pg_map_kernel()
 {
     //Identity map everything
-	pg_map(&kernel_page, 0, 0, (size_t) PLATFORM_TOTAL_ADDR_RANGE, 0, PERM_PRW_URW, 0, 1, 0);
+	pg_map(&kernel_page, 0, 0, (size_t) PLATFORM_TOTAL_ADDR_RANGE, 0, PERM_PRW_UNA, 0, 1, 0);
     //Map higher half kernel start to 0 up to total phys memory
 	pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET)*BIG_PAGE_SIZE), 0, (uint32_t)PLATFORM_TOTAL_MEMORY, 0, PERM_PRW_UNA, 0, 1, 0);
     void* start = &__start;
-    void* end = (&__end)-PLATFORM_KERNEL_BASE;
+    void* end = (&__text_end)-PLATFORM_KERNEL_BASE;
     printf("Making %x to %x read-only\r\n", start, end);
     //Map kernel code pages as read only
-    pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET*BIG_PAGE_SIZE)+start),start, (end-start), 0, PERM_PRW_UNA, 0, 1, 0);
+    pg_map(&kernel_page, (void*)((PLATFORM_KERNEL_VIRT_BASE_OFFSET*BIG_PAGE_SIZE)+start),start, (end-start), 0, PERM_PR_UNA, 0, 1, 0);
 }
 
 void pg_create(pg_tbl_t* tbl, p_addr_t entry_loc, size_t mem)
@@ -142,9 +142,10 @@ int pg_map_secondary(pg_fld_t* fld, v_addr_t virt_addr, p_addr_t phys_addr, size
         #endif
 
 		*fld = 0;
+        v_addr_t fld_vaddr = (v_addr_t)(v_addr&~(BIG_PAGE_SIZE-1));
 		//Mapping from zero, cause we only care about the virtual address bits below PAGE_SIZE
 		//And we want to map the whole page
-		pg_map_secondary(fld, 0, rphys, BIG_PAGE_SIZE, rd, rp, rc, rg, rs);
+		pg_map_secondary(fld, fld_vaddr, rphys, BIG_PAGE_SIZE, rd, rp, rc, rg, rs);
 		//After return, *fld will be set to be an sld page
 	}
 	#endif
@@ -234,9 +235,12 @@ int pg_unmap_secondary(pg_fld_t* fld, v_addr_t virt_addr, size_t mem)
 
 int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
 {	
-	if((uint32_t)virt_addr+mem > tbl->size && tbl->size)
+    printf("Trying to map %x to %x(%x)", virt_addr, phys_addr, mem);
+	if((uint32_t)virt_addr+mem > tbl->size && tbl->size){
+        printf(" FAIL!\r\n");
 		return -1;
-	
+    }
+	printf(" OK!\r\n");
 	pg_fld_t* flds = tbl->addr;
 	//fld_t	|fld_t|fld_t
 	//MEM	|sld_t
@@ -360,7 +364,7 @@ void pg_fld_sld_dbg(pg_tbl_t* tbl, v_addr_t virt)
     pg_fld_t fld = tbl->addr[virt_low/BIG_PAGE_SIZE];
     pg_sld_t* slds = __plat_sld_of_fld(fld);
     printf("fld: %x\r\n", fld);
-    printf("%x->%x\r\n", TO_KERNEL_ADDR_SPACE(slds+0xFF*4), pg_get_phys(&kernel_page, (void*)TO_KERNEL_ADDR_SPACE(slds+0xFF*4)));
+    printf("sld at %x\r\n", slds);
     for(uint32_t x=0; x<256; x++)
     {
         uint32_t sld = pg_get_entry(tbl, (void*)virt_low+x*PAGE_SIZE);

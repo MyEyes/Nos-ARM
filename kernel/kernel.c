@@ -40,6 +40,8 @@ extern FILE stdout;
 void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 {	
 	(void) r0;
+
+    __asm__("add sp, sp, %0\n"::"r"(0xc0000000):);
 	
 	uart_mod_init(0, 0);
 	
@@ -68,23 +70,24 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	//mem_dsb();
 	//mem_dmb();
 	//Change to user mode
-	
-	//printf("Domain Flags: %x\r\n", domain_get_flags());
+
+	printf("Domain Flags: %x\r\n", domain_get_flags());
 	mem_dsb();
 	mem_dmb();
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
-	
-	//void* dummy = (void*)0xff000000;
-	//pg_unmap(&kernel_page, dummy, 4);
-    
+
+    printf("UART0 mapped to: %x(%x)\r\n", pg_get_phys(&kernel_page, (void*)0x20201000), pg_get_entry(&kernel_page, (void*)0x20201000));
+    printf("printf at %x\r\n", printf);
+    //pg_fld_sld_dbg(&kernel_page, (void*)printf);
+
     domain_user_set();
 
 	printf("Processor state: %x\r\n", cpu_get_state());
 	printf("Control registers: %x\r\n", cpu_get_ctrl_regs());
-	
+
 	void* kern_end = &__end;
-	
+
 	#ifdef __DEV_MAP
         set_devmap((devmap_t*)kern_end);
         parse_devmap();
@@ -94,19 +97,22 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 		kern_end += devmap->total_size;
         res_tbl_dbg();
 	#endif
+
 	
 	printf("Memory page: %x\r\n", pg_get_entry(&kernel_page, (void*)0xc0000000));
 	
 	pg_tbl_t* test_tbl = proc_create((char*)0x100000, (char*)0x200000, 0x8000);
-	//printf("tbl_entry: %x\r\n", pg_get_entry(test_tbl, (void*)0x000FFFC4));
+	printf("tbl_entry: %x\r\n", pg_get_entry(test_tbl, (void*)0x000FFFC4));
 	char* phys = pg_get_phys(test_tbl, (char*)0x100000);
 	
-	//printf("Test proc table set up at %x\r\n", test_tbl);
-	//printf("Test proc phys entry at %x\r\n", phys);
-	//printf("Copying image from %x to %x\r\n", &__end, phys);
-	//printf("__end:%x\r\n", (uint32_t)__end);
+	printf("Test proc table set up at %x\r\n", test_tbl);
+	printf("Test proc phys entry at %x\r\n", phys);
+	printf("Copying image from %x to %x\r\n", kern_end, phys);
+	printf("__end:%x\r\n", (uint32_t)kern_end);
+
+    v_addr_t tgt_addr = (v_addr_t)TO_KERNEL_ADDR_SPACE(phys);
 	
-	memcpy(phys, (char*)kern_end, 0x100000);
+	memcpy((char*)tgt_addr, (char*)kern_end, 0x100000);
 	
 	proc_hdr_t* test_proc = malloc(sizeof(proc_hdr_t));
 	proc_init(test_proc, test_tbl, 0x100000, 0x200000, 0);
@@ -118,10 +124,15 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 	thread_ready(test_thread);
 	
 	schd_add_thread(test_thread);
-	
+    p_addr_t test_addr = pg_get_phys(&kernel_page, tgt_addr);
+    printf("Mapping of user_init image: %x\r\n", test_addr);
+
+
+    printf("First byte of image to run: %x\r\n", *((char*)TO_KERNEL_ADDR_SPACE(test_addr)));
+
 	printf("Running\r\n");
-	
-	//clock_enable();
+
+	clock_enable();
 	
 	__asm__("swi 16"); //switch process syscall
 	

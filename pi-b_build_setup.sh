@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 mkdir -p lib
-make std-all
+make -B std-all
 cd usr/init
-make
+make -B
 make install
 cd ../..
 make -B pi-b-all

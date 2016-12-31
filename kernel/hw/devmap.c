@@ -30,7 +30,7 @@ int parse_devmap()
     {
         res_t* res = malloc(sizeof(res_t));
         uint32_t type = RES_TYPE_UNKWN;
-        if(strcmp(devmap->devs[x].type, "mm  "))
+        if(strcmp(devmap->devs[x].type, "mm")==0)
             type = RES_TYPE_MMDEV;
 
         res_create(res, type, 0x1000, (v_addr_t)devmap->devs[x].addr);

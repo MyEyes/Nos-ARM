@@ -8,10 +8,11 @@
 #include "kernel/proc/schd.h"
 #include "kernel/proc/syscall.h"
 #include "kernel/cpu/clock.h"
+#include <kernel/mem/cache.h>
 #include <stdint.h>
 #include <stdio.h>
-#define  INT_SETUP_DBG
-#define INT_DEBUG
+//#define  INT_SETUP_DBG
+//#define INT_DEBUG
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
 uint32_t abt_stack[CPU_INT_STACK_SIZE];
@@ -188,13 +189,13 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 		if(syscall)
 		{
 			uint32_t ret = syscall();
-			printf("Returning: %x\r\n", ret);
+			//printf("Returning: %x\r\n", ret);
 			__plat_thread_setparam(curr_thread, 1, ret);
 		}
 		else
         {
 			printf("No associated syscall with swi %x\r\n", swi_num);
-            printf("Terminationg process!\r\n");
+            printf("Terminating process!\r\n");
             schd_term();
         }
 	}
@@ -202,7 +203,9 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 		printf("No associated syscall with swi %x\r\n", swi_num);
 	
 	char* test = thread_curr_sp();
-	//printf("thread_stored_sp = %x\r\n", test);
+    #ifdef INT_DEBUG
+	printf("thread_stored_sp = %x\r\n", test);
+    #endif
 	return test;
 }
 
@@ -225,7 +228,6 @@ void __attribute__((naked)) swi_hnd()
 	"bic r2, r2, #0xff000000\n"			//Get swi parameter
 	
 	"bl swi_hnd2\n"						//call swi_hnd2																	r0=lr_SRV, r1=sp_sys
-	
 	"CPS #31\n"							//become system again															SYS
 	"mov sp, r0\n"						//Set up sp to return value
 	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
