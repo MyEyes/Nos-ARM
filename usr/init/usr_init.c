@@ -52,12 +52,11 @@ void main(uint32_t tid)
 	
 	puts("Hellooooo from Usermode\r\n", dev2);
 	char c;
-    /*
+    
     ipc_port_t* port = ipc_create_port(1, 0x1000);
     puts("Testing IPC message passing\r\n", dev2);
-
     const char* test_s = "This is a test message\r\n";
-    if(ipc_send_msg(port, 1, strlen(test_s), (char*)test_s))
+    if(ipc_send_msg(port, 1, strlen(test_s)+1, (char*)test_s))
         exit(-1);
     puts("Sent!\r\n", dev2);
     puts((char*)test_s, dev2);
@@ -66,7 +65,7 @@ void main(uint32_t tid)
     puts("Received\r\n", dev2);
     ipc_msg_t* msg = (ipc_msg_t*) input;
     puts(msg->msg, dev2);
-    */
+    
 
 
 	unsigned short position = 0;

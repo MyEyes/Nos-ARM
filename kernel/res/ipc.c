@@ -3,6 +3,7 @@
 #include <kernel/mem/perm.h>
 #include <string.h>
 #include <stdio.h>
+#include "arch/ARM11/mem/cache.h"
 #include <kernel/proc/syscall.h>
 #include <kernel/proc/schd.h>
 #include __PLATFORM__
@@ -80,5 +81,5 @@ int kipc_map(v_addr_t target_addr, uint32_t port)
     if(!ipc_port_tbl.ports[port].loc)
         return -1;
     //mmap the appropriate processes page table
-    return pg_map(curr_thread->proc->pg_tbl, target_addr, ipc_port_tbl.ports[port].loc, 0x1000, 0, PERM_PRW_URW, 0, 1, 0);
+    return pg_map(curr_thread->proc->pg_tbl, target_addr, ipc_port_tbl.ports[port].loc, 0x1000, 0, PERM_PRW_URW, CACHE_TYPE_OI_WB_NW, 1, 0);
 }

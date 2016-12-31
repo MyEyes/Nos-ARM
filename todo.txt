@@ -2,7 +2,7 @@
 and should generally be double checked since the mapping of physical
 to virtual memory seems very risky potentially if we are going to have more than 1Gig of phys memory
 
--ipc_ports should be able to be created and destroyed, kernel needs to keep track of the owners of ipc_ports
+-kernel needs to keep track of the owners of ipc_ports
 
 -There should probably be a general ressource manager for kernel ressources held by threads/processes
 
@@ -10,6 +10,6 @@ to virtual memory seems very risky potentially if we are going to have more than
 
 -Allocating a whole page is tricky because the memory_area_t header will use up the first few bytes (Extra region for mmapped)
 
--req_dev currently maps the whole page containing the malloc descriptor, this isn't acceptablea
+-req_dev currently maps the whole page containing the malloc descriptor, this isn't acceptable
 
--pg_map currently corrupts access permissions when remapping an FLD into SLDs
+-handle external aborts due to exclusive reads and writes in data abort handler
