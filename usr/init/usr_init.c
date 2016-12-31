@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ipc.h>
+#include <sys/types.h>
 
 void putc(int c, volatile char* dev)
 {
@@ -42,11 +43,8 @@ void main(uint32_t tid)
 
     char *input = malloc(512);
 	
-    //volatile char* dev2 = req_dev("bcm2385_uart0");
+    volatile char* dev2 = req_res("bcm2385_uart0", (void*)0x82000);
 	
-    volatile char* dev2 = (char*) pmap((void*)0x3F201000, (void*)0x80000, 0x1000);
-	(void)dev2;
-
     if(dev2 == (char*)-1)
     {
         exit(-1);
@@ -54,9 +52,9 @@ void main(uint32_t tid)
 	
 	puts("Hellooooo from Usermode\r\n", dev2);
 	char c;
+    /*
     ipc_port_t* port = ipc_create_port(1, 0x1000);
     puts("Testing IPC message passing\r\n", dev2);
-
 
     const char* test_s = "This is a test message\r\n";
     if(ipc_send_msg(port, 1, strlen(test_s), (char*)test_s))
@@ -68,6 +66,7 @@ void main(uint32_t tid)
     puts("Received\r\n", dev2);
     ipc_msg_t* msg = (ipc_msg_t*) input;
     puts(msg->msg, dev2);
+    */
 
 
 	unsigned short position = 0;

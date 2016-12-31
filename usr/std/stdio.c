@@ -4,15 +4,10 @@
 #include "usr/std/memory.h"
 #include __PLATFORM__
 
-void* req_dev(char* dev_name)
+void* req_res(char* res_name, void* addr)
 {
 	void* res = 0;
 	//request device
-	PLATFORM_SYSCALL1(SYSCALL_DEV_RQ, dev_name, res);
-	//If we got a device back we map the next PAGE
-	if(res && res!=(void*)-1)
-	{
-		mem_extend(PAGE_SIZE, 0);
-	}
+	PLATFORM_SYSCALL2(SYSCALL_RES_RQ_NM, res_name, addr, res);
 	return res;
 }

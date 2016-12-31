@@ -40,7 +40,7 @@ void res_grnt_pmem(res_t* res, v_addr_t addr)
 {
     if(res->type!=RES_TYPE_PMEM)
         return;
-    pg_map(curr_thread->proc->pg_tbl, addr, res->addr, res->size, 0, PERM_PRW_URW, 0, 1, 1);
+    pg_map(curr_thread->proc->pg_tbl, addr, res->addr, res->size, 0, PERM_PRW_URW, 0, 1, 0);
 }
 
 void res_rm_pmem(res_t* res, v_addr_t addr)
@@ -103,7 +103,7 @@ void res_grnt_mmdev(res_t* res, v_addr_t addr)
 {
     if(res->type!=RES_TYPE_MMDEV)
         return; 
-    pg_map(curr_thread->proc->pg_tbl, addr, res->addr, res->size, 0, PERM_PRW_URW, 0, 1, 1);
+    pg_map(curr_thread->proc->pg_tbl, addr, res->addr, res->size, 0, PERM_PRW_URW, 0, 1, 0);
 }
 
 void res_rm_mmdev(res_t* res, v_addr_t addr)

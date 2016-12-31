@@ -12,14 +12,14 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
 	//we locate this at the top of the RAM, so that it won't get in the way until we overwrite it
 	uint32_t* basemap = (void*)((char*)PLATFORM_TOTAL_MEMORY-0x100000);
 	for(uint32_t x = 0; x<PLATFORM_KERNEL_VIRT_BASE_OFFSET; x++)
-		basemap[x] = (x<<20) + 2;
+		basemap[x] = (x<<20) + 2 + (3<<10);
 	
 	for(uint32_t x = 0; x<PLATFORM_KERNEL_VIRT_SIZE; x++)
-		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2;
+		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2 + (3<<10);
 	
-    //Map the last GB to the first GB
+    //Map the last virt GB to the first phys GB
 	for(uint32_t x = 0; x<(1<<10); x++)
-		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2;
+		basemap[PLATFORM_KERNEL_VIRT_BASE_OFFSET + x] = (x<<20) + 2 + (3<<10);
 
 	//Become domain manager
 	MCR(SYS_CTRL, 0, 3, 0, 0, 3);
@@ -30,12 +30,13 @@ void __attribute__((noreturn)) kernel_map(uint32_t r0, uint32_t r1, uint32_t ata
 	//Set up TTBC
 	MCR(SYS_CTRL, 0, MMU_TTB_CTRL, 0, MMU_TTBC, 0);
 	
-	//Enable MMU and high vectors //and data alignment checking
+	//Enable MMU and high vectors
+    //and data alignment checking
+    //and no subpages
 	uint32_t old_val = 0;
 	MRC(SYS_CTRL,0,MMU_SYSCTL_MAIN,0, 0, old_val);
-	old_val |= 1|1<<13;//3
+	old_val |= 1|1<<13|1<<23;//3
 	MCR(SYS_CTRL,0,MMU_SYSCTL_MAIN,0, 0, old_val);
-	
 	kernel_main(r0, r1, atags);
 	kernel_panic();
 }

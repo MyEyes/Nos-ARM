@@ -80,5 +80,5 @@ int kipc_map(v_addr_t target_addr, uint32_t port)
     if(!ipc_port_tbl.ports[port].loc)
         return -1;
     //mmap the appropriate processes page table
-    return pg_map(curr_thread->proc->pg_tbl, target_addr, ipc_port_tbl.ports[port].loc, 0x1000, 0, PERM_PRW_URW, 0, 0, 1);
+    return pg_map(curr_thread->proc->pg_tbl, target_addr, ipc_port_tbl.ports[port].loc, 0x1000, 0, PERM_PRW_URW, 0, 1, 0);
 }

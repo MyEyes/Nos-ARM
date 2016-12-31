@@ -1,13 +1,14 @@
 #include <stdint.h>
 #include <string.h>
 
-//#define MEM_DBG_TBLS
-#ifdef MEM_DBG_TBLS
-#include <stdio.h>
-#endif
 
 #include "kernel/mem/mem.h"
 #include "kernel/mem/paging.h"
+//#define MEM_DBG_TBLS
+
+#ifdef MEM_DBG_TBLS
+#include <stdio.h>
+#endif
 
 MB_phys_desc_t* desc_tbl = 0;
 size_t num_descs = 0;
@@ -93,9 +94,7 @@ void* mem_phys_find_free(size_t mem)
 			curr_len >>= 1;
 			curr_offset >>= 1;
 			curr_size <<= 1;
-		}
-		
-		
+		}	
 		
 		for(uint32_t curr_desc = 0; curr_desc<num_descs; curr_desc++)
 		{
