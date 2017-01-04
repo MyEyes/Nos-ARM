@@ -5,112 +5,16 @@
 #include <string.h>
 #include <ipc.h>
 #include <sys/types.h>
-
-#define GPIO_SET_1 0x1C
-#define GPIO_SET_2 0x20
-#define GPIO_CLR_1 0x28
-#define GPIO_CLR_2 0x2C
-#define GPIO_FSEL_0 0x00
-
-#define GPIO_FUNC_IN 0
-#define GPIO_FUNC_OUT 1
+#include PLATFORM_INCLUDE
 
 #define TEST_PIN 23
 
-#define GPIO_LEVEL_1 0x34
-#define GPIO_LEVEL_2 0x38
-
-extern void putc(int c, volatile char* dev);
-
-
-void puthexbyte(char* dev, char byte)
-{
-	char high = byte>>4;
-	if(high<10)
-		putc(0x30+high, dev);
-	else
-		putc(0x41+(high-10), dev);
-	
-	char low = byte&0xF;
-	if(low<10)
-		putc(0x30+low, dev);
-	else
-		putc(0x41+(low-10), dev);
-}
-
-
-void puthex(char* dev, unsigned int val)
-{
-	puthexbyte(dev, val>>24);
-	puthexbyte(dev, (val>>16)&0xFF);
-	puthexbyte(dev, (val>>8)&0xFF);
-	puthexbyte(dev, val&0xFF);
-}
-
-void gpio_set(uint32_t* dev, char n)
-{
-    if(n<32)
-        dev[GPIO_SET_1>>2] = 1<<n;
-    else
-        dev[GPIO_SET_2>>2] = 1<<(n-32);
-}
-
-void gpio_clr(uint32_t* dev, char n)
-{
-    if(n<32)
-        dev[GPIO_CLR_1>>2] = 1<<n;
-    else
-        dev[GPIO_CLR_2>>2] = 1<<(n-32);
-}
-
-void gpio_func_sel(uint32_t* dev, char n, char val)
-{
-   char bank = n/10;
-   uint32_t curr_val = dev[GPIO_FSEL_0+bank];
-   uint32_t offset = n%10;
-   uint32_t mask = (7<<(3*offset));
-   curr_val &= ~mask;
-   curr_val |= (uint32_t)val<<(3*offset);
-   dev[GPIO_FSEL_0+bank] = curr_val;
-}
-
-char gpio_func_read(uint32_t* dev, char n)
-{
-   char bank = n/10;
-   uint32_t curr_val = dev[GPIO_FSEL_0+bank];
-   uint32_t offset = n%10;
-   return (curr_val>>(3*offset))&7;
-}
-
-void putc(int c, volatile char* dev)
-{
-	//Wait until device ready
-	//This only works for the bcm2385_uart0
-	//So there's clearly some work left to be done
-	while((dev[0x18] & (1 << 5))){ }
-	*dev = c;
-}
-
-void puts(char* s, volatile char* dev)
-{
-	while(*s)
-		putc(*s++, dev);
-}
-
-unsigned char getc(volatile char* dev)
-{
-    // Wait for UART to have recieved something.
-    while ( dev[0x18] & (1 << 4) ) { }
-    return dev[0];
-}
-
 void __attribute__((naked)) delay(int32_t count)
 {
+	(void) count;
     __asm__ __volatile__(   "__delay_: subs r0, r0, #1\n"
                             "bne __delay_\n"
                             "bx lr");
-/*	asm volatile("__delay_%=: subs %[count], %[count], #1; bne __delay_%=\n"
-		 : "=r"(count): [count]"0"(count) : "cc");*/
 }
 
 void main(uint32_t tid)
