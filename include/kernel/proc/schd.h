@@ -11,6 +11,8 @@ void schd_init();
 void schd_chg_thread();
 void schd_term();
 
+int sys_run_thread();
+
 void schd_add_thread(thread_t*);
 thread_node_t* schd_get_empty_node();
 

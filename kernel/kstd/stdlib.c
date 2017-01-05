@@ -12,15 +12,17 @@ size_t min_alloc = 4096; //have to allocate at least page size
 void* malloc(size_t size)
 {
 	mem_hdr_t* hdr = (mem_hdr_t*)mem_phys_find_free(size+sizeof(mem_hdr_t));
-	void* addr = ((char*)hdr) + sizeof(mem_hdr_t);
+    mem_hdr_t* phdr = hdr;
+    hdr = (mem_hdr_t*) TO_KERNEL_ADDR_SPACE(hdr);
+	void* addr = ((char*)phdr) + sizeof(mem_hdr_t);
 	if(hdr)
 	{
 		hdr->location = addr;
 		hdr->size = size+sizeof(mem_hdr_t);
 		hdr->used = 1;
 	
-		mem_phys_set(hdr, hdr->size);
-		return PLATFORM_KERNEL_BASE + addr;
+		mem_phys_set(phdr, hdr->size);
+		return (void*)TO_KERNEL_ADDR_SPACE(addr);
 	}
 	return 0;
 }

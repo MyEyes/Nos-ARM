@@ -7,6 +7,9 @@
 #include <sys/types.h>
 #include PLATFORM_INCLUDE
 
+volatile char* gpio_dev = 0;
+volatile char running = 1;
+
 #define TEST_PIN 23
 
 void __attribute__((naked)) delay(int32_t count)
@@ -15,6 +18,18 @@ void __attribute__((naked)) delay(int32_t count)
     __asm__ __volatile__(   "__delay_: subs r0, r0, #1\n"
                             "bne __delay_\n"
                             "bx lr");
+}
+
+void thread_test()
+{
+    while(running)
+    { 
+            gpio_set(gpio_dev, TEST_PIN);
+            delay(0x100000);
+            gpio_clr(gpio_dev, TEST_PIN);
+            delay(0x100000);
+    }
+    exit(0);
 }
 
 void main(uint32_t tid)
@@ -33,7 +48,7 @@ void main(uint32_t tid)
     char *input = malloc(512);
 	
     volatile char* dev2 = req_res("bcm2385_uart0", (void*)0x82000);
-    volatile char* gpio_dev = req_res("bcm2385_gpio", (void*)0x83000);
+    gpio_dev = req_res("bcm2385_gpio", (void*)0x83000);
 
     if(dev2 == (char*)-1)
     {
@@ -78,6 +93,17 @@ void main(uint32_t tid)
         puts("\r\n", dev2);
     }
 
+    char* new_stack = malloc(0x8000);
+    char* thread_start = (char*)((uint32_t)(new_stack+0x8000)&(~0xFFF));
+    uint32_t test_thread = thread_create(thread_start, new_stack, thread_test);
+    puts("Created thread: ", dev2);
+    puthex(dev2, test_thread);
+    puts("\r\n",dev2);
+    puts("Trying to run thread\r\n", dev2);
+    uint32_t run_res = thread_run(test_thread);
+    puthex(dev2, run_res);
+    puts("\r\n", dev2);
+
 	unsigned short position = 0;
 	char quit = 0;
 	while(!quit)
@@ -102,7 +128,11 @@ void main(uint32_t tid)
             gpio_clr(gpio_dev, TEST_PIN);
             puts("Turning off GPIO\r\n", dev2);
         }
+        else if(!strcmp(input, "stop"))
+        {
+            running = !running;
+        }
 	}
-	
+	running = 0;
 	exit((int)gpio_dev[GPIO_FSEL_0]);
 }

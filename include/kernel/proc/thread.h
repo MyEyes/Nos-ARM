@@ -30,6 +30,7 @@ typedef struct
 extern thread_t kern_thread;
 extern thread_t* curr_thread;
 
+int sys_create_thread();
 void thread_curr_store(char* pc, char* sp);
 void thread_store(thread_t* thread, char* pc, char* sp);
 void thread_print(thread_t* thread);

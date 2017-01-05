@@ -127,7 +127,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
     p_addr_t test_addr = pg_get_phys(&kernel_page, tgt_addr);
     printf("Mapping of user_init image: %x\r\n", test_addr);
 
-
     printf("First byte of image to run: %x\r\n", *((char*)TO_KERNEL_ADDR_SPACE(test_addr)));
 
 	printf("Running\r\n");

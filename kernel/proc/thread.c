@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "kernel/proc/thread.h"
 #include "kernel/cpu/reg.h"
 #include "kernel/cpu/clock.h"
@@ -12,6 +13,8 @@
 thread_t kern_thread;
 
 thread_t* curr_thread;
+
+int tid_counter = 1000;
 
 void thread_curr_store(char* pc, char* sp)
 {
@@ -48,6 +51,24 @@ void thread_ready(thread_t* thread)
 	__plat_thread_ready(thread);
 	thread->state=THREAD_READY;
 }
+
+int sys_create_thread()
+{
+    thread_t* caller_thread = curr_thread;
+    thread_t* new_thread = malloc(sizeof(thread_t));
+    int new_tid = tid_counter++;
+
+    void* stack_start = (void*) __plat_thread_getparam(curr_thread, 1);
+    void* stack_end = (void*) __plat_thread_getparam(curr_thread, 2);
+    void* entry = (void*) __plat_thread_getparam(curr_thread, 3);
+
+    thread_init(new_thread, caller_thread->proc, stack_start, stack_end, entry, new_tid, caller_thread->priority);
+
+    schd_add_thread(new_thread);
+
+    return new_tid;
+}
+
 
 void thread_change(thread_t* thread)
 {

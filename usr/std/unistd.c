@@ -22,3 +22,17 @@ uint32_t fork()
 	PLATFORM_SYSCALL(SYSCALL_PROC_FORK, result);
 	return result;
 }
+
+uint32_t thread_create(void* stack_start, void* stack_end, void* entry)
+{
+    uint32_t result = 0;
+    PLATFORM_SYSCALL3(SYSCALL_THREAD_CREATE, stack_start, stack_end, entry, result);
+    return result;
+}
+
+uint32_t thread_run(uint32_t tid)
+{
+    uint32_t result = 0;
+    PLATFORM_SYSCALL1(SYSCALL_THREAD_RUN, tid, result);
+    return result;
+}

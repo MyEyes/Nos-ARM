@@ -21,14 +21,16 @@ void __plat_thread_ready(thread_t* thread)
 	printf("thread: %x\r\n", thread);
 	printf("thread->proc: %x\r\n", thread->proc);
 	printf("virt_stack_addr = %x\tphys_stack_addr = %x\r\n",thread->stack_start, phys_stack_addr);
+    printf("entry: %x\r\n", thread->pc);
 	if(!phys_stack_addr)
 		return;
 	//thread suspend pushes r0-12, then spsr, then lr
 	memset((char*) (phys_stack_addr-15), 0, 15*sizeof(uint32_t));
 	phys_stack_addr[-15] = (uint32_t)thread->pc; //lr
-	phys_stack_addr[-14] = thread->proc->priv ? CPU_MODE_SYS : CPU_MODE_USR | (7<<6); //spsr, with all interrupts disabled
+	phys_stack_addr[-14] = thread->proc->priv ? CPU_MODE_SYS : CPU_MODE_USR; //spsr, with all interrupts disabled
 	phys_stack_addr[-13] = thread->tid; //r0=tid (thread id)
 	thread->sp -= sizeof(uint32_t)*15;
+    printf("Done with platform init\r\n");
 }
 
 uint32_t __plat_thread_getparam(thread_t* thread, uint32_t index)

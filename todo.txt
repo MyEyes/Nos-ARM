@@ -13,3 +13,5 @@ to virtual memory seems very risky potentially if we are going to have more than
 -req_dev currently maps the whole page containing the malloc descriptor, this isn't acceptable
 
 -handle external aborts due to exclusive reads and writes in data abort handler
+
+-IRQ handler (and probably swi and dabt handler too) seem to be leaking memory on the stack.

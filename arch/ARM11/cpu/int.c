@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdio.h>
 //#define  INT_SETUP_DBG
-//#define INT_DEBUG
+#define INT_DEBUG
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
 uint32_t abt_stack[CPU_INT_STACK_SIZE];
@@ -49,7 +49,7 @@ void __attribute__((naked)) irq_hnd()
 	__asm__(
 	"sub lr, lr, #4\n"
 	"CPS #31\n"							//Change to System mode to get access to user stack								irq
-	"stmfd sp!, {r0-r12}\n"				//push register states onto stack												push(r0-r12) 					sys stack
+	"stmfd sp!, {r0-r12, r14}\n"				//push register states onto stack												push(r0-r12) 					sys stack
 	"mov r1, sp\n"						//mov sps value into r1 so it can survive the mode change						r1=sp_sys
 	
 	"CPS #18\n"							//Enter irq mode																irq
@@ -64,7 +64,7 @@ void __attribute__((naked)) irq_hnd()
 	
 	"CPS #31\n"							//become system again															irq
 	"mov sp, r0\n"						//Set up sp to return value
-	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
+	"add sp, sp, #64\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
 	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
 	
 	"mov r0, #0\n"
@@ -75,7 +75,9 @@ void __attribute__((naked)) irq_hnd()
 	
 	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_irq						sys stack
 	"msr spsr, r0\n"					//Set process state																spsr=r0
-	"ldmfd r12, {r0-r12}\n"				//load registers																pop(r0-r12)						sys stack
+    "CPS #31\n"
+	"ldmfd r12, {r0-r12, r14}\n"				//load registers																pop(r0-r12)						sys stack
+    "CPS #18\n"
 	"movs pc, lr"						//return from interrupt															pc=lr
 	);
 }
@@ -214,7 +216,7 @@ void __attribute__((naked)) swi_hnd()
 	__asm__	(
 	
 	"CPS #31\n"							//Change to System mode to get access to user stack								SYS
-	"stmfd sp!, {r0-r12}\n"				//push register states onto stack												push(r0-r12) 					sys stack
+	"stmfd sp!, {r0-r12,r14}\n"				//push register states onto stack												push(r0-r12) 					sys stack
 	"mov r1, sp\n"						//mov sps value into r1 so it can survive the mode change						r1=sp_sys
 	
 	"CPS #19\n"							//Enter supervisor mode															SRV
@@ -230,7 +232,7 @@ void __attribute__((naked)) swi_hnd()
 	"bl swi_hnd2\n"						//call swi_hnd2																	r0=lr_SRV, r1=sp_sys
 	"CPS #31\n"							//become system again															SYS
 	"mov sp, r0\n"						//Set up sp to return value
-	"add sp, sp, #60\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
+	"add sp, sp, #64\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
 	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
 	
 	"mov r0, #0\n"
@@ -241,7 +243,9 @@ void __attribute__((naked)) swi_hnd()
 	
 	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_SRV						sys stack
 	"msr spsr, r0\n"					//Set process state																spsr=r0
-	"ldmfd r12, {r0-r12}\n"				//load registers																pop(r0-r12)						sys stack
+    "CPS #31\n"
+	"ldmfd r12, {r0-r12, r14}\n"				//load registers																pop(r0-r12)						sys stack
+    "CPS #19\n"
 	"movs pc, lr"						//return from interrupt															pc=lr
 	);
 }

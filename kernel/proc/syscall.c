@@ -4,6 +4,7 @@
 #include "kernel/mem/perm.h"
 #include "kernel/hw/devmap.h"
 #include "kernel/mem/mmu.h"
+#include "kernel/proc/schd.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -17,6 +18,8 @@ void syscall_init()
 	
 	syscall_set(SYSCALL_PROC_SBRK, sbrk);
 	syscall_set(SYSCALL_PROC_FORK, fork);
+    syscall_set(SYSCALL_THREAD_CREATE, sys_create_thread);
+    syscall_set(SYSCALL_THREAD_RUN, sys_run_thread);
     syscall_set(SYSCALL_PMAP, sys_pmap);
 }
 
