@@ -8,6 +8,7 @@
 #include PLATFORM_INCLUDE
 
 volatile char* gpio_dev = 0;
+volatile i2c_register* i2c_dev = 0;
 volatile char running = 1;
 
 #define TEST_PIN 23
@@ -49,11 +50,14 @@ void main(uint32_t tid)
 	
     volatile char* dev2 = req_res("bcm2385_uart0", (void*)0x82000);
     gpio_dev = req_res("bcm2385_gpio", (void*)0x83000);
+    i2c_dev = req_res("bcm2385_bsc1", (void*)0x84000);
 
     if(dev2 == (char*)-1)
     {
         exit(-1);
     }
+
+    i2c_enable(i2c_dev);
 	
 	puts("Hellooooo from Usermode\r\n", dev2);
 	char c;
@@ -85,6 +89,11 @@ void main(uint32_t tid)
     gpio_func_sel(gpio_dev, TEST_PIN, GPIO_FUNC_OUT);
     puthex(dev2, gpio_func_read(gpio_dev, TEST_PIN));
     puts("\r\n", dev2);
+
+    gpio_func_sel(gpio_dev, 0, 4);
+    gpio_func_sel(gpio_dev, 1, 4);
+    gpio_func_sel(gpio_dev, 2, 4);
+    gpio_func_sel(gpio_dev, 3, 4);
 
     puts("\r\nPostDump\r\n", dev2);
     for(int x=0; x<5; x++)
@@ -131,6 +140,47 @@ void main(uint32_t tid)
         else if(!strcmp(input, "stop"))
         {
             running = !running;
+        }
+        else if(!strcmp(input, "test"))
+        {
+            puthex(dev2, i2c_dev->control);
+            puts("\r\n",dev2);
+            i2c_start(i2c_dev, 0x10, 0x3, 0);
+            delay(0x10000);
+            puthex(dev2, i2c_dev->control);
+            puts("\r\n",dev2);
+            puthex(dev2, i2c_dev->status);
+            puts("\r\n",dev2);
+            puthex(dev2, i2c_dev->slave_addr);
+            puts("\r\n",dev2);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n",dev2);
+            i2c_send(i2c_dev, 'A');
+            delay(0x10000);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n",dev2);
+            i2c_send(i2c_dev, 'A');
+            delay(0x10000);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n",dev2);
+            i2c_send(i2c_dev, '7');
+            delay(0x10000);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n",dev2);
+            delay(1000);
+            puthex(dev2, i2c_dev->control);
+            puts("\r\n", dev2);
+            puthex(dev2, i2c_dev->status);
+            puts("\r\n", dev2);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n", dev2);
+        }
+        else if(!strcmp(input, "test2"))
+        {
+            puthex(dev2, i2c_dev->status);
+            puts("\r\n", dev2);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n", dev2);
         }
 	}
 	running = 0;
