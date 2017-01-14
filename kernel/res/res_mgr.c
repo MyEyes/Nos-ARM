@@ -53,6 +53,7 @@ res_hnd* res_req_nm(char* name)
         if(strcmp(name, res_tbl[x].name)==0)
             return res_tbl+x;
     }
+    printf("Couldn't find device %s\r\n", name);
     return (res_hnd*)0;
 }
 

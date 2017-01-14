@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdio.h>
 //#define  INT_SETUP_DBG
-#define INT_DEBUG
+//#define INT_DEBUG
 uint32_t fiq_stack[CPU_INT_STACK_SIZE];
 uint32_t irq_stack[CPU_INT_STACK_SIZE];
 uint32_t abt_stack[CPU_INT_STACK_SIZE];
@@ -192,7 +192,10 @@ char* __attribute__((used)) swi_hnd2(char* pc, char* sp, uint32_t swi_num)
 		{
 			uint32_t ret = syscall();
 			//printf("Returning: %x\r\n", ret);
-			__plat_thread_setparam(curr_thread, 1, ret);
+            //Only return a value if the syscall
+            //actually returns a value
+            if(swi_num>18)
+    			__plat_thread_setparam(curr_thread, 1, ret);
 		}
 		else
         {
