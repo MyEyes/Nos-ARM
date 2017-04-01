@@ -3,9 +3,9 @@ CC = arm-none-eabi-gcc
 KERNEL_BASE = 0xc0000000
 
 #ARM11 rules
-ARM11_ARCH_FILES = $(shell find arch/ARM11/ -name "*.c")
-ARM11_BOOTFILE = arch/ARM11/boot/boot.S
-ARM11_LDFILE = arch/ARM11/boot/linker.ld
+ARM11_ARCH_FILES = $(shell find arch/ARMv6/ -name "*.c")
+ARM11_BOOTFILE = arch/ARMv6/boot/boot.S
+ARM11_LDFILE = arch/ARMv6/boot/linker.ld
 ARM11_OBJ_FILES = $(patsubst %.c,.obj/%.o,$(ARM11_ARCH_FILES))
 
 #PI1-B BUILD RULES

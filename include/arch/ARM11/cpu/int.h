@@ -14,4 +14,18 @@
 
 #define INT_ADDR_LOC 0x20
 #define LDR_ADDR_OFF (INT_ADDR_LOC-8)
+
+#define INT_HND_ENTRY __asm__(\
+        "SRS #15\n"\
+        "stmfd sp!, {r0-r12}\n"\
+        "mov r1, sp\n"\
+        "CPS #19\n"\
+        );
+
+#define INT_HND_RETURN __asm__(\
+        "CPS #15\n"\
+        "mov sp, r0\n"\
+        "ldmfd sp!, {r0-r12}\n"\
+        "RFE sp\n"\
+        );
 #endif
