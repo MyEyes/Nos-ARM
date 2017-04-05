@@ -10,8 +10,9 @@ to virtual memory seems very risky potentially if we are going to have more than
 
 -Allocating a whole page is tricky because the memory_area_t header will use up the first few bytes (Extra region for mmapped)
 
--req_dev currently maps the whole page containing the malloc descriptor, this isn't acceptable
+-SRS and RFE should be used to streamline interrupt vectors
 
--handle external aborts due to exclusive reads and writes in data abort handler
+-Port to the pi3 cortex? (Requires also porting raspbootin to the pi 3)
 
--IRQ handler (and probably swi and dabt handler too) seem to be leaking memory on the stack.
+
+

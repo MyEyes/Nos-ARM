@@ -53,5 +53,5 @@ typedef struct{
 	uint32_t	tune_step;
 	uint32_t	tune_steps_std;
 	uint32_t	tune_steps_ddr;
-} emmc_map_t;
+} bcm2385_emmc_map_t;
 #endif

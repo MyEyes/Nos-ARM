@@ -69,4 +69,5 @@ int main(int argc, char **argv)
 	rewind(output);
 	fwrite(&num_devs, sizeof(uint32_t), 1, output);
 	fwrite(&total_size, sizeof(size_t), 1, output);
+	return 0;
 }
