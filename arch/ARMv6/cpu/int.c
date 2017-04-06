@@ -47,11 +47,40 @@ uint32_t __attribute__((used)) irq_hnd2(char* pc, char* sp)
 
 void __attribute__((naked)) irq_hnd()
 {
-    INT_HND_ENTRY;
 	__asm__(
+	"sub lr, lr, #4\n"
+	"CPS #31\n"							//Change to System mode to get access to user stack								irq
+	"stmfd sp!, {r0-r12, r14}\n"				//push register states onto stack												push(r0-r12) 					sys stack
+	"mov r1, sp\n"						//mov sps value into r1 so it can survive the mode change						r1=sp_sys
+	
+	"CPS #18\n"							//Enter irq mode																irq
+	
+	"mrs r0, spsr\n"					//mov stored process state into r0												r0=spsr
+	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) ro=spsr_irq 	sys stack
+	
+	"mov r0, lr\n"						//set up arguments for swi_hnd2 call, r1 already contains the stack pointer		r0=lr_SRV
+	"stmfd r1!, {r0}\n"					//push value onto stack of process												push (r1=sp_sys) r0=lr_irq		sys stack
+	
 	"bl irq_hnd2\n"						//call swi_hnd2																	r0=lr_irq, r1=sp_sys
+	
+	"CPS #31\n"							//become system again															irq
+	"mov sp, r0\n"						//Set up sp to return value
+	"add sp, sp, #64\n"					//Correct for popping off stack with r12 reg 60=13*4+4+4
+	"mov r12, r0\n"						//mov return value in as fake stack pointer of process							sp=swi_hnd2
+	
+	"mov r0, #0\n"
+	"MCR p15, 0, r0, c8, c7, 0\n"		//flush TLB
+	
+	"CPS #18\n"							//become irq again
+	"ldmfd r12!, {lr}\n"				//pop stored lr off																lr_sys=lr_irq					sys stack
+	
+	"ldmfd r12!, {r0}\n"				//pop stored process state off													r0=spsr_irq						sys stack
+	"msr spsr, r0\n"					//Set process state																spsr=r0
+    "CPS #31\n"
+	"ldmfd r12, {r0-r12, r14}\n"				//load registers																pop(r0-r12)						sys stack
+    "CPS #18\n"
+	"movs pc, lr"						//return from interrupt															pc=lr
 	);
-    INT_HND_RETURN;
 }
 
 

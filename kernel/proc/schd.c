@@ -42,9 +42,7 @@ void schd_chg_thread()
 	{
 		#ifdef DBG_SCHD
 		printf("queue virt addr:%x\tqueue phys addr:%x\r\n", queues+i, pg_get_phys(&kernel_page, queues + i));
-
-		thread_node_t* dbg = (thread_node_t*)0xC0A04FFC;
-		printf("dbg: %x\n", dbg->next);
+		
 		#endif
 		thread_node_t* test_thread = dequeue_node(queues + i);
 		
@@ -100,6 +98,7 @@ void schd_add_thread(thread_t* thread)
 	thread_node_t* empty_node = schd_get_empty_node();
 	#ifdef DBG_SCHD
 	printf("Adding thread %x to queue %x\r\n",thread->tid, thread->priority);
+	printf("pc: %x\tsp: %x\r\n", (uint32_t)thread->pc, (uint32_t)thread->sp);
 	#endif
     if(thread->state == THREAD_READY)
     	enqueue_node(queues + thread->priority, empty_node, thread);

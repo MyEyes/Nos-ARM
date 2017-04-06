@@ -74,6 +74,7 @@ void main(uint32_t tid)
     puts("Received\r\n", dev2);
     ipc_msg_t* msg = (ipc_msg_t*) input;
     puts(msg->msg, dev2);
+	
 
     puts("\r\nPreDump\r\n", dev2);
     for(int x=0; x<5; x++)
