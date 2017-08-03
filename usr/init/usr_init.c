@@ -10,6 +10,7 @@
 volatile char* gpio_dev = 0;
 volatile i2c_register* i2c_dev = 0;
 volatile char running = 1;
+volatile char* dev2;
 
 #define TEST_PIN 23
 
@@ -33,6 +34,19 @@ void thread_test()
     exit(0);
 }
 
+void display_command(uint8_t c)
+{
+	i2c_start(i2c_dev, 0x3C, 2, 0);
+	delay(0x1000);
+	i2c_send(i2c_dev, 0);
+	i2c_send(i2c_dev, c);
+	delay(0x1000);
+	puthex(dev2, c);
+	puts(" ",dev2);
+	puthex(dev2, i2c_dev->status);
+    puts("\r\n",dev2);
+}
+
 void main(uint32_t tid)
 {
 	(void) tid;
@@ -48,7 +62,7 @@ void main(uint32_t tid)
 
     char *input = malloc(512);
 	
-    volatile char* dev2 = req_res("bcm2385_uart0", (void*)0x82000);
+    dev2 = req_res("bcm2385_uart0", (void*)0x82000);
     gpio_dev = req_res("bcm2385_gpio", (void*)0x83000);
     i2c_dev = req_res("bcm2385_bsc1", (void*)0x84000);
 
@@ -95,6 +109,7 @@ void main(uint32_t tid)
     gpio_func_sel(gpio_dev, 1, 4);
     gpio_func_sel(gpio_dev, 2, 4);
     gpio_func_sel(gpio_dev, 3, 4);
+	gpio_set_pullup(gpio_dev, 2, 15);
 
     puts("\r\nPostDump\r\n", dev2);
     for(int x=0; x<5; x++)
@@ -146,7 +161,7 @@ void main(uint32_t tid)
         {
             puthex(dev2, i2c_dev->control);
             puts("\r\n",dev2);
-            i2c_start(i2c_dev, 0x10, 0x3, 0);
+            i2c_start(i2c_dev, 0x3C, 0x3, 0);
             delay(0x10000);
             puthex(dev2, i2c_dev->control);
             puts("\r\n",dev2);
@@ -156,15 +171,15 @@ void main(uint32_t tid)
             puts("\r\n",dev2);
             puthex(dev2, i2c_dev->data_len);
             puts("\r\n",dev2);
-            i2c_send(i2c_dev, 'A');
+            puthex(dev2, i2c_send(i2c_dev, 'A'));
             delay(0x10000);
             puthex(dev2, i2c_dev->data_len);
             puts("\r\n",dev2);
-            i2c_send(i2c_dev, 'A');
+            puthex(dev2, i2c_send(i2c_dev, 'A'));
             delay(0x10000);
             puthex(dev2, i2c_dev->data_len);
             puts("\r\n",dev2);
-            i2c_send(i2c_dev, '7');
+            puthex(dev2, i2c_send(i2c_dev, '7'));
             delay(0x10000);
             puthex(dev2, i2c_dev->data_len);
             puts("\r\n",dev2);
@@ -183,6 +198,74 @@ void main(uint32_t tid)
             puthex(dev2, i2c_dev->data_len);
             puts("\r\n", dev2);
         }
+		else if (!strcmp(input, "test3"))
+		{
+			for(int x=0; x<127; x++)
+			{
+				i2c_start(i2c_dev, x, 0x3, 0);
+				delay(0x10000);
+				i2c_clear_err(i2c_dev);
+				delay(0x10000);
+				puthex(dev2, x);
+				puts(" ", dev2);
+				puthex(dev2, i2c_dev->status);
+				puts("\r\n", dev2);
+			}
+		}
+		else if (!strcmp(input, "display"))
+		{
+			//Init
+			display_command(0xAE);
+			display_command(0xD5);
+			display_command(0x80);
+			display_command(0xA8);
+			display_command(0xFF);
+			display_command(0xD3);
+			display_command(0x0);
+			display_command(0x40 | 0x0);
+			display_command(0x8D);
+			display_command(0x10);
+			display_command(0x20);
+			display_command(0x00);
+			display_command(0xA0 | 0x1);
+			display_command(0xDA);
+			display_command(0x12);
+			display_command(0x81);
+			display_command(0x9F);
+			display_command(0xD9);
+			display_command(0x22);
+			display_command(0xDB);
+			display_command(0x40);
+			display_command(0xA4);
+			display_command(0xA6);
+			display_command(0x2E);
+			display_command(0xAF);
+			
+			//Turn on pixels
+			//Columns
+			display_command(0x21);
+			display_command(0x0);
+			display_command(0xFF);
+			//Pages
+			display_command(0x22);
+			display_command(0);
+			display_command(0x07);
+			i2c_start(i2c_dev, 0x3C, 2*128*64/8, 0);
+			delay(0x1000);
+			for (uint16_t i=0; i<(128*64/8); i++) {
+				i2c_send(i2c_dev, 0x40);
+				i2c_send(i2c_dev, 0xCC);
+			}
+			puthex(dev2, i2c_dev->status);
+            puts("\r\n", dev2);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n", dev2);
+			delay(0x1000);
+			puthex(dev2, i2c_dev->status);
+            puts("\r\n", dev2);
+            puthex(dev2, i2c_dev->data_len);
+            puts("\r\n", dev2);
+		}
 	}
 	running = 0;
 	exit((int)gpio_dev[GPIO_FSEL_0]);

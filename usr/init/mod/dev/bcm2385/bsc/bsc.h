@@ -31,4 +31,5 @@ void i2c_enable(i2c_register* dev);
 void i2c_start(i2c_register* dev, uint32_t slave_addr, uint32_t data_len, char read);
 int i2c_send(i2c_register* dev, char data);
 void i2c_clear(i2c_register* dev);
+void i2c_clear_err(i2c_register* dev);
 #endif

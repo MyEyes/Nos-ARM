@@ -4,7 +4,6 @@ void i2c_enable(i2c_register* dev)
 {
     dev->control = 1<<I2C_ENABLE_OFF;
     dev->status = -1;
-    dev->clk_div <<= 0xFFFF;
 }
 
 void i2c_start(i2c_register* dev, uint32_t slave_addr, uint32_t data_len, char read)
@@ -17,7 +16,8 @@ void i2c_start(i2c_register* dev, uint32_t slave_addr, uint32_t data_len, char r
         dev->control |= 1<<I2C_READ_OFF;
     else
         dev->control &= ~(1<<I2C_READ_OFF);
-    dev->status |= 1<<I2C_CLKT_OFF | 1<<I2C_ERR_OFF | 1<<I2C_DONE_OFF;
+	dev->status = -1;
+    //dev->status |= 1<<I2C_CLKT_OFF | 1<<I2C_ERR_OFF | 1<<I2C_DONE_OFF;
     //Start transfer
     dev->control |= 1<<I2C_START_OFF | 1<<I2C_CLEAR_OFF;
 }
@@ -28,18 +28,18 @@ int i2c_send(i2c_register* dev, char data)
     if(!dev->data_len)
         return -1;
     //If there's no transfer going on right now or there was an error
-    if(!(dev->status & (1<<I2C_TA_OFF)) || !(dev->status & (1<<I2C_ERR_OFF)))
+    if(!(dev->status & (1<<I2C_TA_OFF)) || (dev->status & (1<<I2C_ERR_OFF)))
         return -1;
     //Spin until there is space in fifo
     while(!(dev->status & (1<<I2C_TXD_OFF)))
     {
         //timed out
-        /*if(dev->status & (1<<I2C_CLKT_OFF))
+        if(dev->status & (1<<I2C_CLKT_OFF))
         {
             //Clear timeout flag and return
             dev->status |= (1<<I2C_CLKT_OFF);
             return -1;
-        }*/
+        }
         //Do nothing until i2c fifo has space for the byte
     }
     //Write data into fifo
@@ -50,4 +50,9 @@ int i2c_send(i2c_register* dev, char data)
 void i2c_clear(i2c_register* dev)
 {
     dev->control |= 1<<I2C_CLEAR_OFF;
+}
+
+void i2c_clear_err(i2c_register* dev)
+{
+	dev->status |= 1<<I2C_ERR_OFF;
 }

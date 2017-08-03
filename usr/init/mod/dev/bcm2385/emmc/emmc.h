@@ -55,8 +55,6 @@ typedef struct{
 	uint32_t	tune_steps_ddr;
 } bcm2385_emmc_map_t;
 
-uint32_t 			emmc_issue_cmd(bcm2385_emmc_map_t* dev, uint32_t cmd, uint32_t arg1, uint32_t arg2);
-uint32_t			emmc_read_data();
-uint128_t		 	emmc_get_response();
+
 
 #endif

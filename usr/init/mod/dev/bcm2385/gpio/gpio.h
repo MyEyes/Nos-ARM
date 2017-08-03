@@ -10,6 +10,10 @@
 #define GPIO_LEVEL_1 0x34
 #define GPIO_LEVEL_2 0x38
 
+#define GPIO_GPPUD 0x94
+#define GPIO_GPPUDCLK0 0x98
+#define GPIO_GPPUDCLK1 0x9C
+
 #include <stdint.h>
 
 void gpio_set(uint32_t* dev, char n);
@@ -19,3 +23,5 @@ void gpio_clr(uint32_t* dev, char n);
 void gpio_func_sel(uint32_t* dev, char n, char val);
 
 char gpio_func_read(uint32_t* dev, char n);
+
+void gpio_set_pullup(uint32_t* dev, char val, uint32_t pins);
