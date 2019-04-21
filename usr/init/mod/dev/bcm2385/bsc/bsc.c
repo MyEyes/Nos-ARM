@@ -1,12 +1,12 @@
 #include "bsc.h"
 
-void i2c_enable(i2c_register* dev)
+void i2c_enable(volatile i2c_register* dev)
 {
     dev->control = 1<<I2C_ENABLE_OFF;
     dev->status = -1;
 }
 
-void i2c_start(i2c_register* dev, uint32_t slave_addr, uint32_t data_len, char read)
+void i2c_start(volatile i2c_register* dev, uint32_t slave_addr, uint32_t data_len, char read)
 {
     //Set slave addr and data length
     dev->slave_addr = slave_addr;
@@ -22,7 +22,7 @@ void i2c_start(i2c_register* dev, uint32_t slave_addr, uint32_t data_len, char r
     dev->control |= 1<<I2C_START_OFF | 1<<I2C_CLEAR_OFF;
 }
 
-int i2c_send(i2c_register* dev, char data)
+int i2c_send(volatile i2c_register* dev, char data)
 {
     //If we don't need to send more data
     if(!dev->data_len)
@@ -47,12 +47,12 @@ int i2c_send(i2c_register* dev, char data)
     return 0;
 }
 
-void i2c_clear(i2c_register* dev)
+void i2c_clear(volatile i2c_register* dev)
 {
     dev->control |= 1<<I2C_CLEAR_OFF;
 }
 
-void i2c_clear_err(i2c_register* dev)
+void i2c_clear_err(volatile i2c_register* dev)
 {
 	dev->status |= 1<<I2C_ERR_OFF;
 }

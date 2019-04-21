@@ -16,12 +16,12 @@
 
 #include <stdint.h>
 
-void gpio_set(uint32_t* dev, char n);
+void gpio_set(volatile char* dev, char n);
 
-void gpio_clr(uint32_t* dev, char n);
+void gpio_clr(volatile char* dev, char n);
 
-void gpio_func_sel(uint32_t* dev, char n, char val);
+void gpio_func_sel(volatile char* dev, char n, char val);
 
-char gpio_func_read(uint32_t* dev, char n);
+char gpio_func_read(volatile char* dev, char n);
 
-void gpio_set_pullup(uint32_t* dev, char val, uint32_t pins);
+void gpio_set_pullup(volatile char* dev, char val, uint32_t pins);

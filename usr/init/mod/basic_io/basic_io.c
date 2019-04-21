@@ -1,7 +1,7 @@
 #include "basic_io.h"
 
 
-void puthexbyte(char* dev, char byte)
+void puthexbyte(volatile char* dev, char byte)
 {
 	char high = byte>>4;
 	if(high<10)
@@ -17,7 +17,7 @@ void puthexbyte(char* dev, char byte)
 }
 
 
-void puthex(char* dev, unsigned int val)
+void puthex(volatile char* dev, unsigned int val)
 {
 	puthexbyte(dev, val>>24);
 	puthexbyte(dev, (val>>16)&0xFF);
@@ -25,7 +25,7 @@ void puthex(char* dev, unsigned int val)
 	puthexbyte(dev, val&0xFF);
 }
 
-void putc(int c, volatile char* dev)
+void putc(char c, volatile char* dev)
 {
 	//Wait until device ready
 	//This only works for the bcm2385_uart0

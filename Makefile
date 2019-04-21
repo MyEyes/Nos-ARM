@@ -1,5 +1,5 @@
 no:
-	@echo "This is now how you want to build!"
+	@echo "This is not how you want to build!"
 	@echo ""
 	@echo "Use make std-all to build the standard library for user mode"
 	@echo "Build the payload in usr/init"

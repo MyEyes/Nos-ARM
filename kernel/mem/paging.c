@@ -235,12 +235,12 @@ int pg_unmap_secondary(pg_fld_t* fld, v_addr_t virt_addr, size_t mem)
 
 int pg_map(pg_tbl_t* tbl, v_addr_t virt_addr, p_addr_t phys_addr, size_t mem, char domain, char perm, char caching, char global, char shared)
 {	
-    printf("Trying to map %x to %x(%x)", virt_addr, phys_addr, mem);
+    //printf("Trying to map %x to %x(%x)", virt_addr, phys_addr, mem);
 	if((uint32_t)virt_addr+mem > tbl->size && tbl->size){
         printf(" FAIL!\r\n");
 		return -1;
     }
-	printf(" OK!\r\n");
+	//printf(" OK!\r\n");
 	pg_fld_t* flds = tbl->addr;
 	//fld_t	|fld_t|fld_t
 	//MEM	|sld_t

@@ -19,6 +19,7 @@
 #include __PLATFORM__
 
 #define INIT_DEBUG
+#undef INIT_DEBUG
 
 extern char* __start;
 

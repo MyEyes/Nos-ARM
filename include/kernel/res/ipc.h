@@ -1,6 +1,6 @@
 #ifndef __K_IPC_H__
 #define __K_IPC_H__
-#define IPC_PORTS_MAX 4096
+#define IPC_PORTS_MAX 65536
 
 #include <stdint.h>
 #include <stddef.h>
