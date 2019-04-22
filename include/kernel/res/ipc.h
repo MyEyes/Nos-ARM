@@ -11,7 +11,7 @@ typedef struct{
 } k_ipc_port_t;
 
 typedef struct{
-    k_ipc_port_t ports[IPC_PORTS_MAX];
+    k_ipc_port_t *ports;
 } k_ipc_port_tbl_t;
 
 void kipc_init();

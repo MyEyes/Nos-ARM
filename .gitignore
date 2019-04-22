@@ -14,3 +14,4 @@ payload
 *.swp
 *.swo
 tools/devmap_bld/devmap_bld
+.vscode/*

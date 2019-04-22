@@ -3,6 +3,7 @@
 #include <kernel/mem/perm.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "arch/ARM11/mem/cache.h"
 #include <kernel/proc/syscall.h>
 #include <kernel/proc/schd.h>
@@ -12,7 +13,8 @@ k_ipc_port_tbl_t ipc_port_tbl;
 
 void kipc_init()
 {
-    memset((char*)&ipc_port_tbl, 0, sizeof(k_ipc_port_tbl_t));
+    ipc_port_tbl.ports = malloc(sizeof(k_ipc_port_t)*IPC_PORTS_MAX);
+    memset((char*)ipc_port_tbl.ports, 0, sizeof(k_ipc_port_t)*IPC_PORTS_MAX);
     syscall_set(SYSCALL_IPC_REG_PRT, sys_kipc_reg_port);
     syscall_set(SYSCALL_IPC_UNREG_PRT, sys_kipc_unreg_port);
     syscall_set(SYSCALL_IPC_MAP_PRT, sys_kipc_map_port);

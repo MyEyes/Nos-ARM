@@ -11,3 +11,4 @@ cat nos.bin > nos.img
 dd if=/dev/zero of=nos.img seek=$END bs=1 count=1 conv=notrunc,noerror
 cat hw_map.map >> nos.img
 cat payload >> nos.img
+#cat usr/init/bootfs/bootfs.img >> nos.img
